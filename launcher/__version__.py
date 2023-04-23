@@ -1,0 +1,7 @@
+__title__ = "launcher"
+__description__ = "G.A.M.M.A. Launcher module"
+__url__ = ""
+__version__ = "0.1"
+__author__ = "Mord3rca"
+__author_email__ = "morderca@morderca.net"
+__license__ = "GPLv3"
