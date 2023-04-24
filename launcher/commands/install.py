@@ -12,6 +12,23 @@ from launcher.meta import create_ini_file, create_ini_separator_file
 
 class FullInstall:
 
+    arguments: dict = {
+        "--anomaly": {
+            "help": "Path to ANOMALY directory",
+            "required": True,
+            "type": str
+        },
+        "--gamma": {
+            "help": "Path to GAMMA directory",
+            "required": True,
+            "type": str
+        },
+    }
+
+    name: str = "full_install"
+
+    help: str = "Complete install of S.T.A.L.K.E.R.: G.A.M.M.A."
+
     def __init__(self):
         self._anomaly_dir = None
         self._gamma_dir = None
@@ -172,9 +189,6 @@ AutomaticArchiveInvalidation=false
 """)
 
     def run(self, args):
-        if not args.anomaly and not args.gamma:
-            exit('anomaly & gamma args have to be defined')
-
         # Init paths
         self._anomaly_dir = args.anomaly
         self._gamma_dir = args.gamma
