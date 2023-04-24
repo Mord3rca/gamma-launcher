@@ -1,4 +1,4 @@
-from launcher.commands import FullInstall
+from launcher.commands import FullInstall, RemoveReshade
 
 from argparse import ArgumentParser
 
@@ -22,6 +22,7 @@ parser_desc = {
          "dest": "command",
          "list": {
              **command_object_to_dict(FullInstall),
+             **command_object_to_dict(RemoveReshade),
          },
      },
 }
