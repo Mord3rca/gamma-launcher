@@ -3,11 +3,12 @@ import os
 from distutils.dir_util import copy_tree, DistutilsFileError
 from shutil import copy2, move
 from tempfile import TemporaryDirectory
-from typing import Dict, List, Optional
 
 from launcher.archive import extract_archive
 from launcher.downloader import get_handler_for_url
 from launcher.meta import create_ini_file, create_ini_separator_file
+
+from .common import read_mod_maker
 
 
 class FullInstall:
@@ -37,7 +38,6 @@ class FullInstall:
         self._mod_dir = None
         self._grok_mod_dir = None
 
-        self._mods = []
         self._mods_make = {}
 
     def _update_gamma_definition(self) -> None:
@@ -64,46 +64,7 @@ class FullInstall:
             self._anomaly_dir
         )
 
-    def _read_mod_list(self) -> List[str]:
-        path = os.path.join(self._grok_mod_dir, 'G.A.M.M.A', 'modpack_data', 'modlist.txt')
-        print(f'[+] Reading modlist {path}...')
-        with open(path) as f:
-            d = f.read()
-        return [
-            i[1:].strip() for i in filter(lambda x: x.startswith('+') or x.startswith('-'), d.split('\n'))
-        ]
-
-    def _read_mod_maker(self) -> Dict[str, Dict]:
-        path = os.path.join(self._grok_mod_dir, 'G.A.M.M.A', 'modpack_data', 'modpack_maker_list.txt')
-        print(f'[+] Reading modpack maker ({path})...')
-        mods_make = {}
-        with open(path, 'r') as f:
-            d = f.read()
-        for i in filter(lambda x: x and not x.startswith(' '), d.split('\n')):
-            try:
-                it = i.split('\t')
-                mods_make[f"{it[3]}{it[2]}"] = {
-                    'url': it[0],
-                    'install_directives': [
-                         i.replace('\\', os.path.sep).lstrip(os.path.sep) for i in it[1].split(':')
-                     ] if it[1] != '0' else None,
-                    'author': it[2],
-                    'title': it[3],
-                    'info_url': it[4] if len(it) >= 5 else '',
-                }
-            except ValueError:
-                print(f'   Skipping: {i}')
-
-        return mods_make
-
-    def _find_mod_make_directive(self, title) -> Optional[Dict]:
-        for k, v in self._mods_make.items():
-            if k in title:
-                return v
-
-        return None
-
-    def _install_mod(self, name: str) -> None:
+    def _install_mod(self, name: str, m: dict) -> None:
         install_dir = os.path.join(self._mod_dir, name)
 
         # Special case, it's a separator
@@ -113,8 +74,6 @@ class FullInstall:
             create_ini_separator_file(os.path.join(install_dir, 'meta.ini'))
             return
 
-        # Find mod in mod make directive and install it if it exist
-        m = self._find_mod_make_directive(name)
         if not m:
             return
 
@@ -162,11 +121,13 @@ class FullInstall:
         create_ini_file(os.path.join(install_dir, 'meta.ini'), e.filename, url)
 
     def _install_mods(self) -> None:
-        self._mods = self._read_mod_list()
-        self._mods_make = self._read_mod_maker()
+        self._mods_make = read_mod_maker(
+            os.path.join(self._grok_mod_dir, 'G.A.M.M.A', 'modpack_data', 'modlist.txt'),
+            os.path.join(self._grok_mod_dir, 'G.A.M.M.A', 'modpack_data', 'modpack_maker_list.txt')
+        )
 
-        for m in self._mods:
-            self._install_mod(m)
+        for k, v in self._mods_make.items():
+            self._install_mod(k, v)
 
     def _copy_gamma_modpack(self) -> None:
         path = os.path.join(self._grok_mod_dir, 'G.A.M.M.A', 'modpack_addons')
