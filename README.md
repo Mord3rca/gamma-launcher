@@ -16,7 +16,7 @@ Where *directory* is the toplevel directory containing `setup.py`
 
 ## Usage
 
-Once installed, you can use: `gamma-launcher --anomaly <Anomaly path> --gamma <GAMMA path>`
+Once installed, you can use: `gamma-launcher full_install --anomaly <Anomaly path> --gamma <GAMMA path>`
 to setup your GAMMA mods folder.
 
 Afterwards, you will need to start Mod Organizer and set Anomaly Path (launcher can't do that ... yet.)
@@ -27,7 +27,7 @@ Remove some mods:
 * 190- Screen Space Shaders - Ascii1457
 * 290- Atmospherics Shaders Weathers and Reshade - Hippobot
 
-Also, remove ReShade by following [this](https://reshade.me/forum/general-discussion/4398-howto-uninstall-reshade) post
+Also, remove ReShade with: `gamma-launcher remove_reshade --anomaly <Anomaly path>`
 
 
 ## Troubleshoot
