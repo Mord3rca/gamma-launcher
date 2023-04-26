@@ -1,4 +1,9 @@
-from launcher.commands import FullInstall, RemoveReshade, PurgeShaderCache
+from launcher.commands import (
+    CheckMD5,
+    FullInstall,
+    RemoveReshade,
+    PurgeShaderCache,
+)
 
 from argparse import ArgumentParser
 
@@ -21,6 +26,7 @@ parser_desc = {
          "help": "Command to invoke",
          "dest": "command",
          "list": {
+             **command_object_to_dict(CheckMD5),
              **command_object_to_dict(FullInstall),
              **command_object_to_dict(RemoveReshade),
              **command_object_to_dict(PurgeShaderCache),
