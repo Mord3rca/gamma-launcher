@@ -15,6 +15,12 @@ Where *directory* is the toplevel directory containing `setup.py`
 
 ## Commands
 
+## Check MD5
+
+This will perform a MD5 check for all ModDB addons
+
+To run it: `gamma-launcher check-md5 --gamma <GAMMA path>`
+
 ### Full Install
 
 This will install all mods based on [Stalker_GAMMA](https://github.com/Grokitach/Stalker_GAMMA)
