@@ -22,7 +22,7 @@ setup(
     author=about['__author__'],
     author_email=about['__author_email__'],
     url=about['__url__'],
-    requires=["requests", "rarfile", "py7zr"],
+    requires=["bs4", "py7zr", "rarfile", "requests"],
     packages=['launcher', 'launcher.commands', 'launcher.downloader'],
     entry_points={
         'console_scripts': [
