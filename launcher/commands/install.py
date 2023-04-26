@@ -26,7 +26,7 @@ class FullInstall:
         },
     }
 
-    name: str = "full_install"
+    name: str = "full-install"
 
     help: str = "Complete install of S.T.A.L.K.E.R.: G.A.M.M.A."
 

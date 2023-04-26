@@ -19,7 +19,7 @@ Where *directory* is the toplevel directory containing `setup.py`
 
 This will install all mods based on [Stalker_GAMMA](https://github.com/Grokitach/Stalker_GAMMA)
 
-To setup your GAMMA folder:  `gamma-launcher full_install --anomaly <Anomaly path> --gamma <GAMMA path>`
+To setup your GAMMA folder:  `gamma-launcher full-install --anomaly <Anomaly path> --gamma <GAMMA path>`
 
 Afterwards, you will need to start Mod Organizer and set Anomaly Path (launcher can't do that ... yet.)
 
@@ -27,19 +27,19 @@ Afterwards, you will need to start Mod Organizer and set Anomaly Path (launcher 
 
 This will do remove ReShade based on [this guide](https://reshade.me/forum/general-discussion/4398-howto-uninstall-reshade)
 
-To use it: `gamma-launcher remove_reshade --anomaly <Anomaly path>`
+To use it: `gamma-launcher remove-reshade --anomaly <Anomaly path>`
 
 ### Purge Shader Cache
 
 This will delete cached shaders
 
-To use it: `gamma-launcher purge_shader_cache --anomaly <Anomaly path>`
+To use it: `gamma-launcher purge-shader-cache --anomaly <Anomaly path>`
 
 ## Troubleshoot
 
 ### Shader compilation error
 
-Remove ReShade with: `gamma-launcher remove_reshade --anomaly <Anomaly path>`
+Remove ReShade with: `gamma-launcher remove-reshade --anomaly <Anomaly path>`
 
 Also remove some shaders mods:
 * 188- Enhanced Shaders - KennShade
