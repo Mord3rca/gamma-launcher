@@ -5,7 +5,7 @@ from pathlib import Path
 
 class PurgeShaderCache:
 
-    name: str = 'purge_shader_cache'
+    name: str = 'purge-shader-cache'
 
     help: str = 'Purge Anomaly shader cache'
 
@@ -26,7 +26,7 @@ class PurgeShaderCache:
 
 class RemoveReshade:
 
-    name: str = 'remove_reshade'
+    name: str = 'remove-reshade'
 
     help: str = 'Remove ReShade from Anomaly bin'
 
