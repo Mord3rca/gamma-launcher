@@ -15,7 +15,7 @@ Where *directory* is the toplevel directory containing `setup.py`
 
 ## Commands
 
-## Check MD5
+### Check MD5
 
 This will perform a MD5 check for all ModDB addons
 
