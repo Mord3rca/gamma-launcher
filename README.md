@@ -41,6 +41,13 @@ This will delete cached shaders
 
 To use it: `gamma-launcher purge-shader-cache --anomaly <Anomaly path>`
 
+### Test Mod Maker
+
+This command will verify if additonal installation directives are valid
+(aka folder is in the archive)
+
+To use it: `gamma-launcher test-mod-maker --gamma <GAMMA path>`
+
 ## Troubleshoot
 
 ### Shader compilation error
