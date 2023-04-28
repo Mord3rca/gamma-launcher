@@ -56,7 +56,7 @@ class CheckMD5:
                 info = parse_moddb_data(i['info_url'])
                 file = modpack_dl_dir / info['Filename']
             except KeyError:
-                print(f"  !! Can't parse moddb page for i['info_url']")
+                print(f"  !! Can't parse moddb page for {i['info_url']}")
                 errors += [f"Error: parsing failure for {i['info_url']}"]
                 continue
 
