@@ -1,6 +1,5 @@
-import os
-
 from distutils.dir_util import copy_tree, DistutilsFileError
+from pathlib import Path
 from requests.exceptions import ConnectionError
 from shutil import copy2, move
 from tempfile import TemporaryDirectory
@@ -44,55 +43,55 @@ class FullInstall:
 
     def _update_gamma_definition(self) -> None:
         print('[+] Updating G.A.M.M.A. definition')
-        gdef = f'{self._grok_mod_dir}/GAMMA_definition.zip'
+        gdef = self._grok_mod_dir / 'GAMMA_definition.zip'
 
-        if not os.path.isfile(gdef):
+        if not gdef.is_file():
             print('    downloading archive...')
             g = get_handler_for_url("https://github.com/Grokitach/Stalker_GAMMA/archive/refs/heads/main.zip")
             g.download(gdef)
 
         with TemporaryDirectory(prefix="gamma-launcher-") as dir:
             extract_archive(gdef, dir)
-            copy_tree(f"{dir}/Stalker_GAMMA-main", self._grok_mod_dir)
+            copy_tree(Path(dir) / 'Stalker_GAMMA-main', self._grok_mod_dir)
 
         move(
-            os.path.join(self._grok_mod_dir, 'G.A.M.M.A_definition_version.txt'),
-            os.path.join(self._grok_mod_dir, 'version.txt')
+            self._grok_mod_dir / 'G.A.M.M.A_definition_version.txt',
+            self._grok_mod_dir / 'version.txt'
         )
 
     def _patch_anomaly(self) -> None:
         copy_tree(
-            os.path.join(self._grok_mod_dir, 'G.A.M.M.A', 'modpack_patches'),
+            self._grok_mod_dir / 'G.A.M.M.A' / 'modpack_patches',
             self._anomaly_dir
         )
 
     @retry(stop=stop_after_attempt(3))
-    def _download_mod(self, url: str) -> str:
+    def _download_mod(self, url: str) -> Path:
         e = get_handler_for_url(url)
-        filename = os.path.join(self._dl_dir, e.filename)
+        file = self._dl_dir / e.filename
 
-        if os.path.isfile(filename):
-            print(f'  - Using cached {e.filename}')
-            return filename
+        if file.is_file():
+            print(f'  - Using cached {file.name}')
+            return file
 
-        print(f'  - Downloading {e.filename}')
+        print(f'  - Downloading {file.name}')
         try:
-            e.download(filename)
+            e.download(file)
         except ConnectionError:
             print('  -> Failed, retrying...')
-            os.remove(filename)
+            file.unlink()
             raise TryAgain
 
-        return filename
+        return file
 
     def _install_mod(self, name: str, m: dict, use_cached: bool = True) -> None:
-        install_dir = os.path.join(self._mod_dir, name)
+        install_dir = self._mod_dir / name
 
         # Special case, it's a separator
         if 'separator' in name:
             print(f'[+] Installing separator: {name}')
-            os.makedirs(install_dir, exist_ok=True)
-            create_ini_separator_file(os.path.join(install_dir, 'meta.ini'))
+            install_dir.mkdir(exist_ok=True)
+            create_ini_separator_file(install_dir / 'meta.ini')
             return
 
         if not m:
@@ -104,11 +103,11 @@ class FullInstall:
 
         print(f'[+] Installing mod: {title}')
 
-        filename = self._download_mod(url)
+        file = self._download_mod(url)
 
-        os.makedirs(install_dir, exist_ok=True)
+        install_dir.mkdir(exist_ok=True)
         with TemporaryDirectory(prefix="gamma-launcher-modinstall-") as dir:
-            extract_archive(filename, dir)
+            extract_archive(file, dir)
             if not install_directives:
                 copy_tree(dir, install_dir)
             else:
@@ -118,8 +117,8 @@ class FullInstall:
                 for folder in ['fomod', 'gamedata']:
                     try:
                         copy_tree(
-                            os.path.join(dir, folder),
-                            os.path.join(install_dir, folder)
+                            Path(dir) / folder,
+                            install_dir / folder
                         )
                     except DistutilsFileError:
                         pass
@@ -128,36 +127,37 @@ class FullInstall:
                     # Can except if mod are updated (official launcher silently crash)
                     try:
                         print(f'    Installing {folder} -> {install_dir}')
-                        copy_tree(os.path.join(dir, folder), install_dir)
+                        copy_tree(Path(dir) / folder, install_dir)
                     except DistutilsFileError:
                         print(f'    WARNING: {folder} does not exist')
 
-        create_ini_file(os.path.join(install_dir, 'meta.ini'), os.path.basename(filename), url)
+        create_ini_file(install_dir / 'meta.ini', file.name, url)
 
     def _install_mods(self) -> None:
         self._mods_make = read_mod_maker(
-            os.path.join(self._grok_mod_dir, 'G.A.M.M.A', 'modpack_data', 'modlist.txt'),
-            os.path.join(self._grok_mod_dir, 'G.A.M.M.A', 'modpack_data', 'modpack_maker_list.txt')
+            self._grok_mod_dir / 'G.A.M.M.A' / 'modpack_data' / 'modlist.txt',
+            self._grok_mod_dir / 'G.A.M.M.A' / 'modpack_data' / 'modpack_maker_list.txt'
         )
 
         for k, v in self._mods_make.items():
             self._install_mod(k, v)
 
     def _copy_gamma_modpack(self) -> None:
-        path = os.path.join(self._grok_mod_dir, 'G.A.M.M.A', 'modpack_addons')
+        path = self._grok_mod_dir / 'G.A.M.M.A' / 'modpack_addons'
         print(f'[+] Copying G.A.M.M.A mods in from "{path}" to "{self._mod_dir}"')
         copy_tree(path, self._mod_dir)
 
     def _install_modorganizer_profile(self) -> None:
-        p_path = os.path.join(self._gamma_dir, 'profiles', 'G.A.M.M.A')
+        p_path = self._gamma_dir / 'profiles' / 'G.A.M.M.A'
+        settings = p_path / 'settings.txt'
+
         print(f'[+] Installing G.A.M.M.A profile in {p_path}')
-        os.makedirs(p_path, exist_ok=True)
+        p_path.mkdir(exist_ok=True)
         copy2(
-            os.path.join(self._grok_mod_dir, 'G.A.M.M.A', 'modpack_data', 'modlist.txt'),
+            self._grok_mod_dir / 'G.A.M.M.A' / 'modpack_data' / 'modlist.txt',
             p_path
         )
-        with open(os.path.join(p_path, 'settings.txt'), 'w') as f:
-            f.write("""[General]
+        settings.write_text("""[General]
 LocalSaves=false
 LocalSettings=true
 AutomaticArchiveInvalidation=false
@@ -165,12 +165,12 @@ AutomaticArchiveInvalidation=false
 
     def run(self, args):
         # Init paths
-        self._anomaly_dir = args.anomaly
-        self._gamma_dir = args.gamma
+        self._anomaly_dir = Path(args.anomaly)
+        self._gamma_dir = Path(args.gamma)
 
-        self._dl_dir = os.path.join(args.gamma, "downloads")
-        self._mod_dir = os.path.join(args.gamma, "mods")
-        self._grok_mod_dir = os.path.join(args.gamma, ".Grok's Modpack Installer")
+        self._dl_dir = Path(args.gamma) / "downloads"
+        self._mod_dir = Path(args.gamma) / "mods"
+        self._grok_mod_dir = Path(args.gamma) / ".Grok's Modpack Installer"
 
         # Start installing
         self._update_gamma_definition()
