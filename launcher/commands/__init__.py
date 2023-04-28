@@ -1,3 +1,4 @@
+from .check import CheckMD5
 from .install import FullInstall
 from .shader import RemoveReshade, PurgeShaderCache
-from .check import CheckMD5
+from .tests import TestModMaker
