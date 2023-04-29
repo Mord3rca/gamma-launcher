@@ -25,6 +25,16 @@ class FullInstall:
             "required": True,
             "type": str
         },
+        "--no-def-update": {
+            "help": "Do not update S.T.A.L.K..E.R.: G.A.M.M.A. definition",
+            "action": "store_false",
+            "dest": "update_def",
+        },
+        "--no-anomaly-patch": {
+            "help": "Do not patch Anomaly directory",
+            "action": "store_false",
+            "dest": "anomaly_patch",
+        },
     }
 
     name: str = "full-install"
@@ -176,8 +186,11 @@ AutomaticArchiveInvalidation=false
         self._grok_mod_dir = Path(args.gamma) / ".Grok's Modpack Installer"
 
         # Start installing
-        self._update_gamma_definition()
-        self._patch_anomaly()
+        if args.update_def:
+            self._update_gamma_definition()
+        if args.anomaly_patch:
+            self._patch_anomaly()
+
         self._install_mods()
         self._install_modorganizer_profile()
         self._copy_gamma_modpack()
