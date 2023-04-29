@@ -75,4 +75,4 @@ Also, avoid OS specific code. I plan to build it with pyinstaller for Windows us
 
 I did not have access to the official launcher so, I can only guess how it's done.
 
-Miraculously, it works on my side. Fell free to contribute if something is wrong.
+Miraculously, it works on my side. Feel free to contribute if something is wrong.
