@@ -1,1 +1,4 @@
 **/__pycache__
+
+launcher.egg-info/*
+gamma-dev/*
