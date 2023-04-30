@@ -63,6 +63,7 @@ class CheckMD5:
         print('-- Starting MD5 Check')
         for i in filter(lambda x: x[1] and x[1]["info_url"], mod_maker.items()):
             k, v = i[0], i[1]
+            k, v = i[0], i[1]
 
             try:
                 info = parse_moddb_data(v['info_url'])
@@ -88,22 +89,13 @@ class CheckMD5:
             if md5 != info['MD5 Hash']:
                 errors += [f"Error: {file.name} -- remote({info['MD5 Hash']}) != local({md5})"]
                 if redownload:
-                    retry_num = 0
-                    max_retries = 3
-                    could_not_download = True
-
                     print(f"Redownloading {file.name}...")
-                    while retry_num < max_retries:
-                        if self.redownload(k, v, args.gamma):
-                            print(f"{file.name} downloaded successfully")
-                            could_not_download = False
-                            break
-                        else:
-                            print(f"Download failed. Retrying ({retry_num+1}/{max_retries})...")
-                            retry_num += 1
-
-                    if could_not_download:
-                        errors += [f"Error: {file.name} could not be downloaded."]
+                    if self.redownload(k, v, args.gamma):
+                        print(f"{file.name} downloaded successfully")
+                    else:
+                        error = f"Error: {file.name} failed MD5 check after being redownloaded"
+                        print(error)
+                        errors += [error]
                 else:
                     print('  !! Please update your installation')
 
