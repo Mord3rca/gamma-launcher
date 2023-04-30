@@ -100,7 +100,7 @@ class CheckMD5:
         for err in errors:
             print(err)
 
-    def redownload(self, name, dict, gamma_dir):
+    def redownload(self, name: str, dict: dict, gamma_dir: str) -> bool:
         """
         Downloads and installs a specific mod, then checks its MD5 hash again.
 
