@@ -87,15 +87,23 @@ class CheckMD5:
 
             if md5 != info['MD5 Hash']:
                 errors += [f"Error: {file.name} -- remote({info['MD5 Hash']}) != local({md5})"]
-                # Download the mod again if redownload argument was provided:
                 if redownload:
+                    retry_num = 0
+                    max_retries = 3
+                    could_not_download = True
+
                     print(f"Redownloading {file.name}...")
-                    if self.redownload(k, v, args.gamma):
-                        print(f"{file.name} downloaded successfully")
-                    else:
-                        error = f"Error: {file.name} failed MD5 check after being redownloaded"
-                        print(error)
-                        errors += [error]
+                    while retry_num < max_retries:
+                        if self.redownload(k, v, args.gamma):
+                            print(f"{file.name} downloaded successfully")
+                            could_not_download = False
+                            break
+                        else:
+                            print(f"Download failed. Retrying ({retry_num+1}/{max_retries})...")
+                            retry_num += 1
+
+                    if could_not_download:
+                        errors += [f"Error: {file.name} could not be downloaded."]
                 else:
                     print('  !! Please update your installation')
 

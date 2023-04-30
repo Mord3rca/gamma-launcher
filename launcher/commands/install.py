@@ -151,9 +151,15 @@ class FullInstall:
             self._grok_mod_dir / 'G.A.M.M.A' / 'modpack_data' / 'modlist.txt',
             self._grok_mod_dir / 'G.A.M.M.A' / 'modpack_data' / 'modpack_maker_list.txt'
         )
-
+        
         for k, v in self._mods_make.items():
-            self._install_mod(k, v)
+            print("hi")
+            #print(f"k: {k}")
+            #print(f"v: {v}")
+            #self._install_mod(k, v)
+        #print("=====================")
+        #print(self._mods_make.items())
+        print(self._mods_make.get("223- Fluid Relations - Favkis_Nexerade"))
 
     def _copy_gamma_modpack(self) -> None:
         path = self._grok_mod_dir / 'G.A.M.M.A' / 'modpack_addons'
@@ -192,7 +198,7 @@ AutomaticArchiveInvalidation=false
             self._patch_anomaly()
 
         self._install_mods()
-        self._install_modorganizer_profile()
-        self._copy_gamma_modpack()
+        #self._install_modorganizer_profile()
+        #self._copy_gamma_modpack()
 
         print('[+] Setup ended... Enjoy your journey in the Zone o/')
