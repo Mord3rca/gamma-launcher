@@ -1,8 +1,10 @@
 import os
 
 from distutils.dir_util import copy_tree, DistutilsFileError
+from requests.exceptions import ConnectionError
 from shutil import copy2, move
 from tempfile import TemporaryDirectory
+from tenacity import retry, TryAgain, stop_after_attempt
 
 from launcher.archive import extract_archive
 from launcher.downloader import get_handler_for_url
@@ -64,6 +66,25 @@ class FullInstall:
             self._anomaly_dir
         )
 
+    @retry(stop=stop_after_attempt(3))
+    def _download_mod(self, url: str) -> str:
+        e = get_handler_for_url(url)
+        filename = os.path.join(self._dl_dir, e.filename)
+
+        if os.path.isfile(filename):
+            print(f'  - Using cached {e.filename}')
+            return filename
+
+        print(f'  - Downloading {e.filename}')
+        try:
+            e.download(filename)
+        except ConnectionError:
+            print('  -> Failed, retrying...')
+            os.remove(filename)
+            raise TryAgain
+
+        return filename
+
     def _install_mod(self, name: str, m: dict, use_cached: bool = True) -> None:
         install_dir = os.path.join(self._mod_dir, name)
 
@@ -83,14 +104,7 @@ class FullInstall:
 
         print(f'[+] Installing mod: {title}')
 
-        # Downloading
-        e = get_handler_for_url(url)
-        filename = os.path.join(self._dl_dir, e.filename)
-        if not os.path.isfile(filename):
-            print(f'  - Downloading {e.filename}')
-            e.download(filename)
-        elif use_cached:
-            print(f'  - Using cached {e.filename}')
+        filename = self._download_mod(url)
 
         os.makedirs(install_dir, exist_ok=True)
         with TemporaryDirectory(prefix="gamma-launcher-modinstall-") as dir:
@@ -118,7 +132,7 @@ class FullInstall:
                     except DistutilsFileError:
                         print(f'    WARNING: {folder} does not exist')
 
-        create_ini_file(os.path.join(install_dir, 'meta.ini'), e.filename, url)
+        create_ini_file(os.path.join(install_dir, 'meta.ini'), os.path.basename(filename), url)
 
     def _install_mods(self) -> None:
         self._mods_make = read_mod_maker(
