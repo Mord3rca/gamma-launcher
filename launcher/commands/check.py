@@ -22,6 +22,10 @@ def parse_moddb_data(url: str) -> Dict[str, str]:
         # We can parse more, but we don't need it.
         if name in ('Filename', 'MD5 Hash'):
             result[name] = value
+    try:
+        result['Download'] = soup.find(id='downloadmirrorstoggle')['href'].strip()
+    except TypeError:
+        pass
 
     return result
 
@@ -58,6 +62,11 @@ class CheckMD5:
             except KeyError:
                 print(f"  !! Can't parse moddb page for {i['info_url']}")
                 errors += [f"Error: parsing failure for {i['info_url']}"]
+                continue
+
+            if info.get('Download', '') not in i['url']:
+                errors += [f"WARNING: Skipping {file.name} since ModDB info do not match download url"]
+                print(f"{file.name} is bad !")
                 continue
 
             if not file.exists():
