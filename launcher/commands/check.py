@@ -83,6 +83,7 @@ class CheckMD5:
 
             if md5 != info['MD5 Hash']:
                 errors += [f"Error: {file.name} -- remote({info['MD5 Hash']}) != local({md5})"]
+                # Download the mod again if redownload argument was provided:
                 if redownload:
                     print(f"Redownloading {file.name}...")
                     if self.redownload(k, v, args.gamma):
@@ -100,12 +101,27 @@ class CheckMD5:
             print(err)
 
     def redownload(self, name, dict, gamma_dir):
+        """
+        Downloads and installs a specific mod, then checks its MD5 hash again.
+
+        :param name:
+        The name of the mod.
+        :param dict:
+        Values gathered from the modpack_maker_list.txt file.
+        :param gamma_dir:
+        Path to the GAMMA folder.
+
+        :return:
+        Whether the local and remote MD5 hashes match.
+        """
+
+        # Download and install the mod:
         full_install = FullInstall()
         full_install._dl_dir = os.path.join(gamma_dir, "downloads")
         full_install._mod_dir = os.path.join(gamma_dir, "mods")
         full_install._install_mod(name, dict, use_cached=False)
 
-        # Check MD5 sum again
+        # Check MD5 sum again:
         e = get_handler_for_url(dict["url"])
         file = os.path.join(full_install._dl_dir, e.filename)
         info = parse_moddb_data(dict["info_url"])
