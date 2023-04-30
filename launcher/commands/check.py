@@ -7,6 +7,7 @@ from typing import Dict
 from launcher.downloader.base import g_session
 from launcher.downloader import get_handler_for_url
 from launcher.commands.common import read_mod_maker
+from launcher.commands.install import FullInstall
 
 
 def parse_moddb_data(url: str) -> Dict[str, str]:
@@ -60,7 +61,7 @@ class CheckMD5:
 
         print('-- Starting MD5 Check')
         for i in filter(lambda x: x[1] and x[1]["info_url"], mod_maker.items()):
-            k,v = i[0], i[1]
+            k, v = i[0], i[1]
 
             try:
                 info = parse_moddb_data(v['info_url'])
@@ -83,22 +84,13 @@ class CheckMD5:
             if md5 != info['MD5 Hash']:
                 errors += [f"Error: {file.name} -- remote({info['MD5 Hash']}) != local({md5})"]
                 if redownload:
-                    retry_num = 0
-                    max_retries = 3
-                    could_not_download = True
-
                     print(f"Redownloading {file.name}...")
-                    while retry_num < max_retries:
-                        if self.redownload(k, v, args.gamma):
-                            print(f"{file.name} downloaded successfully")
-                            could_not_download = False
-                            break
-                        else:
-                            print(f"Download failed. Retrying ({retry_num+1}/{max_retries})...")
-                            retry_num += 1
-
-                    if could_not_download:
-                        errors += [f"Error: {file.name} could not be downloaded."]
+                    if self.redownload(k, v, args.gamma):
+                        print(f"{file.name} downloaded successfully")
+                    else:
+                        error = f"Error: {file.name} failed MD5 check after being redownloaded"
+                        print(error)
+                        errors += [error]
                 else:
                     print('  !! Please update your installation')
 
@@ -108,24 +100,19 @@ class CheckMD5:
             print(err)
 
     def redownload(self, name, dict, gamma_dir):
-        dl_dir = os.path.join(gamma_dir, "downloads")
-        e = get_handler_for_url(dict["url"])
-        filename = os.path.join(dl_dir, e.filename)
-        e.download(filename)
-        print(f"filename: {filename}")
-        
-        # TODO: Create this!
-        #modpack_data_dir = Path(gamma_dir) / ".Grok's Modpack Installer" / "G.A.M.M.A" / "modpack_data"
-        info = parse_moddb_data(dict["info_url"])
-        #file = modpack_data_dir / info["Filename"]
-        #file = filename / info["Filename"]
-        #return self.check_md5(file, info["MD5 Hash"])
-        return self.check_md5(filename, info["MD5 Hash"])
+        full_install = FullInstall()
+        full_install._dl_dir = os.path.join(gamma_dir, "downloads")
+        full_install._mod_dir = os.path.join(gamma_dir, "mods")
+        full_install._install_mod(name, dict, use_cached=False)
 
-    def check_md5(self, file, remote_md5):
+        # Check MD5 sum again
+        e = get_handler_for_url(dict["url"])
+        file = os.path.join(full_install._dl_dir, e.filename)
+        info = parse_moddb_data(dict["info_url"])
+
         with open(file, 'rb') as f:
             local_md5 = file_digest(f, 'md5').hexdigest()
-        print(f"{file} remote hash is: '{remote_md5}'")
-        print(f"{file} local  hash is: '{local_md5}'")
+        print(f"{info['Filename']} remote hash is: '{info['MD5 Hash']}'")
+        print(f"{info['Filename']} local  hash is: '{local_md5}'")
 
-        return remote_md5 == local_md5
+        return info["MD5 Hash"] == local_md5

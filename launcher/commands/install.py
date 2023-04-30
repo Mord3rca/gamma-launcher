@@ -64,7 +64,7 @@ class FullInstall:
             self._anomaly_dir
         )
 
-    def _install_mod(self, name: str, m: dict) -> None:
+    def _install_mod(self, name: str, m: dict, use_cached: bool = True) -> None:
         install_dir = os.path.join(self._mod_dir, name)
 
         # Special case, it's a separator
@@ -89,7 +89,7 @@ class FullInstall:
         if not os.path.isfile(filename):
             print(f'  - Downloading {e.filename}')
             e.download(filename)
-        else:
+        elif use_cached:
             print(f'  - Using cached {e.filename}')
 
         os.makedirs(install_dir, exist_ok=True)
@@ -116,7 +116,7 @@ class FullInstall:
                         print(f'    Installing {folder} -> {install_dir}')
                         copy_tree(os.path.join(dir, folder), install_dir)
                     except DistutilsFileError:
-                        print(f'    ERROR: {folder} do not exist')
+                        print(f'    WARNING: {folder} does not exist')
 
         create_ini_file(os.path.join(install_dir, 'meta.ini'), e.filename, url)
 
@@ -125,15 +125,9 @@ class FullInstall:
             os.path.join(self._grok_mod_dir, 'G.A.M.M.A', 'modpack_data', 'modlist.txt'),
             os.path.join(self._grok_mod_dir, 'G.A.M.M.A', 'modpack_data', 'modpack_maker_list.txt')
         )
-        
+
         for k, v in self._mods_make.items():
-            print("hi")
-            #print(f"k: {k}")
-            #print(f"v: {v}")
-            #self._install_mod(k, v)
-        #print("=====================")
-        #print(self._mods_make.items())
-        print(self._mods_make.get("223- Fluid Relations - Favkis_Nexerade"))
+            self._install_mod(k, v)
 
     def _copy_gamma_modpack(self) -> None:
         path = os.path.join(self._grok_mod_dir, 'G.A.M.M.A', 'modpack_addons')
@@ -165,10 +159,10 @@ AutomaticArchiveInvalidation=false
         self._grok_mod_dir = os.path.join(args.gamma, ".Grok's Modpack Installer")
 
         # Start installing
-        #self._update_gamma_definition()
-        #self._patch_anomaly()
+        self._update_gamma_definition()
+        self._patch_anomaly()
         self._install_mods()
-        #self._install_modorganizer_profile()
-        #self._copy_gamma_modpack()
+        self._install_modorganizer_profile()
+        self._copy_gamma_modpack()
 
         print('[+] Setup ended... Enjoy your journey in the Zone o/')
