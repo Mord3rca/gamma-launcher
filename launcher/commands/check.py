@@ -77,12 +77,10 @@ class CheckMD5:
 
             if info.get('Download', '') not in i['url']:
                 errors += [f"WARNING: Skipping {file.name} since ModDB info do not match download url"]
-                print(f"{file.name} is bad !")
                 continue
 
             if not file.exists():
                 errors += [f"Error: {file.name} not found on disk"]
-                print(f"{file.name} do not exist, skiping")
                 continue
 
             with open(file, 'rb') as f:
