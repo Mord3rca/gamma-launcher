@@ -60,18 +60,15 @@ class CheckMD5:
                 info = parse_moddb_data(i['info_url'])
                 file = modpack_dl_dir / info['Filename']
             except KeyError:
-                print(f"  !! Can't parse moddb page for {i['info_url']}")
                 errors += [f"Error: parsing failure for {i['info_url']}"]
                 continue
 
             if info.get('Download', '') not in i['url']:
                 errors += [f"WARNING: Skipping {file.name} since ModDB info do not match download url"]
-                print(f"{file.name} is bad !")
                 continue
 
             if not file.exists():
                 errors += [f"Error: {file.name} not found on disk"]
-                print(f"{file.name} do not exist, skiping")
                 continue
 
             with open(file, 'rb') as f:
@@ -81,7 +78,6 @@ class CheckMD5:
 
             if md5 != info['MD5 Hash']:
                 errors += [f"Error: {file.name} -- remote({info['MD5 Hash']}) != local({md5})"]
-                print('  !! Please update your installation')
 
             print('-' * 25)
 
