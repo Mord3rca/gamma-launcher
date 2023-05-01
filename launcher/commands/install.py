@@ -52,7 +52,10 @@ class FullInstall:
 
         with TemporaryDirectory(prefix="gamma-launcher-") as dir:
             extract_archive(gdef, dir)
-            copy_tree(Path(dir) / 'Stalker_GAMMA-main', self._grok_mod_dir)
+            copy_tree(
+                str(Path(dir) / 'Stalker_GAMMA-main'),
+                str(self._grok_mod_dir)
+            )
 
         move(
             self._grok_mod_dir / 'G.A.M.M.A_definition_version.txt',
@@ -61,8 +64,8 @@ class FullInstall:
 
     def _patch_anomaly(self) -> None:
         copy_tree(
-            self._grok_mod_dir / 'G.A.M.M.A' / 'modpack_patches',
-            self._anomaly_dir
+            str(self._grok_mod_dir / 'G.A.M.M.A' / 'modpack_patches'),
+            str(self._anomaly_dir)
         )
 
     @retry(stop=stop_after_attempt(3))
@@ -109,7 +112,7 @@ class FullInstall:
         with TemporaryDirectory(prefix="gamma-launcher-modinstall-") as dir:
             extract_archive(file, dir)
             if not install_directives:
-                copy_tree(dir, install_dir)
+                copy_tree(dir, str(install_dir))
             else:
                 # I'm a lazy bastard and I don't really get it.
                 # Not gonna think about it all day, just do a quick & dirty 'trick'
@@ -117,8 +120,8 @@ class FullInstall:
                 for folder in ['fomod', 'gamedata']:
                     try:
                         copy_tree(
-                            Path(dir) / folder,
-                            install_dir / folder
+                            str(Path(dir) / folder),
+                            str(install_dir / folder)
                         )
                     except DistutilsFileError:
                         pass
@@ -127,7 +130,7 @@ class FullInstall:
                     # Can except if mod are updated (official launcher silently crash)
                     try:
                         print(f'    Installing {folder} -> {install_dir}')
-                        copy_tree(Path(dir) / folder, install_dir)
+                        copy_tree(str(Path(dir) / folder), str(install_dir))
                     except DistutilsFileError:
                         print(f'    ERROR: {folder} do not exist')
 
@@ -145,7 +148,7 @@ class FullInstall:
     def _copy_gamma_modpack(self) -> None:
         path = self._grok_mod_dir / 'G.A.M.M.A' / 'modpack_addons'
         print(f'[+] Copying G.A.M.M.A mods in from "{path}" to "{self._mod_dir}"')
-        copy_tree(path, self._mod_dir)
+        copy_tree(str(path), str(self._mod_dir))
 
     def _install_modorganizer_profile(self) -> None:
         p_path = self._gamma_dir / 'profiles' / 'G.A.M.M.A'
