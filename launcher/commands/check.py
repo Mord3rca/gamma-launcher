@@ -1,33 +1,7 @@
-from bs4 import BeautifulSoup
 from hashlib import file_digest
 from pathlib import Path
-from typing import Dict
 
-from launcher.downloader.base import g_session
-from launcher.commands.common import read_mod_maker
-
-
-def parse_moddb_data(url: str) -> Dict[str, str]:
-    soup = BeautifulSoup(g_session.get(url).text, features="html.parser")
-    result = {}
-
-    for i in soup.body.find_all('div', attrs={'class': "row clear"}):
-        try:
-            name = i.h5.text
-            value = i.span.text.strip()
-        except AttributeError:
-            # if div have no h5 or span child, just ignore it.
-            continue
-
-        # We can parse more, but we don't need it.
-        if name in ('Filename', 'MD5 Hash'):
-            result[name] = value
-    try:
-        result['Download'] = soup.find(id='downloadmirrorstoggle')['href'].strip()
-    except TypeError:
-        pass
-
-    return result
+from launcher.commands.common import read_mod_maker, parse_moddb_data
 
 
 class CheckMD5:
