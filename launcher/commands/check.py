@@ -1,8 +1,5 @@
-import os
-from bs4 import BeautifulSoup
 from hashlib import file_digest
 from pathlib import Path
-from typing import Dict
 
 from launcher.downloader.base import g_session
 from launcher.downloader import get_handler_for_url
