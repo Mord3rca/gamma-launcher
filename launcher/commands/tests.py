@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Dict
 
 from launcher.archive import list_archive_content
-from launcher.commands.common import read_mod_maker
+from launcher.commands.common import read_mod_maker, parse_moddb_data
 from launcher.downloader import get_handler_for_url
 
 
@@ -47,6 +47,19 @@ class TestModMaker:
             else:
                 print(f'Warning: "{d}" is not in "{archive.name}"')
 
+    def _check_mod_info(self, mod: Dict):
+        if not mod['info_url']:
+            return
+
+        info = parse_moddb_data(mod['info_url'])
+
+        if 'Filename' not in info:
+            print(f"ERROR: parsing failure for {mod['info_url']}")
+            return
+
+        if info.get('Download', '') not in mod['url']:
+            print(f"WARNING: Download link {mod['url']} do not match link in {mod['info_url']}")
+
     def run(self, args) -> None:
         self.modpack_dl_dir = Path(args.gamma) / "downloads"
         self.modpack_data_dir = Path(args.gamma) / ".Grok's Modpack Installer" / "G.A.M.M.A" / "modpack_data"
@@ -57,4 +70,5 @@ class TestModMaker:
         )
 
         for mod in filter(lambda x: x, mod_maker.values()):
+            self._check_mod_info(mod)
             self._check_install_directives(mod)
