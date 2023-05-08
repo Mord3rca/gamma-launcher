@@ -7,11 +7,21 @@ This is a reimplementation of G.AM.M.A. launcher used for the first setup. You w
 
 ## Installation
 
-It's strongly advised to install this in a [venv](https://docs.python.org/3/library/venv.html#creating-virtual-environments)
+It's strongly advised to install this in a [venv](https://docs.python.org/3/library/venv.html#creating-virtual-environments) (Python Virtual Environment)
 
-To install the launcher, use *pip* command follow: `pip install <directory>`
+A quick guide on how to do this is to open your terminal/command prompt and navigating to the downloaded folder containing gamma-launcher, and typing `python3 -m venv env` on Linux, or `py -m venv env` on Windows.
 
-Where *directory* is the toplevel directory containing `setup.py`
+You will then have to enter the virtual environment by typing `source env/bin/activate` on Linux, or `.\env\Scripts\activate` on Windows.
+
+To confirm that you're in the right place, type `which python` on Linux, or `where python` on Windows. It should print out either `.../env/bin/python` or `...\env\Scripts\python.exe`, respectively.
+
+You may first have to upgrade pip for the installation to work. (If it's complaining about a 'bad interpreter', for example.) If this is the case, type `pip install --upgrade pip`.
+
+If currently in your gamma-launcher folder, you can simply type `pip install .` OR `pip install directory`. Replace 'directory' with the actual path of said directory. The specificed directory must contain the gamma-launcher setup.py file.
+
+If all went well, you can now use the `gamma-launcher` command as intended.
+
+(Type `deactivate` to leave the virtual environment. Use the previous `source` command to re-enter it.)
 
 ## Commands
 
