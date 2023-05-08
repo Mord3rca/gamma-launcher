@@ -29,12 +29,13 @@ setup(
             'gamma-launcher = launcher.cli:main',
         ],
     },
-    python_requires='>=3.11.0',
+    python_requires='>=3.10.0',
     license=about['__license__'],
     classifiers=[
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3 :: Only',
+        'Programming Language :: Python :: 3.10'
         'Programming Language :: Python :: 3.11'
     ]
 )
