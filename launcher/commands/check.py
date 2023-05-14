@@ -1,12 +1,16 @@
 from hashlib import file_digest
 from pathlib import Path
 
-from launcher.downloader.base import g_session
+
+from launcher.downloader.base import g_session, Base
 from launcher.downloader import get_handler_for_url
 from launcher.commands.common import read_mod_maker
-from launcher.commands.install import FullInstall
+from bs4 import BeautifulSoup
+from typing import Dict
+from tenacity import RetryError
+from launcher.downloader import _download_mod
 
-
+# TODO: Not in current code - remove??
 def parse_moddb_data(url: str) -> Dict[str, str]:
     soup = BeautifulSoup(g_session.get(url).text, features="html.parser")
     result = {}
@@ -61,10 +65,7 @@ class CheckMD5:
         )
 
         print('-- Starting MD5 Check')
-        for i in filter(lambda x: x[1] and x[1]["info_url"], mod_maker.items()):
-            k, v = i[0], i[1]
-            k, v = i[0], i[1]
-
+        for k, v in filter(lambda x: x[1] and x[1]["info_url"], mod_maker.items()):
             try:
                 info = parse_moddb_data(v['info_url'])
                 file = modpack_dl_dir / info['Filename']
@@ -73,9 +74,9 @@ class CheckMD5:
                 errors += [f"Error: parsing failure for {v['info_url']}"]
                 continue
 
-            if info.get('Download', '') not in i['url']:
-                errors += [f"WARNING: Skipping {file.name} since ModDB info do not match download url"]
-                continue
+            #if info.get('Download', '') not in v['url']:
+            #    errors += [f"WARNING: Skipping {file.name} since ModDB info do not match download url"]
+            #    continue
 
             if not file.exists():
                 errors += [f"Error: {file.name} not found on disk"]
@@ -119,16 +120,23 @@ class CheckMD5:
         Whether the local and remote MD5 hashes match.
         """
 
+        print("Hello World!!!")
+
         # Download and install the mod:
-        full_install = FullInstall()
-        full_install._dl_dir = os.path.join(gamma_dir, "downloads")
-        full_install._mod_dir = os.path.join(gamma_dir, "mods")
-        full_install._install_mod(name, dict, use_cached=False)
+        info = parse_moddb_data(dict["info_url"])
+        download_dir = Path(gamma_dir).joinpath("downloads")
+        #try:
+        #    #Base._download_mod(dict["url"], info["Filename"], str(download_dir))
+        #    _download_mod(dict["url"], info["Filename"], str(download_dir), use_cached=False)
+        #except RetryError as e:
+        #    print(f"(ERROR) {e}")
+        ##Base._download_mod(dict["url"], info["Filename"], download_dir)
+
+        _download_mod(dict["url"], info["Filename"], str(download_dir), use_cached=False)
 
         # Check MD5 sum again:
         e = get_handler_for_url(dict["url"])
-        file = os.path.join(full_install._dl_dir, e.filename)
-        info = parse_moddb_data(dict["info_url"])
+        file = Path(download_dir).joinpath(e.filename)
 
         with open(file, 'rb') as f:
             local_md5 = file_digest(f, 'md5').hexdigest()

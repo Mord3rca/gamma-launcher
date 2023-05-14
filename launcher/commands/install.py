@@ -3,7 +3,6 @@ from pathlib import Path
 from requests.exceptions import ConnectionError
 from shutil import copy2, move
 from tempfile import TemporaryDirectory
-from tenacity import retry, TryAgain, stop_after_attempt
 
 from launcher.archive import extract_archive
 from launcher.downloader import get_handler_for_url
@@ -77,25 +76,6 @@ class FullInstall:
             str(self._grok_mod_dir / 'G.A.M.M.A' / 'modpack_patches'),
             str(self._anomaly_dir)
         )
-
-    @retry(stop=stop_after_attempt(3))
-    def _download_mod(self, url: str) -> Path:
-        e = get_handler_for_url(url)
-        file = self._dl_dir / e.filename
-
-        if file.is_file():
-            print(f'  - Using cached {file.name}')
-            return file
-
-        print(f'  - Downloading {file.name}')
-        try:
-            e.download(file)
-        except ConnectionError:
-            print('  -> Failed, retrying...')
-            file.unlink()
-            raise TryAgain
-
-        return file
 
     def _install_mod(self, name: str, m: dict, use_cached: bool = True) -> None:
         install_dir = self._mod_dir / name
