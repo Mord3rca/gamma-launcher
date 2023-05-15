@@ -36,7 +36,7 @@ class CheckMD5:
         )
 
         print('-- Starting MD5 Check')
-        for i in filter(lambda v: v and v["info_url"], mod_maker.values()):
+        for i in filter(lambda v: v and v['info_url'], mod_maker.values()):
             try:
                 info = parse_moddb_data(i['info_url'])
                 file = modpack_dl_dir / info['Filename']
