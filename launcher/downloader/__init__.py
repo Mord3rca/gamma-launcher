@@ -14,15 +14,16 @@ def get_handler_for_url(url: str) -> Base:
         'www.moddb.com': ModDB,
     }.get(host)(url)
 
+
 @retry(stop=stop_after_attempt(3))
-def _download_mod(url: str, filename: str, download_dir: str, use_cached: bool = True) -> Path:
+def _download_mod(url: str, download_dir: Path, use_cached: bool = True) -> Path:
     e = get_handler_for_url(url)
     file = Path(f"{download_dir}/{e.filename}")
 
     if file.is_file() and use_cached:
         print(f'  - Using cached {file.name}')
         return file
-    
+
     print(f'  - Downloading {file.name}')
     try:
         e.download(file)
@@ -30,5 +31,5 @@ def _download_mod(url: str, filename: str, download_dir: str, use_cached: bool =
         print('  -> Failed, retrying...')
         file.unlink()
         raise TryAgain
-    
+
     return file

@@ -1,37 +1,8 @@
 from hashlib import file_digest
 from pathlib import Path
 
-
-from launcher.downloader.base import g_session, Base
-from launcher.downloader import get_handler_for_url
-from launcher.commands.common import read_mod_maker
-from bs4 import BeautifulSoup
-from typing import Dict
-from tenacity import RetryError
+from launcher.commands.common import read_mod_maker, parse_moddb_data
 from launcher.downloader import _download_mod
-
-# TODO: Not in current code - remove??
-def parse_moddb_data(url: str) -> Dict[str, str]:
-    soup = BeautifulSoup(g_session.get(url).text, features="html.parser")
-    result = {}
-
-    for i in soup.body.find_all('div', attrs={'class': "row clear"}):
-        try:
-            name = i.h5.text
-            value = i.span.text.strip()
-        except AttributeError:
-            # if div have no h5 or span child, just ignore it.
-            continue
-
-        # We can parse more, but we don't need it.
-        if name in ('Filename', 'MD5 Hash'):
-            result[name] = value
-    try:
-        result['Download'] = soup.find(id='downloadmirrorstoggle')['href'].strip()
-    except TypeError:
-        pass
-
-    return result
 
 
 class CheckMD5:
@@ -74,9 +45,9 @@ class CheckMD5:
                 errors += [f"Error: parsing failure for {v['info_url']}"]
                 continue
 
-            #if info.get('Download', '') not in v['url']:
-            #    errors += [f"WARNING: Skipping {file.name} since ModDB info do not match download url"]
-            #    continue
+            if info.get('Download', '') not in v['url']:
+                errors += [f"WARNING: Skipping {file.name} since ModDB info do not match download url"]
+                continue
 
             if not file.exists():
                 errors += [f"Error: {file.name} not found on disk"]
@@ -120,24 +91,12 @@ class CheckMD5:
         Whether the local and remote MD5 hashes match.
         """
 
-        print("Hello World!!!")
-
         # Download and install the mod:
-        info = parse_moddb_data(dict["info_url"])
         download_dir = Path(gamma_dir).joinpath("downloads")
-        #try:
-        #    #Base._download_mod(dict["url"], info["Filename"], str(download_dir))
-        #    _download_mod(dict["url"], info["Filename"], str(download_dir), use_cached=False)
-        #except RetryError as e:
-        #    print(f"(ERROR) {e}")
-        ##Base._download_mod(dict["url"], info["Filename"], download_dir)
-
-        _download_mod(dict["url"], info["Filename"], str(download_dir), use_cached=False)
+        file = _download_mod(dict["url"], download_dir, use_cached=False)
 
         # Check MD5 sum again:
-        e = get_handler_for_url(dict["url"])
-        file = Path(download_dir).joinpath(e.filename)
-
+        info = parse_moddb_data(dict["info_url"])
         with open(file, 'rb') as f:
             local_md5 = file_digest(f, 'md5').hexdigest()
         print(f"{info['Filename']} remote hash is: '{info['MD5 Hash']}'")

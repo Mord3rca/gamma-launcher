@@ -1,9 +1,9 @@
 from distutils.dir_util import copy_tree, DistutilsFileError
 from pathlib import Path
-from requests.exceptions import ConnectionError
 from shutil import copy2, move
 from tempfile import TemporaryDirectory
 
+from launcher.downloader import _download_mod
 from launcher.archive import extract_archive
 from launcher.downloader import get_handler_for_url
 from launcher.meta import create_ini_file, create_ini_separator_file
@@ -96,7 +96,7 @@ class FullInstall:
 
         print(f'[+] Installing mod: {title}')
 
-        file = self._download_mod(url)
+        file = _download_mod(url, self._dl_dir)
 
         install_dir.mkdir(exist_ok=True)
         with TemporaryDirectory(prefix="gamma-launcher-modinstall-") as dir:
