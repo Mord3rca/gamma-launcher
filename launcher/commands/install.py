@@ -1,7 +1,9 @@
 from distutils.dir_util import copy_tree, DistutilsFileError
 from pathlib import Path
+from requests.exceptions import ConnectionError
 from shutil import copy2, move
 from tempfile import TemporaryDirectory
+from tenacity import retry, TryAgain, stop_after_attempt
 
 from launcher.downloader import _download_mod
 from launcher.archive import extract_archive
@@ -33,6 +35,10 @@ class FullInstall:
             "help": "Do not patch Anomaly directory",
             "action": "store_false",
             "dest": "anomaly_patch",
+        },
+        "--preserve-user-config": {
+            "help": "Do not overwrite user configuration when patching Anomaly directory",
+            "action": "store_true",
         },
     }
 
@@ -71,13 +77,41 @@ class FullInstall:
             self._grok_mod_dir / 'version.txt'
         )
 
-    def _patch_anomaly(self) -> None:
+    def _patch_anomaly(self, preserve_user_config: bool = False) -> None:
+        user_config = self._anomaly_dir / 'appdata' / 'user.ltx'
+        saved_config = self._anomaly_dir / 'appdata' / 'user.ltx.bak'
+
+        if user_config.is_file():
+            copy2(user_config, saved_config)
+
         copy_tree(
             str(self._grok_mod_dir / 'G.A.M.M.A' / 'modpack_patches'),
             str(self._anomaly_dir)
         )
 
-    def _install_mod(self, name: str, m: dict, use_cached: bool = True) -> None:
+        if preserve_user_config:
+            copy2(saved_config, user_config)
+
+    @retry(stop=stop_after_attempt(3))
+    def _download_mod(self, url: str) -> Path:
+        e = get_handler_for_url(url)
+        file = self._dl_dir / e.filename
+
+        if file.is_file():
+            print(f'  - Using cached {file.name}')
+            return file
+
+        print(f'  - Downloading {file.name}')
+        try:
+            e.download(file)
+        except ConnectionError:
+            print('  -> Failed, retrying...')
+            file.unlink()
+            raise TryAgain
+
+        return file
+
+    def _install_mod(self, name: str, m: dict) -> None:
         install_dir = self._mod_dir / name
 
         # Special case, it's a separator
@@ -169,7 +203,7 @@ AutomaticArchiveInvalidation=false
         if args.update_def:
             self._update_gamma_definition()
         if args.anomaly_patch:
-            self._patch_anomaly()
+            self._patch_anomaly(args.preserve_user_config)
 
         self._install_mods()
         self._install_modorganizer_profile()

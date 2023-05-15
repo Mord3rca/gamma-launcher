@@ -49,6 +49,10 @@ class CheckMD5:
                 errors += [f"WARNING: Skipping {file.name} since ModDB info do not match download url"]
                 continue
 
+            if info.get('Download', '') not in i['url']:
+                errors += [f"WARNING: Skipping {file.name} since ModDB info do not match download url"]
+                continue
+
             if not file.exists():
                 errors += [f"Error: {file.name} not found on disk"]
                 continue
