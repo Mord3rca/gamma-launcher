@@ -1,14 +1,11 @@
 from abc import ABC, abstractmethod
 from hashlib import md5
-from pathlib import Path
-from tenacity import retry, TryAgain, stop_after_attempt
-
-#from launcher.downloader import get_handler_for_url
 
 from requests import Session
 
 g_session = Session()
 g_session.headers.update({'User-Agent': 'pyGammaLauncher'})
+
 
 class Base(ABC):
 

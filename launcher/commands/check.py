@@ -62,7 +62,7 @@ class CheckMD5:
                 errors += [f"Error: {file.name} -- remote({info['MD5 Hash']}) != local({md5})"]
                 if redownload:
                     print(f"Redownloading {file.name}...")
-                    if self.redownload(k, v, args.gamma):
+                    if self.redownload(v, args.gamma):
                         print(f"{file.name} downloaded successfully")
                     else:
                         error = f"Error: {file.name} failed MD5 check after being redownloaded"
@@ -76,12 +76,10 @@ class CheckMD5:
         for err in errors:
             print(err)
 
-    def redownload(self, name: str, dict: dict, gamma_dir: str) -> bool:
+    def redownload(self, dict: dict, gamma_dir: str) -> bool:
         """
         Downloads and installs a specific mod, then checks its MD5 hash again.
 
-        :param name:
-        The name of the mod.
         :param dict:
         Values gathered from the modpack_maker_list.txt file.
         :param gamma_dir:
