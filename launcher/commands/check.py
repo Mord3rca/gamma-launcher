@@ -36,16 +36,16 @@ class CheckMD5:
         )
 
         print('-- Starting MD5 Check')
-        for k, v in filter(lambda x: x[1] and x[1]["info_url"], mod_maker.items()):
+        for i in filter(lambda v: v and v["info_url"], mod_maker.values()):
             try:
-                info = parse_moddb_data(v['info_url'])
+                info = parse_moddb_data(i['info_url'])
                 file = modpack_dl_dir / info['Filename']
             except KeyError:
-                print(f"  !! Can't parse moddb page for {v['info_url']}")
-                errors += [f"Error: parsing failure for {v['info_url']}"]
+                print(f"  !! Can't parse moddb page for {i['info_url']}")
+                errors += [f"Error: parsing failure for {i['info_url']}"]
                 continue
 
-            if info.get('Download', '') not in v['url']:
+            if info.get('Download', '') not in i['url']:
                 errors += [f"WARNING: Skipping {file.name} since ModDB info do not match download url"]
                 continue
 
@@ -62,7 +62,7 @@ class CheckMD5:
                 errors += [f"Error: {file.name} -- remote({info['MD5 Hash']}) != local({md5})"]
                 if redownload:
                     print(f"Redownloading {file.name}...")
-                    if self.redownload(v, args.gamma):
+                    if self.redownload(i, args.gamma):
                         print(f"{file.name} downloaded successfully")
                     else:
                         error = f"Error: {file.name} failed MD5 check after being redownloaded"
