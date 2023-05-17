@@ -2,7 +2,7 @@ from hashlib import file_digest
 from pathlib import Path
 
 from launcher.commands.common import read_mod_maker, parse_moddb_data
-from launcher.downloader import _download_mod
+from launcher.downloader import download_mod
 
 
 class CheckMD5:
@@ -91,7 +91,7 @@ class CheckMD5:
 
         # Download and install the mod:
         download_dir = Path(gamma_dir).joinpath("downloads")
-        file = _download_mod(dict["url"], download_dir, use_cached=False)
+        file = download_mod(dict["url"], download_dir, use_cached=False)
 
         # Check MD5 sum again:
         info = parse_moddb_data(dict["info_url"])

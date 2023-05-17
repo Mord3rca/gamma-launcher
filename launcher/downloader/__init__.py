@@ -16,9 +16,9 @@ def get_handler_for_url(url: str) -> Base:
 
 
 @retry(stop=stop_after_attempt(3))
-def _download_mod(url: str, download_dir: Path, use_cached: bool = True) -> Path:
+def download_mod(url: str, download_dir: Path, use_cached: bool = True) -> Path:
     e = get_handler_for_url(url)
-    file = Path(f"{download_dir}/{e.filename}")
+    file = Path(download_dir, e.filename)
 
     if file.is_file() and use_cached:
         print(f'  - Using cached {file.name}')
