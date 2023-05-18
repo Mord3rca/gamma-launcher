@@ -1,10 +1,9 @@
 from distutils.dir_util import copy_tree, DistutilsFileError
 from pathlib import Path
-from requests.exceptions import ConnectionError
 from shutil import copy2, move
 from tempfile import TemporaryDirectory
-from tenacity import retry, TryAgain, stop_after_attempt
 
+from launcher.downloader import download_mod
 from launcher.archive import extract_archive
 from launcher.downloader import get_handler_for_url
 from launcher.meta import create_ini_file, create_ini_separator_file
@@ -91,25 +90,6 @@ class FullInstall:
         if preserve_user_config:
             copy2(saved_config, user_config)
 
-    @retry(stop=stop_after_attempt(3))
-    def _download_mod(self, url: str) -> Path:
-        e = get_handler_for_url(url)
-        file = self._dl_dir / e.filename
-
-        if file.is_file():
-            print(f'  - Using cached {file.name}')
-            return file
-
-        print(f'  - Downloading {file.name}')
-        try:
-            e.download(file)
-        except ConnectionError:
-            print('  -> Failed, retrying...')
-            file.unlink()
-            raise TryAgain
-
-        return file
-
     def _install_mod(self, name: str, m: dict) -> None:
         install_dir = self._mod_dir / name
 
@@ -129,7 +109,7 @@ class FullInstall:
 
         print(f'[+] Installing mod: {title}')
 
-        file = self._download_mod(url)
+        file = download_mod(url, self._dl_dir)
 
         install_dir.mkdir(exist_ok=True)
         with TemporaryDirectory(prefix="gamma-launcher-modinstall-") as dir:
@@ -155,7 +135,7 @@ class FullInstall:
                         print(f'    Installing {folder} -> {install_dir}')
                         copy_tree(str(Path(dir) / folder), str(install_dir))
                     except DistutilsFileError:
-                        print(f'    ERROR: {folder} do not exist')
+                        print(f'    WARNING: {folder} does not exist')
 
         create_ini_file(install_dir / 'meta.ini', file.name, url)
 
