@@ -3,6 +3,7 @@ from .moddb import ModDB
 from .base import Base
 
 from urllib.parse import urlparse
+from requests.exceptions import ConnectionError
 from tenacity import retry, TryAgain, stop_after_attempt
 from pathlib import Path
 

@@ -59,7 +59,6 @@ class CheckMD5:
             print(f"{file.name} local  hash is: '{md5}'")
 
             if md5 != info['MD5 Hash']:
-                errors += [f"Error: {file.name} -- remote({info['MD5 Hash']}) != local({md5})"]
                 if redownload:
                     print(f"Redownloading {file.name}...")
                     if self.redownload(i, args.gamma):
@@ -69,6 +68,7 @@ class CheckMD5:
                         print(error)
                         errors += [error]
                 else:
+                    errors += [f"Error: {file.name} -- remote({info['MD5 Hash']}) != local({md5})"]
                     print('  !! Please update your installation')
 
             print('-' * 25)
