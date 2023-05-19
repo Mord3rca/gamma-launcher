@@ -1,0 +1,30 @@
+name: Generate Standalone Executable
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  generate:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: '3.11'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install . pyinstall
+    - name: Build executable
+      run: |
+        pyinstaller --distpath './artifacts' --onefile "$(command -v gamma-launcher)"
+    - name: Upload Artifacts
+      uses: skx/github-action-publish-binaries@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        args: 'artifacts/*'
