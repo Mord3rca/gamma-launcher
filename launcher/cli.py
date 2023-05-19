@@ -1,3 +1,4 @@
+from launcher.__version__ import __version__
 from launcher.commands import (
     CheckMD5,
     FullInstall,
@@ -41,6 +42,7 @@ def main():
     global parser_desc
 
     parser = ArgumentParser(description=parser_desc["description"])
+    parser.add_argument('--version', action='version', version=f"%(prog)s {__version__}")
     for m, a in parser_desc['arguments'].items():
         parser.add_argument(m, **a)
 
