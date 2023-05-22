@@ -7,6 +7,7 @@ on:
 jobs:
   generate:
 
+    name: Create Artifacts
     runs-on: ubuntu-latest
 
     steps:
@@ -18,7 +19,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install . pyinstall
+        pip install . pyinstaller
     - name: Build executable
       run: |
         pyinstaller --distpath './artifacts' --onefile "$(command -v gamma-launcher)"
