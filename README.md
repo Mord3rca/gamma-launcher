@@ -51,6 +51,14 @@ This will delete cached shaders
 
 To use it: `gamma-launcher purge-shader-cache --anomaly <Anomaly path>`
 
+### USVFS Workaround
+
+This will create a usable GAMMA installation without ModOrganizer.
+
+DO NOT USE IT if wine is compatible with ModOrganizer, this will remove all mods flexibility.
+
+To use it: `gamma-launcher usvfs-workaround --anomaly <Anomaly path> --gamma <GAMMA path> --final <Final Install path>`
+
 ### Test Mod Maker
 
 This command will verify if additonal installation directives are valid
