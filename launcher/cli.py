@@ -5,6 +5,7 @@ from launcher.commands import (
     RemoveReshade,
     PurgeShaderCache,
     TestModMaker,
+    Usvfs,
 )
 
 from argparse import ArgumentParser
@@ -33,6 +34,7 @@ parser_desc = {
              **command_object_to_dict(RemoveReshade),
              **command_object_to_dict(PurgeShaderCache),
              **command_object_to_dict(TestModMaker),
+             **command_object_to_dict(Usvfs),
          },
      },
 }
