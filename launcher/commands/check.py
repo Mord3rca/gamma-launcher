@@ -1,8 +1,22 @@
-from hashlib import file_digest
 from pathlib import Path
 
 from launcher.commands.common import read_mod_maker, parse_moddb_data
 from launcher.downloader import download_mod
+
+try:
+    # Only available in Python 3.11
+    from hashlib import file_digest
+except ImportError:
+    from hashlib import md5
+
+    def file_digest(file, *arg, **kwargs) -> md5:
+        hash = md5()
+        while True:
+            r = file.read(1024*1024)
+            if not r:
+                break
+            hash.update(r)
+        return hash
 
 
 class CheckMD5:
