@@ -7,6 +7,15 @@ This is a reimplementation of G.AM.M.A. launcher used for the first setup. You w
 
 ## Installation
 
+### Using release
+
+By downloading gamma-launcher from the [latest release](https://github.com/Mord3rca/gamma-launcher/releases/latest),
+you can use it without any installation. Everything is self contained in an executable.
+
+However, if you may have glibc error, in this case, install gamma launcher in a venv.
+
+### Using venv
+
 It's strongly advised to install this in a [venv](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#creating-a-virtual-environment) (Python Virtual Environment)
 
 A quick guide on how to do this is to open your terminal/command prompt and navigating to the downloaded folder containing gamma-launcher, and typing `python3 -m venv env` on Linux, or `py -m venv env` on Windows.
