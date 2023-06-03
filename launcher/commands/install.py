@@ -114,28 +114,29 @@ class FullInstall:
         install_dir.mkdir(exist_ok=True)
         with TemporaryDirectory(prefix="gamma-launcher-modinstall-") as dir:
             extract_archive(file, dir)
-            if not install_directives:
-                copy_tree(dir, str(install_dir))
-            else:
-                # I'm a lazy bastard and I don't really get it.
-                # Not gonna think about it all day, just do a quick & dirty 'trick'
-                # But TODO: Fix this crap.
-                for folder in ['fomod', 'gamedata']:
-                    try:
-                        copy_tree(
-                            str(Path(dir) / folder),
-                            str(install_dir / folder)
-                        )
-                    except DistutilsFileError:
-                        pass
+            pdir = Path(dir)
 
-                for folder in install_directives:
-                    # Can except if mod are updated (official launcher silently crash)
-                    try:
-                        print(f'    Installing {folder} -> {install_dir}')
-                        copy_tree(str(Path(dir) / folder), str(install_dir))
-                    except DistutilsFileError:
-                        print(f'    WARNING: {folder} does not exist')
+            iterator = [pdir] + ([Path(dir) / i for i in install_directives] if install_directives else [])
+            for i in iterator:
+                if pdir != i:
+                    print(f'    Installing {i.name} -> {install_dir}')
+
+                if not i.exists():
+                    print(f'    WARNING: {i.name} does not exist')
+
+                # Well, I guess it's a feature now.
+                # Maybe I'm not that lazy after all
+                for gamedir in ['appdata', 'bin', 'db', 'gamedata']:
+                    pgame_dir = i / gamedir
+                    pinstall_dir = install_dir / gamedir
+
+                    if not pgame_dir.exists():
+                        continue
+
+                    copy_tree(
+                        str(pgame_dir),
+                        str(install_dir / gamedir)
+                    )
 
         create_ini_file(install_dir / 'meta.ini', file.name, url)
 
