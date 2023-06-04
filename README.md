@@ -14,6 +14,11 @@ you can use it without any installation. Everything is self contained in an exec
 
 However, if you may have glibc error, in this case, install gamma launcher in a venv.
 
+### Using pip (from source)
+
+Execute `pip install .` in the git-repo root directory.
+Use `pip uninstall launcher` to remove.
+
 ### Using venv
 
 It's strongly advised to install this in a [venv](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#creating-a-virtual-environment) (Python Virtual Environment)
