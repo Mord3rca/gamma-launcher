@@ -1,7 +1,9 @@
 from distutils.dir_util import copy_tree, DistutilsFileError
+from os import name as os_name
 from pathlib import Path
 from shutil import copy2, move
 from tempfile import TemporaryDirectory
+from typing import List
 
 from launcher.downloader import download_mod
 from launcher.archive import extract_archive
@@ -43,6 +45,8 @@ class FullInstall:
     name: str = "full-install"
 
     help: str = "Complete install of S.T.A.L.K.E.R.: G.A.M.M.A."
+
+    folder_to_install: List[str] = ['appdata', 'bin', 'db', 'gamedata']
 
     def __init__(self):
         self._anomaly_dir = None
@@ -90,6 +94,19 @@ class FullInstall:
         if preserve_user_config:
             copy2(saved_config, user_config)
 
+    def _fix_path_case(self, dir: Path) -> None:
+        # Do not exec this on windows
+        if os_name == 'nt':
+            return
+
+        for path in filter(lambda x: x.name.lower() in self.folder_to_install and x.name != x.name.lower(), dir.glob('**')):
+            for file in path.glob('**/*.*'):
+                t = file.relative_to(path.parent)
+                l = str(t.parent).lower()
+                nfolder = path.parent / l
+                nfolder.mkdir(parents=True, exist_ok=True)
+                file.rename(nfolder / file.name)
+
     def _install_mod(self, name: str, m: dict) -> None:
         install_dir = self._mod_dir / name
 
@@ -113,8 +130,9 @@ class FullInstall:
 
         install_dir.mkdir(exist_ok=True)
         with TemporaryDirectory(prefix="gamma-launcher-modinstall-") as dir:
-            extract_archive(file, dir)
             pdir = Path(dir)
+            extract_archive(file, dir)
+            self._fix_path_case(pdir)
 
             iterator = [pdir] + ([Path(dir) / i for i in install_directives] if install_directives else [])
             for i in iterator:
@@ -126,7 +144,7 @@ class FullInstall:
 
                 # Well, I guess it's a feature now.
                 # Maybe I'm not that lazy after all
-                for gamedir in ['appdata', 'bin', 'db', 'gamedata']:
+                for gamedir in self.folder_to_install:
                     pgame_dir = i / gamedir
                     pinstall_dir = install_dir / gamedir
 
