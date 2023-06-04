@@ -16,8 +16,22 @@ However, if you may have glibc error, in this case, install gamma launcher in a 
 
 ### Using pip (from source)
 
-Execute `pip install .` in the git-repo root directory.
-Use `pip uninstall gamma-launcher` to remove.
+It's strongly advised to install this in a [venv](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#creating-a-virtual-environment) (Python Virtual Environment)
+
+A quick guide on how to do this is to open your terminal/command prompt and navigating to the downloaded folder containing gamma-launcher, and typing `python3 -m venv env` on Linux, or `py -m venv env` on Windows.
+
+You will then have to enter the virtual environment by typing `source env/bin/activate` on Linux, or `.\env\Scripts\activate` on Windows.
+
+To confirm that you're in the right place, type `which python` on Linux, or `where python` on Windows. It should print out either `.../env/bin/python` or `...\env\Scripts\python.exe`, respectively.
+
+You may first have to upgrade pip for the installation to work. (If it's complaining about a 'bad interpreter', for example.) If this is the case, type `pip install --upgrade pip`.
+
+If currently in your gamma-launcher folder, you can simply type `pip install .` OR `pip install directory`. 
+Replace 'directory' with the actual path of said directory. The specificed directory must contain the gamma-launcher setup.py file.
+
+If all went well, you can now use the `gamma-launcher` command as intended.
+
+(Type `deactivate` to leave the virtual environment. Use the previous `source` command to re-enter it.)
 
 ## Commands
 
