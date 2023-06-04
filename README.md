@@ -17,7 +17,7 @@ However, if you may have glibc error, in this case, install gamma launcher in a 
 ### Using pip (from source)
 
 Execute `pip install .` in the git-repo root directory.
-Use `pip uninstall launcher` to remove.
+Use `pip uninstall gamma-launcher` to remove.
 
 ### Using venv
 
