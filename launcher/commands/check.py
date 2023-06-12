@@ -1,3 +1,4 @@
+from requests.exceptions import ConnectionError
 from pathlib import Path
 
 from launcher.commands.common import read_mod_maker, parse_moddb_data
@@ -57,7 +58,12 @@ class CheckMD5:
             self.register_err(f"{file.name} not found on disk", show=False)
             return
 
-        file = download_mod(url, self._dl_dir, use_cached=False)
+        try:
+            file = download_mod(url, self._dl_dir, use_cached=False)
+        except ConnectionError as e:
+            self._register_err(f"Failed to download {file.name}\n  Reason: {e}")
+            return
+
         if not self._test_hash(file, hash):
             self.register_err(f"Failed to download missing file - {file.name}")
 
@@ -100,7 +106,12 @@ class CheckMD5:
                 self.register_err(f"{file.name} MD5 missmatch")
                 continue
 
-            file = download_mod(i['url'], self._dl_dir, use_cached=False)
+            try:
+                file = download_mod(i['url'], self._dl_dir, use_cached=False)
+            except ConnectionError as e:
+                self._register_err(f"Failed to redownload {file.name}\n  Reason: {e}")
+                continue
+
             if not self._test_hash(file, info['MD5 Hash']):
                 self.register_err(f"{file.name} failed MD5 check after being redownloaded")
 

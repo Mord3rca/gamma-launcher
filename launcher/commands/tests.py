@@ -29,7 +29,11 @@ class TestModMaker:
             return
 
         e = get_handler_for_url(mod['url'])
-        archive = self.modpack_dl_dir / e.filename
+        try:
+            archive = self.modpack_dl_dir / e.filename
+        except TypeError:
+            print(f"ModDB error, skipping check for {mod['title']}")
+            return
 
         if not archive.exists():
             print(f"Downloading missing file: {archive.name}")
