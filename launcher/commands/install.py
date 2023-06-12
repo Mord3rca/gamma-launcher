@@ -1,6 +1,7 @@
 from distutils.dir_util import copy_tree
 from os import name as os_name
 from pathlib import Path
+from requests.exceptions import ConnectionError
 from shutil import copy2, move
 from sys import exit
 from tempfile import TemporaryDirectory
@@ -146,7 +147,11 @@ class FullInstall:
 
         print(f'[+] Installing mod: {title}')
 
-        file = download_mod(url, self._dl_dir)
+        try:
+            file = download_mod(url, self._dl_dir)
+        except ConnectionError as e:
+            print(f"[-] Failed to download {url} for {title}\n  Reason: {e}")
+            return
 
         install_dir.mkdir(exist_ok=True)
         with TemporaryDirectory(prefix="gamma-launcher-modinstall-") as dir:
