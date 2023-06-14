@@ -9,7 +9,11 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        include:
+            - os: ubuntu-latest
+              artifact_name: artifacts/gamma-launcher
+            - os: windows-latest
+              artifact_name: artifacts/gamma-launcher.exe
 
     name: Create Artifacts
     runs-on: ${{ matrix.os }}
@@ -26,9 +30,8 @@ jobs:
         pip install . pyinstaller
     - name: Build executable
       run: bash .github/scripts/release.sh
-    - name: Upload Artifacts
-      uses: skx/github-action-publish-binaries@master
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Upload artifacts
+      uses: svenstaro/upload-release-action@v2
       with:
-        args: 'artifacts/*'
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: ${{ matrix.artifact_name }}
