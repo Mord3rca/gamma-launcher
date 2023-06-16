@@ -49,7 +49,8 @@ def extract_archive(filename: str, path: str) -> None:
     ext = os.path.basename(filename).split(os.path.extsep)[-1]
     _extract_func_dict.get(ext)(filename, path)
 
-def list_archive_content(filename: str):
+
+def list_archive_content(filename: str) -> List[str]:
     ext = os.path.basename(filename).split(os.path.extsep)[-1]
     return {
         '7z': lambda f: SevenZipFile(f).getnames(),
