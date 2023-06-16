@@ -30,8 +30,15 @@ class CheckMD5:
 
     help: str = "Check MD5 hash for all addons"
 
+    def __init__(self) -> None:
+        self._errors = []
+
+    def register_err(self, err: str, show: bool = True, level: str = "Error") -> None:
+        self._errors += [f"{level}: {err}"]
+        if show:
+            print(f"  !! {err}")
+
     def run(self, args) -> None:
-        errors = []
         modpack_dl_dir = Path(args.gamma) / "downloads"
         modpack_data_dir = Path(args.gamma) / ".Grok's Modpack Installer" / "G.A.M.M.A" / "modpack_data"
 
@@ -46,19 +53,21 @@ class CheckMD5:
                 info = parse_moddb_data(i['info_url'])
                 file = modpack_dl_dir / info['Filename']
             except KeyError:
-                print(f"  !! Can't parse moddb page for {i['info_url']}")
-                errors += [f"Error: parsing failure for {i['info_url']}"]
+                self.register_err(f"Can't parse moddb page for {i['info_url']}")
                 continue
 
             if info.get('Download', '') not in i['url']:
-                errors += [f"WARNING: Skipping {file.name} since ModDB info do not match download url"]
+                self.register_err(
+                    f"Skipping {file.name} since ModDB info do not match download url",
+                    show=False, level="Warning"
+                )
                 continue
 
             if not file.exists():
                 if args.update_cache:
                     self.redownload(i, args.gamma)
                 else:
-                    errors += [f"Error: {file.name} not found on disk"]
+                    self.register_err(f"{file.name} not found on disk", show=False)
                 continue
 
             with open(file, 'rb') as f:
@@ -71,19 +80,16 @@ class CheckMD5:
                 continue
 
             if not args.update_cache:
-                errors += [f"Error: {file.name} -- remote({info['MD5 Hash']}) != local({md5})"]
-                print('  !! Please update your installation')
+                self.register_err(f"{file.name} -- remote({info['MD5 Hash']}) != local({md5})")
                 continue
 
             print(f"Redownloading {file.name}...")
             if self.redownload(i, args.gamma):
                 print(f"{file.name} downloaded successfully")
             else:
-                error = f"Error: {file.name} failed MD5 check after being redownloaded"
-                print(error)
-                errors += [error]
+                self.register_err(f"{file.name} failed MD5 check after being redownloaded")
 
-        for err in errors:
+        for err in self._errors:
             print(err)
 
     def redownload(self, dict: dict, gamma_dir: str) -> bool:
