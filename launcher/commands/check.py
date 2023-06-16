@@ -13,9 +13,15 @@ class CheckMD5:
             "required": True,
             "type": str
         },
-        "--redownload": {
-            "help": "Redownloads a mod if the MD5 sums do not match",
+        "--update-cache": {
+            "help": "Update download cache if file is missing or MD5 do not match",
             "required": False,
+            "action": "store_true"
+        },
+        "--redownload": {
+            "help": "Here for compatibility, same as --update-cache",
+            "required": False,
+            "dest": "update_cache",
             "action": "store_true"
         },
     }
@@ -28,7 +34,6 @@ class CheckMD5:
         errors = []
         modpack_dl_dir = Path(args.gamma) / "downloads"
         modpack_data_dir = Path(args.gamma) / ".Grok's Modpack Installer" / "G.A.M.M.A" / "modpack_data"
-        redownload = args.redownload
 
         mod_maker = read_mod_maker(
             modpack_data_dir / 'modlist.txt',
@@ -50,7 +55,10 @@ class CheckMD5:
                 continue
 
             if not file.exists():
-                errors += [f"Error: {file.name} not found on disk"]
+                if args.update_cache:
+                    self.redownload(i, args.gamma)
+                else:
+                    errors += [f"Error: {file.name} not found on disk"]
                 continue
 
             with open(file, 'rb') as f:
@@ -62,7 +70,7 @@ class CheckMD5:
             if info["MD5 Hash"] == md5:
                 continue
 
-            if not redownload:
+            if not args.update_cache:
                 errors += [f"Error: {file.name} -- remote({info['MD5 Hash']}) != local({md5})"]
                 print('  !! Please update your installation')
                 continue
