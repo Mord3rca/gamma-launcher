@@ -189,6 +189,10 @@ AutomaticArchiveInvalidation=false
 """)
 
     def run(self, args):
+        if os_name == 'nt':
+            print('/!\\ Currently not fully supported on Windows.')
+            print('/!\\ rarfile will cause trouble.')
+
         # Init paths
         self._anomaly_dir = Path(args.anomaly)
         self._gamma_dir = Path(args.gamma)
