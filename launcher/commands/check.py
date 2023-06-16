@@ -59,7 +59,9 @@ class CheckMD5:
             print(f"{file.name} ({info['MD5 Hash']}): ", end='')
             print("OK" if info["MD5 Hash"] == md5 else "MISMATCH")
 
-            if info["MD5 Hash"] == md5: continue
+            if info["MD5 Hash"] == md5:
+                continue
+
             if not redownload:
                 errors += [f"Error: {file.name} -- remote({info['MD5 Hash']}) != local({md5})"]
                 print('  !! Please update your installation')
