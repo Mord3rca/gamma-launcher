@@ -1,4 +1,4 @@
-from distutils.dir_util import copy_tree, DistutilsFileError
+from distutils.dir_util import copy_tree
 from os import name as os_name
 from pathlib import Path
 from shutil import copy2, move
@@ -99,11 +99,14 @@ class FullInstall:
         if os_name == 'nt':
             return
 
-        for path in filter(lambda x: x.name.lower() in self.folder_to_install and x.name != x.name.lower(), dir.glob('**')):
+        for path in filter(
+            lambda x: x.name.lower() in self.folder_to_install and x.name != x.name.lower(),
+            dir.glob('**')
+        ):
             for file in path.glob('**/*.*'):
                 t = file.relative_to(path.parent)
-                l = str(t.parent).lower()
-                nfolder = path.parent / l
+                rp = str(t.parent).lower()
+                nfolder = path.parent / rp
                 nfolder.mkdir(parents=True, exist_ok=True)
                 file.rename(nfolder / file.name)
 
@@ -146,7 +149,6 @@ class FullInstall:
                 # Maybe I'm not that lazy after all
                 for gamedir in self.folder_to_install:
                     pgame_dir = i / gamedir
-                    pinstall_dir = install_dir / gamedir
 
                     if not pgame_dir.exists():
                         continue
