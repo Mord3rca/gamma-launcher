@@ -1,4 +1,5 @@
 from pathlib import Path
+from sys import stderr
 
 from launcher.commands.common import read_mod_maker, parse_moddb_data
 from launcher.downloader import download_mod
@@ -67,10 +68,14 @@ class CheckMD5:
         self._dl_dir = self._gamma / "downloads"
         modpack_data_dir = self._gamma / ".Grok's Modpack Installer" / "G.A.M.M.A" / "modpack_data"
 
-        mod_maker = read_mod_maker(
-            modpack_data_dir / 'modlist.txt',
-            modpack_data_dir / 'modpack_maker_list.txt'
-        )
+        try:
+            mod_maker = read_mod_maker(
+                modpack_data_dir / 'modlist.txt',
+                modpack_data_dir / 'modpack_maker_list.txt'
+            )
+        except FileNotFoundError:
+            print("Failure to read mod maker data, please run full-install once before using check-md5", file=stderr)
+            return
 
         print('-- Starting MD5 Check')
         for i in filter(lambda v: v and v['info_url'], mod_maker.values()):
