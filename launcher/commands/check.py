@@ -62,7 +62,7 @@ class CheckMD5:
         if not self._test_hash(file, hash):
             self.register_err(f"Failed to download missing file - {file.name}")
 
-    def run(self, args) -> None:
+    def run(self, args) -> None:  # noqa: C901
         self._gamma = Path(args.gamma)
         self._update_cache = args.update_cache
         self._dl_dir = self._gamma / "downloads"
