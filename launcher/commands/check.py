@@ -1,4 +1,5 @@
 from pathlib import Path
+from tenacity import RetryError
 
 from launcher.commands.common import read_mod_maker, parse_moddb_data
 from launcher.downloader import download_mod
@@ -57,11 +58,16 @@ class CheckMD5:
             self.register_err(f"{file.name} not found on disk", show=False)
             return
 
-        file = download_mod(url, self._dl_dir, use_cached=False)
+        try:
+            file = download_mod(url, self._dl_dir, use_cached=False)
+        except RetryError:
+            self._register_err(f"Failed to download {file.name}")
+            return
+
         if not self._test_hash(file, hash):
             self.register_err(f"Failed to download missing file - {file.name}")
 
-    def run(self, args) -> None:
+    def run(self, args) -> None:  # noqa: C901
         self._gamma = Path(args.gamma)
         self._update_cache = args.update_cache
         self._dl_dir = self._gamma / "downloads"
@@ -100,7 +106,12 @@ class CheckMD5:
                 self.register_err(f"{file.name} MD5 missmatch")
                 continue
 
-            file = download_mod(i['url'], self._dl_dir, use_cached=False)
+            try:
+                file = download_mod(i['url'], self._dl_dir, use_cached=False)
+            except RetryError:
+                self._register_err(f"Failed to redownload {file.name}")
+                continue
+
             if not self._test_hash(file, info['MD5 Hash']):
                 self.register_err(f"{file.name} failed MD5 check after being redownloaded")
 

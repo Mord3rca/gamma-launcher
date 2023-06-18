@@ -3,6 +3,7 @@ from os import name as os_name
 from pathlib import Path
 from shutil import copy2, move
 from tempfile import TemporaryDirectory
+from tenacity import RetryError
 from typing import List
 
 from launcher.downloader import download_mod
@@ -129,7 +130,11 @@ class FullInstall:
 
         print(f'[+] Installing mod: {title}')
 
-        file = download_mod(url, self._dl_dir)
+        try:
+            file = download_mod(url, self._dl_dir)
+        except RetryError:
+            print(f"[-] Failed to download {url} for {install_directives}")
+            return
 
         install_dir.mkdir(exist_ok=True)
         with TemporaryDirectory(prefix="gamma-launcher-modinstall-") as dir:
