@@ -178,6 +178,9 @@ class FullInstall:
 
     def _copy_gamma_modpack(self) -> None:
         path = self._grok_mod_dir / 'G.A.M.M.A' / 'modpack_addons'
+        # Fixing case of overlay tree before copying
+        for d in path.glob('*/'):
+            self._fix_path_case(d)
         print(f'[+] Copying G.A.M.M.A mods in from "{path}" to "{self._mod_dir}"')
         copy_tree(str(path), str(self._mod_dir))
 
