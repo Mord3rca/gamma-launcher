@@ -100,7 +100,7 @@ class FullInstall:
             return
 
         for path in filter(
-            lambda x: x.name.lower() in self.folder_to_install and x.name != x.name.lower(),
+            lambda x: x.name.lower() in self.folder_to_install,
             dir.glob('**')
         ):
             for file in path.glob('**/*.*'):
@@ -108,7 +108,7 @@ class FullInstall:
                 rp = str(t.parent).lower()
                 nfolder = path.parent / rp
                 nfolder.mkdir(parents=True, exist_ok=True)
-                file.rename(nfolder / file.name)
+                file.rename(nfolder / file.name.lower())
 
     def _install_mod(self, name: str, m: dict) -> None:
         install_dir = self._mod_dir / name
