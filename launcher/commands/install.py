@@ -110,6 +110,13 @@ class FullInstall:
                 nfolder.mkdir(parents=True, exist_ok=True)
                 file.rename(nfolder / file.name.lower())
 
+        # Cleanup empty dirs
+        for dir in sorted(dir.glob('**/'), reverse=True):
+            try:
+                dir.rmdir()
+            except OSError:  # Directory may not be empty (err: 39)
+                continue
+
     def _install_mod(self, name: str, m: dict) -> None:
         install_dir = self._mod_dir / name
 
