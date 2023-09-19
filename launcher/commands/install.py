@@ -110,6 +110,19 @@ class FullInstall:
                 nfolder.mkdir(parents=True, exist_ok=True)
                 file.rename(nfolder / file.name)
 
+    def _fix_malformed_archive(self, dir: Path) -> None:
+        # Do not exec this on windows
+        if os_name == 'nt':
+            return
+
+        for path in dir.glob('*.*'):
+            if '\\' not in path.name:
+                continue
+
+            p = dir / path.name.replace('\\', '/')
+            p.parent.mkdir(parents=True, exist_ok=True)
+            path.rename(dir / p)
+
     def _install_mod(self, name: str, m: dict) -> None:
         install_dir = self._mod_dir / name
 
@@ -135,6 +148,7 @@ class FullInstall:
         with TemporaryDirectory(prefix="gamma-launcher-modinstall-") as dir:
             pdir = Path(dir)
             extract_archive(file, dir)
+            self._fix_malformed_archive(pdir)
             self._fix_path_case(pdir)
 
             iterator = [pdir] + ([Path(dir) / i for i in install_directives] if install_directives else [])
