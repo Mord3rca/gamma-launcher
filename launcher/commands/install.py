@@ -213,6 +213,9 @@ AutomaticArchiveInvalidation=false
         self._mod_dir = Path(args.gamma) / "mods"
         self._grok_mod_dir = Path(args.gamma) / ".Grok's Modpack Installer"
 
+        # Make sure folder are existing
+        self._dl_dir.mkdir(parents=True, exist_ok=True)
+
         # Start installing
         if args.update_def:
             self._update_gamma_definition()
