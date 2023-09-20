@@ -2,6 +2,7 @@ from distutils.dir_util import copy_tree
 from os import name as os_name
 from pathlib import Path
 from shutil import copy2, move
+from sys import exit
 from tempfile import TemporaryDirectory
 from typing import List
 
@@ -11,6 +12,9 @@ from launcher.downloader import get_handler_for_url
 from launcher.meta import create_ini_file, create_ini_separator_file
 
 from .common import read_mod_maker
+
+
+guide_url: str = "https://github.com/DravenusRex/stalker-gamma-linux-guide"
 
 
 class FullInstall:
@@ -215,6 +219,20 @@ AutomaticArchiveInvalidation=false
 
         # Make sure folder are existing
         self._dl_dir.mkdir(parents=True, exist_ok=True)
+
+        if not (self._anomaly_dir / "bin").is_dir():
+            print(
+                f"Follow this installation guide: {guide_url}\n"
+                "And make sure Anomaly is correctly installed."
+            )
+            exit(1)
+
+        if not (self._mod_dir.is_dir() and self._grok_mod_dir.is_dir()):
+            print(
+                f"Follow this installation guide: {guide_url}\n"
+                "And make sure GAMMA RC3 is correctly installed."
+            )
+            exit(1)
 
         # Start installing
         if args.update_def:
