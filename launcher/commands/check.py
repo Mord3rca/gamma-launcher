@@ -84,6 +84,9 @@ class CheckMD5:
                 info = parse_moddb_data(i['info_url'])
                 file = self._dl_dir / info['Filename']
                 hash = info['MD5 Hash']
+            except ConnectionError as e:
+                self.register_err(f"Can't fetch moddb page for {i['info_url']}\n  Reason: {e}")
+                continue
             except KeyError:
                 self.register_err(f"Can't parse moddb page for {i['info_url']}")
                 continue
