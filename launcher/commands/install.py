@@ -8,6 +8,7 @@ from tempfile import TemporaryDirectory
 from typing import List
 
 from launcher.downloader import download_mod
+from launcher.downloader.base import g_session
 from launcher.archive import extract_archive
 from launcher.downloader import get_handler_for_url
 from launcher.meta import create_ini_file, create_ini_separator_file
@@ -66,6 +67,17 @@ class FullInstall:
     def _update_gamma_definition(self) -> None:
         print('[+] Updating G.A.M.M.A. definition')
         gdef = self._grok_mod_dir / 'GAMMA_definition.zip'
+
+        try:
+            l_version = Path(self._grok_mod_dir / 'version.txt').read_text()
+            r_version = g_session.get(
+                'https://raw.githubusercontent.com/Grokitach/Stalker_GAMMA/main/G.A.M.M.A_definition_version.txt'
+            ).text
+            if int(r_version) > int(l_version):
+                gdef.unlink()
+                print(f"    will be updated from {l_version} to {r_version}")
+        except Exception:
+            pass
 
         if not gdef.is_file():
             print('    downloading archive...')
