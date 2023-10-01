@@ -69,10 +69,10 @@ class FullInstall:
         gdef = self._grok_mod_dir / 'GAMMA_definition.zip'
 
         try:
-            l_version = Path(self._grok_mod_dir / 'version.txt').read_text()
+            l_version = Path(self._grok_mod_dir / 'version.txt').read_text().strip()
             r_version = g_session.get(
                 'https://raw.githubusercontent.com/Grokitach/Stalker_GAMMA/main/G.A.M.M.A_definition_version.txt'
-            ).text
+            ).text.strip()
             if int(r_version) > int(l_version):
                 gdef.unlink()
                 print(f"    will be updated from {l_version} to {r_version}")
