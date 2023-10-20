@@ -46,7 +46,7 @@ jobs:
         run: |
           dir
           cd
-          nuitka --onefile --remove-output --output-filename=cli.exe launcher/cli.py
+          nuitka --onefile --remove-output launcher/cli.py
 
       - name: "Upload Artifacts"
         uses: actions/upload-artifact@v3
