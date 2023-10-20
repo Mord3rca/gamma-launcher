@@ -51,5 +51,6 @@ jobs:
         with:
           name: ${{ runner.os }} Build
           path: |
-            cli.bin
-            *.bin
+            build/*.exe
+            build/*.bin
+            build/*.app/**/*
