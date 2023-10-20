@@ -31,7 +31,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install .
-          python -m pip install charset-normalizer
+          python -m pip install Nuitka
 
       # Install fuse
       - name: Install fuse
@@ -41,10 +41,14 @@ jobs:
           sudo apt-get install -y fuse
 
       # Build python script into a stand-alone exe with nuitka
-      - uses: jimkring/python-script-to-exe@v0.2.0
-        with:
-          script-name: launcher/cli.py
-          onefile: true
+#      - uses: jimkring/python-script-to-exe@v0.2.0
+#        with:
+#          script-name: launcher/cli.py
+#          onefile: true
+#          enable-console: false
+      - name: Manual compile with nuitka
+        run: |
+          python -m nuitka3 --onefile --remove-output launcher/cli.py
 
       # Uploads artifacts
       - name: "Upload Artifacts"
@@ -52,6 +56,8 @@ jobs:
         with:
           name: ${{ runner.os }} Build
           path: |
+            *.bin
+            *.exe
             build/*.exe
             build/*.bin
             build/*.app/**/*
