@@ -1,0 +1,49 @@
+name: Build-All-Platforms
+
+on:
+  push:
+    branches: [ "master" ]
+  workflow_dispatch:
+
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ macos-latest, ubuntu-latest, windows-latest ]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      # Check-out repository
+      - uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          architecture: 'x64'
+          cache: 'pip'
+
+      # Install dependencies
+      - name: Install Dependencies
+        run: |
+          pip install .
+
+      # Build python script into a stand-alone exe with nuitka
+      - uses: jimkring/python-script-to-exe@v0.2.0
+        with:
+          script-name: launcher/cli.py
+          onefile: true
+
+      # Uploads artifacts
+      - name: "Upload Artifacts"
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ runner.os }} Build
+          path: |
+            cli.bin
+            build/*.exe
+            build/*.bin
+            build/*.app/**/*
