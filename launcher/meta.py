@@ -1,6 +1,7 @@
 def create_ini_file(path: str, zipfile: str, url: str) -> None:
     with open(path, 'w') as f:
-        f.write(f"""[General]
+        f.write(
+            f"""[General]
 gameName=stalkeranomaly
 modid=0
 ignoredversion={zipfile}
@@ -27,12 +28,14 @@ tracked=0
 1\\modid=0
 1\\fileid=0
 size=1
-""")
+"""
+        )
 
 
 def create_ini_separator_file(filename: str, **kwargs) -> None:
     with open(filename, 'w') as f:
-        f.write("""[General]
+        f.write(
+            """[General]
 modid=0
 version=
 newestVersion=
@@ -41,4 +44,5 @@ installationFile=
 
 [installedFiles]
 size=0
-""")
+"""
+        )

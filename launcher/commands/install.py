@@ -16,41 +16,33 @@ from launcher.meta import create_ini_file, create_ini_separator_file
 from .common import read_mod_maker
 
 
-guide_url: str = "https://github.com/DravenusRex/stalker-gamma-linux-guide"
+guide_url: str = 'https://github.com/DravenusRex/stalker-gamma-linux-guide'
 
 
 class FullInstall:
 
     arguments: dict = {
-        "--anomaly": {
-            "help": "Path to ANOMALY directory",
-            "required": True,
-            "type": str
+        '--anomaly': {'help': 'Path to ANOMALY directory', 'required': True, 'type': str},
+        '--gamma': {'help': 'Path to GAMMA directory', 'required': True, 'type': str},
+        '--no-def-update': {
+            'help': 'Do not update S.T.A.L.K..E.R.: G.A.M.M.A. definition',
+            'action': 'store_false',
+            'dest': 'update_def',
         },
-        "--gamma": {
-            "help": "Path to GAMMA directory",
-            "required": True,
-            "type": str
+        '--no-anomaly-patch': {
+            'help': 'Do not patch Anomaly directory',
+            'action': 'store_false',
+            'dest': 'anomaly_patch',
         },
-        "--no-def-update": {
-            "help": "Do not update S.T.A.L.K..E.R.: G.A.M.M.A. definition",
-            "action": "store_false",
-            "dest": "update_def",
-        },
-        "--no-anomaly-patch": {
-            "help": "Do not patch Anomaly directory",
-            "action": "store_false",
-            "dest": "anomaly_patch",
-        },
-        "--preserve-user-config": {
-            "help": "Do not overwrite user configuration when patching Anomaly directory",
-            "action": "store_true",
+        '--preserve-user-config': {
+            'help': 'Do not overwrite user configuration when patching Anomaly directory',
+            'action': 'store_true',
         },
     }
 
-    name: str = "full-install"
+    name: str = 'full-install'
 
-    help: str = "Complete install of S.T.A.L.K.E.R.: G.A.M.M.A."
+    help: str = 'Complete install of S.T.A.L.K.E.R.: G.A.M.M.A.'
 
     folder_to_install: List[str] = ['appdata', 'bin', 'db', 'gamedata']
 
@@ -75,26 +67,20 @@ class FullInstall:
             ).text.strip()
             if int(r_version) > int(l_version):
                 gdef.unlink()
-                print(f"    will be updated from {l_version} to {r_version}")
+                print(f'    will be updated from {l_version} to {r_version}')
         except Exception:
             pass
 
         if not gdef.is_file():
             print('    downloading archive...')
-            g = get_handler_for_url("https://github.com/Grokitach/Stalker_GAMMA/archive/refs/heads/main.zip")
+            g = get_handler_for_url('https://github.com/Grokitach/Stalker_GAMMA/archive/refs/heads/main.zip')
             g.download(gdef)
 
-        with TemporaryDirectory(prefix="gamma-launcher-") as dir:
+        with TemporaryDirectory(prefix='gamma-launcher-') as dir:
             extract_archive(gdef, dir)
-            copy_tree(
-                str(Path(dir) / 'Stalker_GAMMA-main'),
-                str(self._grok_mod_dir)
-            )
+            copy_tree(str(Path(dir) / 'Stalker_GAMMA-main'), str(self._grok_mod_dir))
 
-        move(
-            self._grok_mod_dir / 'G.A.M.M.A_definition_version.txt',
-            self._grok_mod_dir / 'version.txt'
-        )
+        move(self._grok_mod_dir / 'G.A.M.M.A_definition_version.txt', self._grok_mod_dir / 'version.txt')
 
     def _patch_anomaly(self, preserve_user_config: bool = False) -> None:
         user_config = self._anomaly_dir / 'appdata' / 'user.ltx'
@@ -103,10 +89,7 @@ class FullInstall:
         if user_config.is_file():
             copy2(user_config, saved_config)
 
-        copy_tree(
-            str(self._grok_mod_dir / 'G.A.M.M.A' / 'modpack_patches'),
-            str(self._anomaly_dir)
-        )
+        copy_tree(str(self._grok_mod_dir / 'G.A.M.M.A' / 'modpack_patches'), str(self._anomaly_dir))
 
         if preserve_user_config:
             copy2(saved_config, user_config)
@@ -117,8 +100,7 @@ class FullInstall:
             return
 
         for path in filter(
-            lambda x: x.name.lower() in self.folder_to_install and x.name != x.name.lower(),
-            dir.glob('**')
+            lambda x: x.name.lower() in self.folder_to_install and x.name != x.name.lower(), dir.glob('**')
         ):
             for file in path.glob('**/*.*'):
                 t = file.relative_to(path.parent)
@@ -162,11 +144,11 @@ class FullInstall:
         try:
             file = download_mod(url, self._dl_dir)
         except ConnectionError as e:
-            print(f"[-] Failed to download {url} for {title}\n  Reason: {e}")
+            print(f'[-] Failed to download {url} for {title}\n  Reason: {e}')
             return
 
         install_dir.mkdir(exist_ok=True)
-        with TemporaryDirectory(prefix="gamma-launcher-modinstall-") as dir:
+        with TemporaryDirectory(prefix='gamma-launcher-modinstall-') as dir:
             pdir = Path(dir)
             extract_archive(file, dir)
             self._fix_malformed_archive(pdir)
@@ -188,17 +170,14 @@ class FullInstall:
                     if not pgame_dir.exists():
                         continue
 
-                    copy_tree(
-                        str(pgame_dir),
-                        str(install_dir / gamedir)
-                    )
+                    copy_tree(str(pgame_dir), str(install_dir / gamedir))
 
         create_ini_file(install_dir / 'meta.ini', file.name, url)
 
     def _install_mods(self) -> None:
         self._mods_make = read_mod_maker(
             self._grok_mod_dir / 'G.A.M.M.A' / 'modpack_data' / 'modlist.txt',
-            self._grok_mod_dir / 'G.A.M.M.A' / 'modpack_data' / 'modpack_maker_list.txt'
+            self._grok_mod_dir / 'G.A.M.M.A' / 'modpack_data' / 'modpack_maker_list.txt',
         )
 
         for k, v in self._mods_make.items():
@@ -215,40 +194,33 @@ class FullInstall:
 
         print(f'[+] Installing G.A.M.M.A profile in {p_path}')
         p_path.mkdir(exist_ok=True)
-        copy2(
-            self._grok_mod_dir / 'G.A.M.M.A' / 'modpack_data' / 'modlist.txt',
-            p_path
-        )
-        settings.write_text("""[General]
+        copy2(self._grok_mod_dir / 'G.A.M.M.A' / 'modpack_data' / 'modlist.txt', p_path)
+        settings.write_text(
+            """[General]
 LocalSaves=false
 LocalSettings=true
 AutomaticArchiveInvalidation=false
-""")
+"""
+        )
 
     def run(self, args):
         # Init paths
         self._anomaly_dir = Path(args.anomaly)
         self._gamma_dir = Path(args.gamma)
 
-        self._dl_dir = Path(args.gamma) / "downloads"
-        self._mod_dir = Path(args.gamma) / "mods"
+        self._dl_dir = Path(args.gamma) / 'downloads'
+        self._mod_dir = Path(args.gamma) / 'mods'
         self._grok_mod_dir = Path(args.gamma) / ".Grok's Modpack Installer"
 
         # Make sure folder are existing
         self._dl_dir.mkdir(parents=True, exist_ok=True)
 
-        if not (self._anomaly_dir / "bin").is_dir():
-            print(
-                f"Follow this installation guide: {guide_url}\n"
-                "And make sure Anomaly is correctly installed."
-            )
+        if not (self._anomaly_dir / 'bin').is_dir():
+            print(f'Follow this installation guide: {guide_url}\n' 'And make sure Anomaly is correctly installed.')
             exit(1)
 
         if not (self._mod_dir.is_dir() and self._grok_mod_dir.is_dir()):
-            print(
-                f"Follow this installation guide: {guide_url}\n"
-                "And make sure GAMMA RC3 is correctly installed."
-            )
+            print(f'Follow this installation guide: {guide_url}\n' 'And make sure GAMMA RC3 is correctly installed.')
             exit(1)
 
         # Start installing

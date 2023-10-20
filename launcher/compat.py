@@ -4,11 +4,8 @@ try:
 except ImportError:
     from hashlib import md5
 
-    def file_digest(file, *args, **kwargs) -> md5:
-        hash = md5()
-        while True:
-            r = file.read(1024*1024)
-            if not r:
-                break
-            hash.update(r)
-        return hash
+    def file_digest(file, *args, **kwargs):
+        hash_obj = md5()
+        for chunk in iter(lambda: file.read(1024 * 1024), ''):
+            hash_obj.update(chunk)
+        return hash_obj

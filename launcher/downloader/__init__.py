@@ -10,10 +10,9 @@ from pathlib import Path
 
 def get_handler_for_url(url: str) -> Base:
     host = urlparse(url).hostname
-    return {
-        'github.com': Github,
-        'www.moddb.com': ModDB,
-    }.get(host)(url)
+    return {'github.com': Github, 'www.moddb.com': ModDB,}.get(
+        host
+    )(url)
 
 
 @retry(
