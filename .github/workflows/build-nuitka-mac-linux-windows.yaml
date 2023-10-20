@@ -48,7 +48,7 @@ jobs:
 #          enable-console: false
       - name: Manual compile with nuitka
         run: |
-          python -m nuitka3 --onefile --remove-output launcher/cli.py
+          nuitka3 --onefile --remove-output launcher/cli.py
 
       # Uploads artifacts
       - name: "Upload Artifacts"
