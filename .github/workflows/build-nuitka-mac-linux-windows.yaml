@@ -44,7 +44,7 @@ jobs:
       - name: "Manual compile with nuitka in windows"
         if: runner.os == 'Windows'
         run: |
-          nuitka --onefile --remove-output --output-filename=cli.exe launcher/cli.py
+          echo Yes | nuitka --onefile --remove-output --output-filename=cli.exe launcher/cli.py
 
       - name: "Upload Artifacts"
         uses: actions/upload-artifact@v3
