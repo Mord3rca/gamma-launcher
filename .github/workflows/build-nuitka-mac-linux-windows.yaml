@@ -44,6 +44,8 @@ jobs:
       - name: "Manual compile with nuitka in windows"
         if: runner.os == 'Windows'
         run: |
+          python -m pip install --upgrade pip
+          python -m pip install Nuitka
           python -m nuitka3 --onefile --remove-output launcher/cli.py
 
       - name: "Upload Artifacts"
