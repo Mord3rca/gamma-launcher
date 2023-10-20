@@ -19,17 +19,16 @@ jobs:
       # Check-out repository
       - uses: actions/checkout@v3
 
-      - name: Setup Python
+      - name: Setup Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
-          architecture: 'x64'
-          cache: 'pip'
+          python-version: ${{ matrix.python-version }}
 
       # Install dependencies
       - name: Install Dependencies
         run: |
-          pip install .
+          python -m pip install --upgrade pip
+          python -m pip install .
 
       # Build python script into a stand-alone exe with nuitka
       - uses: jimkring/python-script-to-exe@v0.2.0
@@ -44,6 +43,3 @@ jobs:
           name: ${{ runner.os }} Build
           path: |
             cli.bin
-            build/*.exe
-            build/*.bin
-            build/*.app/**/*
