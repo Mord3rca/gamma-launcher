@@ -29,13 +29,13 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install .
           python -m pip install Nuitka
-          python -m pip install ordered-set
 
-      - name: Install fuse
+      - name: Install fuse and ccache
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y fuse
+          sudo apt-get install -y ccache
 
       - name: Manual compile with nuitka in linux
         if: runner.os == 'Linux'
