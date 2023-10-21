@@ -24,29 +24,30 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: "Install Dependencies"
+      - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
           python -m pip install .
           python -m pip install Nuitka
+          python -m pip install ordered-set
 
-      - name: "Install fuse"
+      - name: Install fuse
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y fuse
 
-      - name: "Manual compile with nuitka in linux"
+      - name: Manual compile with nuitka in linux
         if: runner.os == 'Linux'
         run: |
           nuitka3 --onefile --remove-output launcher/cli.py
 
-      - name: "Manual compile with nuitka in windows"
+      - name: Manual compile with nuitka in windows
         if: runner.os == 'Windows'
         run: |
           echo Yes | nuitka --onefile --remove-output --output-filename=cli.exe launcher/cli.py
 
-      - name: "Upload Artifacts"
+      - name: Upload Artifacts ${{ matrix.python-version }} ${{ runner.os }}
         uses: actions/upload-artifact@v3
         with:
           name: ${{ runner.os }} Build
