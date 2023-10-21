@@ -6,10 +6,10 @@ from launcher.downloader.base import g_session
 
 
 def parse_moddb_data(url: str) -> Dict[str, str]:
-    soup = BeautifulSoup(g_session.get(url).text, features="html.parser")
+    soup = BeautifulSoup(g_session.get(url).text, features='html.parser')
     result = {}
 
-    for i in soup.body.find_all('div', attrs={'class': "row clear"}):
+    for i in soup.body.find_all('div', attrs={'class': 'row clear'}):
         try:
             name = i.h5.text
             value = i.span.text.strip()
@@ -31,9 +31,7 @@ def parse_moddb_data(url: str) -> Dict[str, str]:
 def _read_mod_list(mod_list) -> Dict[str, None]:
     with open(mod_list) as f:
         d = f.read()
-    return {
-        i[1:].strip(): None for i in filter(lambda x: x.startswith('+') or x.startswith('-'), d.split('\n'))
-    }
+    return {i[1:].strip(): None for i in filter(lambda x: x.startswith('+') or x.startswith('-'), d.split('\n'))}
 
 
 def read_mod_maker(mod_list, mod_make) -> Dict[str, Dict]:
@@ -46,7 +44,7 @@ def read_mod_maker(mod_list, mod_make) -> Dict[str, Dict]:
             mod = None
             it = i.split('\t')
             for i in mods_make.keys():
-                if f"{it[3]}{it[2]}" in i:
+                if f'{it[3]}{it[2]}' in i:
                     mod = i
                     break
             else:
@@ -54,9 +52,9 @@ def read_mod_maker(mod_list, mod_make) -> Dict[str, Dict]:
 
             mods_make[mod] = {
                 'url': it[0],
-                'install_directives': [
-                     i.replace('\\', os.path.sep).lstrip(os.path.sep) for i in it[1].split(':')
-                 ] if it[1] != '0' else None,
+                'install_directives': [i.replace('\\', os.path.sep).lstrip(os.path.sep) for i in it[1].split(':')]
+                if it[1] != '0'
+                else None,
                 'author': it[2],
                 'title': it[3],
                 'info_url': it[4] if len(it) >= 5 else '',

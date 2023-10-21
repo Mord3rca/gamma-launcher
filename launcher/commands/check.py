@@ -9,27 +9,23 @@ from launcher.compat import file_digest
 class CheckMD5:
 
     arguments: dict = {
-        "--gamma": {
-            "help": "Path to GAMMA directory",
-            "required": True,
-            "type": str
+        '--gamma': {'help': 'Path to GAMMA directory', 'required': True, 'type': str},
+        '--update-cache': {
+            'help': 'Update download cache if file is missing or MD5 do not match',
+            'required': False,
+            'action': 'store_true',
         },
-        "--update-cache": {
-            "help": "Update download cache if file is missing or MD5 do not match",
-            "required": False,
-            "action": "store_true"
-        },
-        "--redownload": {
-            "help": "Here for compatibility, same as --update-cache",
-            "required": False,
-            "dest": "update_cache",
-            "action": "store_true"
+        '--redownload': {
+            'help': 'Here for compatibility, same as --update-cache',
+            'required': False,
+            'dest': 'update_cache',
+            'action': 'store_true',
         },
     }
 
-    name: str = "check-md5"
+    name: str = 'check-md5'
 
-    help: str = "Check MD5 hash for all addons"
+    help: str = 'Check MD5 hash for all addons'
 
     def __init__(self) -> None:
         self._gamma = None
@@ -37,10 +33,10 @@ class CheckMD5:
         self._errors = []
         self._update_cache = False
 
-    def register_err(self, err: str, show: bool = True, level: str = "Error") -> None:
-        self._errors += [f"{level}: {err}"]
+    def register_err(self, err: str, show: bool = True, level: str = 'Error') -> None:
+        self._errors += [f'{level}: {err}']
         if show:
-            print(f"  !! {err}")
+            print(f'  !! {err}')
 
     def _test_hash(self, file: Path, hash: str) -> bool:
         with open(file, 'rb') as f:
@@ -48,35 +44,32 @@ class CheckMD5:
 
         valid = md5 == hash
 
-        print(f"{file.name} ({hash}): ", end='')
-        print("OK" if valid else "MISMATCH")
+        print(f'{file.name} ({hash}): ', end='')
+        print('OK' if valid else 'MISMATCH')
 
         return valid
 
     def _if_file_missing(self, file: Path, url: str, hash: str) -> None:
         if not self._update_cache:
-            self.register_err(f"{file.name} not found on disk", show=False)
+            self.register_err(f'{file.name} not found on disk', show=False)
             return
 
         try:
             file = download_mod(url, self._dl_dir, use_cached=False)
         except ConnectionError as e:
-            self._register_err(f"Failed to download {file.name}\n  Reason: {e}")
+            self._register_err(f'Failed to download {file.name}\n  Reason: {e}')
             return
 
         if not self._test_hash(file, hash):
-            self.register_err(f"Failed to download missing file - {file.name}")
+            self.register_err(f'Failed to download missing file - {file.name}')
 
     def run(self, args) -> None:  # noqa: C901
         self._gamma = Path(args.gamma)
         self._update_cache = args.update_cache
-        self._dl_dir = self._gamma / "downloads"
-        modpack_data_dir = self._gamma / ".Grok's Modpack Installer" / "G.A.M.M.A" / "modpack_data"
+        self._dl_dir = self._gamma / 'downloads'
+        modpack_data_dir = self._gamma / ".Grok's Modpack Installer" / 'G.A.M.M.A' / 'modpack_data'
 
-        mod_maker = read_mod_maker(
-            modpack_data_dir / 'modlist.txt',
-            modpack_data_dir / 'modpack_maker_list.txt'
-        )
+        mod_maker = read_mod_maker(modpack_data_dir / 'modlist.txt', modpack_data_dir / 'modpack_maker_list.txt')
 
         print('-- Starting MD5 Check')
         for i in filter(lambda v: v and v['info_url'], mod_maker.values()):
@@ -93,8 +86,7 @@ class CheckMD5:
 
             if info.get('Download', '') not in i['url']:
                 self.register_err(
-                    f"Skipping {file.name} since ModDB info do not match download url",
-                    show=False, level="Warning"
+                    f'Skipping {file.name} since ModDB info do not match download url', show=False, level='Warning'
                 )
                 continue
 
@@ -106,17 +98,17 @@ class CheckMD5:
                 continue
 
             if not args.update_cache:
-                self.register_err(f"{file.name} MD5 missmatch")
+                self.register_err(f'{file.name} MD5 missmatch')
                 continue
 
             try:
                 file = download_mod(i['url'], self._dl_dir, use_cached=False)
             except ConnectionError as e:
-                self._register_err(f"Failed to redownload {file.name}\n  Reason: {e}")
+                self._register_err(f'Failed to redownload {file.name}\n  Reason: {e}')
                 continue
 
             if not self._test_hash(file, info['MD5 Hash']):
-                self.register_err(f"{file.name} failed MD5 check after being redownloaded")
+                self.register_err(f'{file.name} failed MD5 check after being redownloaded')
 
         for err in self._errors:
             print(err)

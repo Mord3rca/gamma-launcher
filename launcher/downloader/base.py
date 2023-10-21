@@ -8,7 +8,6 @@ g_session.headers.update({'User-Agent': 'pyGammaLauncher'})
 
 
 class Base(ABC):
-
     def __init__(self, url: str) -> None:
         self._url = url
         self._md5 = None
@@ -20,7 +19,7 @@ class Base(ABC):
     @property
     def md5(self) -> str:
         if not self._md5:
-            raise RuntimeError("md5 not calculated, please use download() first")
+            raise RuntimeError('md5 not calculated, please use download() first')
 
         return self._md5
 

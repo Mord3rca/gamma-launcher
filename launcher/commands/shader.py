@@ -9,13 +9,7 @@ class PurgeShaderCache:
 
     help: str = 'Purge Anomaly shader cache'
 
-    arguments: dict = {
-        "--anomaly": {
-            "help": "Path to ANOMALY directory",
-            "required": True,
-            "type": str
-        }
-    }
+    arguments: dict = {'--anomaly': {'help': 'Path to ANOMALY directory', 'required': True, 'type': str}}
 
     def run(self, args) -> None:
         scache = Path(args.anomaly) / 'appdata' / 'shaders_cache'
@@ -30,20 +24,18 @@ class RemoveReshade:
 
     help: str = 'Remove ReShade from Anomaly bin'
 
-    arguments: dict = {
-        "--anomaly": {
-            "help": "Path to ANOMALY directory",
-            "required": True,
-            "type": str
-        }
-    }
+    arguments: dict = {'--anomaly': {'help': 'Path to ANOMALY directory', 'required': True, 'type': str}}
 
     def run(self, args) -> None:
         anomaly = Path(args.anomaly)
         bin_files = [
-            'd3d9.dll', 'dxgi.dll', 'dxgi.log',
-            'G.A.M.M.A.Reshade.ini', 'ReShade.ini',
-            'ReShade.log', 'reshade-shaders'
+            'd3d9.dll',
+            'dxgi.dll',
+            'dxgi.log',
+            'G.A.M.M.A.Reshade.ini',
+            'ReShade.ini',
+            'ReShade.log',
+            'reshade-shaders',
         ]
 
         for i in bin_files:
