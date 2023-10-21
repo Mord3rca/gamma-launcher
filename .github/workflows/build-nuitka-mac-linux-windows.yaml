@@ -12,7 +12,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-latest, windows-latest ]
-        python-version: [ "3.10", "3.11"]
+        python-version: [ "3.11", ]
 
     runs-on: ${{ matrix.os }}
 
@@ -41,16 +41,17 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           nuitka3 --onefile --remove-output launcher/cli.py
+          chmod +x cli.bin
 
       - name: Manual compile with nuitka in windows
         if: runner.os == 'Windows'
         run: |
           echo Yes | nuitka --onefile --remove-output --output-filename=cli.exe launcher/cli.py
 
-      - name: Upload Artifacts ${{ matrix.python-version }} ${{ runner.os }}
+      - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ runner.os }} Build
+          name: ${{ matrix.python-version }} ${{ runner.os }} Build
           path: |
             cli.bin
             cli.exe
