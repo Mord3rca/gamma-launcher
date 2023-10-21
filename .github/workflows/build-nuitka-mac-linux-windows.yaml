@@ -35,13 +35,11 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y fuse
-          sudo apt-get install -y ccache
 
       - name: Manual compile with nuitka in linux
         if: runner.os == 'Linux'
         run: |
           nuitka3 --onefile --remove-output launcher/cli.py
-          chmod +x cli.bin
 
       - name: Manual compile with nuitka in windows
         if: runner.os == 'Windows'
@@ -51,7 +49,7 @@ jobs:
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.python-version }} ${{ runner.os }} Build
+          name: Python ${{ matrix.python-version }} ${{ runner.os }} Build
           path: |
             cli.bin
             cli.exe
