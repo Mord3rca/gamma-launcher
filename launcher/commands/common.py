@@ -53,7 +53,7 @@ def read_mod_maker(mod_list, mod_make) -> Dict[str, Dict]:
                 continue
 
             mods_make[mod] = {
-                'url': it[0],
+                'url': it[4] if '222467' in it[0] else it[0],
                 'install_directives': [
                      i.replace('\\', os.path.sep).lstrip(os.path.sep) for i in it[1].split(':')
                  ] if it[1] != '0' else None,
