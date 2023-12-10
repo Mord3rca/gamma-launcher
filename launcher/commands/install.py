@@ -2,7 +2,7 @@ from distutils.dir_util import copy_tree
 from os import name as os_name
 from pathlib import Path
 from requests.exceptions import ConnectionError
-from shutil import copy2, move
+from shutil import copy2, disk_usage, move
 from sys import exit
 from tempfile import TemporaryDirectory
 from typing import Dict, List
@@ -84,6 +84,9 @@ class AnomalyInstall:
         self._anomaly_dir = Path(args.anomaly)
         self._anomaly_dir.mkdir(parents=True, exist_ok=True)
 
+        self._cache_dir = Path(args.cache_path or args.anomaly)
+        self._cache_dir.mkdir(parents=True, exist_ok=True)
+
         print("[+] Installing base Anomaly 1.5.1")
         self._install_component("base-1.5.1", ext="7z-bcj2")
 
@@ -95,6 +98,87 @@ class AnomalyInstall:
 
         if (args.anomaly_purge_cache):
             self._purge_cache()
+
+
+class GammaSetup:
+
+    arguments: dict = {
+        "--gamma": {
+            "help": "Path to GAMMA directory",
+            "required": True,
+            "type": str
+        },
+        "--gamma-no-mod-organizer": {
+            "help": "Skip ModOrganizer installation",
+            "action": "store_false",
+            "dest": "gamma_install_mo",
+        },
+        "--gamma-set-mod-organizer-version": {
+            "help": "Set ModOrganizer Version (have to match github tags)",
+            "type": str,
+            "default": "v2.4.4",
+            "dest": "mo_version",
+        },
+        "--cache-directory": {
+            "help": "Path to cache directory",
+            "type": str,
+            "dest": "cache_path"
+        },
+    }
+
+    name: str = "gamma-setup"
+
+    help: str = "Preliminary setup for S.T.A.L.K.E.R.: G.A.M.M.A."
+
+    def __init__(self) -> None:
+        self._cache_dir = None
+        self._gamma_dir = None
+        self._grok_mod_dir = None
+
+    def _check_tmp_free_space(self, size=5*1024*1024*1024) -> None:
+        with TemporaryDirectory(prefix="gamma-launcher-mo-setup-") as dir:
+            _, __, free = disk_usage(dir)
+            if free < size:
+                raise RuntimeError(
+                    "You need at least 5 GiB of space in TMPDIR for this to work.\n"
+                    "Please export TMPDIR to a folder with enough space available."
+                )
+
+    def _install_mod_organizer(self, version: str) -> None:
+        url = "https://github.com/ModOrganizer2/modorganizer/releases/download/" + \
+              f"{version}/Mod.Organizer-{version.lstrip('v')}.7z"
+
+        with TemporaryDirectory(prefix="gamma-launcher-mo-setup-") as dir:
+            mo_archive = download_archive(url, self._cache_dir or dir, host='base')
+            extract_archive(mo_archive, self._gamma_dir)
+
+    def run(self, args) -> None:
+        if not args.cache_path:
+            self._check_tmp_free_space()
+
+        self._gamma_dir = Path(args.gamma)
+        self._grok_mod_dir = Path(args.gamma) / ".Grok's Modpack Installer" / "G.A.M.M.A"
+        self._grok_mod_dir.mkdir(parents=True, exist_ok=True)
+
+        if args.cache_path:
+            self._cache_dir = Path(args.cache_path)
+            self._cache_dir.mkdir(parents=True, exist_ok=True)
+
+        print("[+] Installing base setup for GAMMA")
+        if args.gamma_install_mo:
+            self._install_mod_organizer(args.mo_version)
+
+        with TemporaryDirectory(prefix="gamma-launcher-mo-setup-") as dir:
+            file = download_archive("https://github.com/Grokitach/gamma_setup", self._cache_dir or dir)
+            extract_archive(file, self._grok_mod_dir)
+
+        gamma_setup_dir = list(self._grok_mod_dir.glob("gamma_setup-*"))[0]
+        for i in gamma_setup_dir.glob("*"):
+            move(i, self._grok_mod_dir)
+        gamma_setup_dir.rmdir()
+
+        for i in ["downloads", "mods"]:
+            (self._gamma_dir / i).mkdir(exist_ok=True)
 
 
 class FullInstall:
