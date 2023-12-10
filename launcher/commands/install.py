@@ -7,6 +7,7 @@ from sys import exit
 from tempfile import TemporaryDirectory
 from typing import Dict, List
 
+from launcher.commands import CheckAnomaly
 from launcher.downloader import download_archive, download_mod
 from launcher.downloader.base import g_session
 from launcher.archive import extract_archive
@@ -26,7 +27,17 @@ class AnomalyInstall:
             "help": "Path to ANOMALY directory",
             "required": True,
             "type": str
-        }
+        },
+        "--anomaly-skip-verify": {
+            "help": "Skip installation verification",
+            "action": "store_false",
+            "dest": "anomaly_verify"
+        },
+        "--anomaly-purge-cache": {
+            "help": "Do not keep 7z archives",
+            "action": "store_true",
+            "dest": "anomaly_purge_cache"
+        },
     }
 
     name: str = "anomaly-install"
@@ -58,6 +69,11 @@ class AnomalyInstall:
         print("  - Extracting")
         extract_archive(file, self._anomaly_dir, ext)
 
+    def _purge_cache(self) -> None:
+        print("[+] Purging Anomaly archives")
+        for archive in self._anomaly_dir.glob("*.7z"):
+            archive.unlink()
+
     def run(self, args) -> None:
         self._anomaly_dir = Path(args.anomaly)
         self._anomaly_dir.mkdir(parents=True, exist_ok=True)
@@ -67,6 +83,12 @@ class AnomalyInstall:
 
         print("[+] Installing update Anomaly 1.5.1 to 1.5.2")
         self._install_component("update-1.5.2", ext="7z-bcj2")
+
+        if (args.anomaly_verify):
+            CheckAnomaly().run(args)
+
+        if (args.anomaly_purge_cache):
+            self._purge_cache()
 
 
 class FullInstall:

@@ -24,10 +24,10 @@ class CheckAnomaly:
     @staticmethod
     def _read_checksums(anomaly: Path):
         checksums = anomaly / "tools" / "checksums.md5"
-        for l in checksums.read_text().split("\n"):
-            if(not l):
+        for line in checksums.read_text().split("\n"):
+            if (not line):
                 continue
-            hash, file = l.split(" ")
+            hash, file = line.split(" ")
             file = anomaly / file.lstrip("*").replace("\\", sep)
             yield file, hash
 
@@ -38,10 +38,10 @@ class CheckAnomaly:
             print(f"Checking Anomaly file: {file}...")
             with file.open("rb") as f:
                 fhash = file_digest(f, "md5").hexdigest()
-            if(not fhash == hash):
+            if (not fhash == hash):
                 errors.append(str(file))
 
-        if(errors):
+        if (errors):
             err_str = "\n".join(errors)
             raise RuntimeError(f"Invalid file(s) detected:\n{err_str}")
 
