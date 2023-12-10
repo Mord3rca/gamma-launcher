@@ -47,7 +47,6 @@ def download_archive(
         print(f'  - Updating cache file {file.name}')
         file.unlink()  # Redownload
 
-    print(f'  - Downloading {file.name}')
     try:
         e.download(file)
     except ConnectionError as e:

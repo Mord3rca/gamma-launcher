@@ -1,6 +1,7 @@
 from hashlib import md5
 from os.path import basename
 from urllib.parse import urlparse
+from tqdm import tqdm
 
 from requests import Session
 
@@ -31,10 +32,14 @@ class Base:
 
     def download(self, path: str) -> None:
         h = md5()
-        with open(path, 'wb') as f:
-            r = g_session.get(self._url)
+        with open(path, "wb") as f, tqdm(
+            desc=f"  - Downloading {self.filename}",
+            unit="iB", unit_scale=True, unit_divisor=1024
+        ) as progress:
+            r = g_session.get(self._url, stream=True)
             for chunk in r.iter_content(chunk_size=1 * 1024 * 1024):
                 if chunk:
-                    f.write(chunk)
+                    size = f.write(chunk)
+                    progress.update(size)
                     h.update(chunk)
         self._md5 = h.hexdigest()
