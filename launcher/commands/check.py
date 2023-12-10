@@ -1,9 +1,49 @@
 from requests.exceptions import ConnectionError
 from pathlib import Path
+from os.path import sep
 
 from launcher.commands.common import read_mod_maker, parse_moddb_data
 from launcher.downloader import download_mod
 from launcher.compat import file_digest
+
+
+class CheckAnomaly:
+
+    arguments: dict = {
+        "--anomaly": {
+            "help": "Path to Anomaly directory",
+            "required": True,
+            "type": str
+        },
+    }
+
+    name: str = "check-anomaly"
+
+    help: str = "Check Anomaly installation"
+
+    @staticmethod
+    def _read_checksums(anomaly: Path):
+        checksums = anomaly / "tools" / "checksums.md5"
+        for l in checksums.read_text().split("\n"):
+            if(not l):
+                continue
+            hash, file = l.split(" ")
+            file = anomaly / file.lstrip("*").replace("\\", sep)
+            yield file, hash
+
+    def run(self, args) -> None:
+        anomaly = Path(args.anomaly)
+        errors = []
+        for file, hash in self._read_checksums(anomaly):
+            print(f"Checking Anomaly file: {file}...")
+            with file.open("rb") as f:
+                fhash = file_digest(f, "md5").hexdigest()
+            if(not fhash == hash):
+                errors.append(str(file))
+
+        if(errors):
+            err_str = "\n".join(errors)
+            raise RuntimeError(f"Invalid file(s) detected:\n{err_str}")
 
 
 class CheckMD5:
