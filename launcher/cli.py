@@ -1,5 +1,6 @@
 from launcher.__version__ import __version__
 from launcher.commands import (
+    AnomalyInstall,
     CheckMD5,
     FullInstall,
     RemoveReshade,
@@ -29,6 +30,7 @@ parser_desc = {
          "help": "Command to invoke",
          "dest": "command",
          "list": {
+             **command_object_to_dict(AnomalyInstall),
              **command_object_to_dict(CheckMD5),
              **command_object_to_dict(FullInstall),
              **command_object_to_dict(RemoveReshade),
