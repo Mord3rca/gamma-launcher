@@ -34,6 +34,16 @@ If all went well, you can now use the `gamma-launcher` command as intended.
 
 ## Commands
 
+### Anomaly Install
+
+Create an usable Anomaly installation is target directory
+
+To setup Anomaly:  `gamma-launcher anomaly-install --anomaly <Anomaly path>`
+
+### Check Anomaly
+
+Verify Anomaly installation with:  `gamma-launcher check-anomaly --anomaly <Anomaly path>`
+
 ### Check MD5
 
 This will perform a MD5 check for all ModDB addons
