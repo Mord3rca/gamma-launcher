@@ -5,18 +5,68 @@ from requests.exceptions import ConnectionError
 from shutil import copy2, move
 from sys import exit
 from tempfile import TemporaryDirectory
-from typing import List
+from typing import Dict, List
 
-from launcher.downloader import download_mod
+from launcher.downloader import download_archive, download_mod
 from launcher.downloader.base import g_session
 from launcher.archive import extract_archive
 from launcher.downloader import get_handler_for_url
 from launcher.meta import create_ini_file, create_ini_separator_file
 
-from .common import read_mod_maker
+from .common import read_mod_maker, parse_moddb_data
 
 
 guide_url: str = "https://github.com/DravenusRex/stalker-gamma-linux-guide"
+
+
+class AnomalyInstall:
+
+    arguments: dict = {
+        "--anomaly": {
+            "help": "Path to ANOMALY directory",
+            "required": True,
+            "type": str
+        }
+    }
+
+    name: str = "anomaly-install"
+
+    help: str = "Installation of S.T.A.L.K.E.R.: Anomaly"
+
+    files: Dict[str, Dict[str, str]] = {
+        "base-1.5.1": {
+            "dl_link": "https://www.moddb.com/downloads/start/207799",
+            "moddb_page": "https://www.moddb.com/mods/stalker-anomaly/downloads/stalker-anomaly-151",
+        },
+        "update-1.5.2": {
+            "dl_link": "https://www.moddb.com/downloads/start/235237",
+            "moddb_page": "https://www.moddb.com/mods/stalker-anomaly/downloads/stalker-anomaly-151-to-152",
+        },
+    }
+
+    def __init__(self) -> None:
+        self._anomaly_dir = None
+
+    def _dl_component(self, c_data: Dict) -> Path:
+        metadata = parse_moddb_data(c_data.get("moddb_page"))
+        return download_archive(c_data.get("dl_link"), self._anomaly_dir, hash=metadata.get('MD5 Hash'))
+
+    def _install_component(self, comp: str, ext: str = None) -> None:
+        c = self.files.get(comp)
+        file = self._dl_component(c)
+
+        print("  - Extracting")
+        extract_archive(file, self._anomaly_dir, ext)
+
+    def run(self, args) -> None:
+        self._anomaly_dir = Path(args.anomaly)
+        self._anomaly_dir.mkdir(parents=True, exist_ok=True)
+
+        print("[+] Installing base Anomaly 1.5.1")
+        self._install_component("base-1.5.1", ext="7z-bcj2")
+
+        print("[+] Installing update Anomaly 1.5.1 to 1.5.2")
+        self._install_component("update-1.5.2", ext="7z-bcj2")
 
 
 class FullInstall:
