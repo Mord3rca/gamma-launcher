@@ -1,5 +1,6 @@
-from abc import ABC, abstractmethod
 from hashlib import md5
+from os.path import basename
+from urllib.parse import urlparse
 
 from requests import Session
 
@@ -7,7 +8,7 @@ g_session = Session()
 g_session.headers.update({'User-Agent': 'pyGammaLauncher'})
 
 
-class Base(ABC):
+class Base:
 
     def __init__(self, url: str) -> None:
         self._url = url
@@ -25,9 +26,8 @@ class Base(ABC):
         return self._md5
 
     @property
-    @abstractmethod
     def filename(self) -> str:
-        pass
+        return basename(urlparse(self._url).path)
 
     def download(self, path: str) -> None:
         h = md5()

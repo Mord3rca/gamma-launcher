@@ -1,6 +1,6 @@
+from .base import Base
 from .github import Github
 from .moddb import ModDB
-from .base import Base
 
 from urllib.parse import urlparse
 from requests.exceptions import ConnectionError
@@ -10,9 +10,10 @@ from pathlib import Path
 from launcher.compat import file_digest
 
 
-def get_handler_for_url(url: str) -> Base:
-    host = urlparse(url).hostname
+def get_handler_for_url(url: str, host: str = None) -> Base:
+    host = host or urlparse(url).hostname
     return {
+        'base': Base,
         'github.com': Github,
         'www.moddb.com': ModDB,
     }.get(host)(url)
@@ -25,9 +26,10 @@ def get_handler_for_url(url: str) -> Base:
 )
 def download_archive(
     url: str, download_dir: Path, use_cached: bool = True,
-    hash_type: str = 'md5', hash: str = None
+    hash_type: str = 'md5', hash: str = None,
+    host: str = None
 ) -> Path:
-    e = get_handler_for_url(url)
+    e = get_handler_for_url(url, host)
     file = Path(download_dir, e.filename)
 
     if file.is_file() and use_cached:
