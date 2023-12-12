@@ -4,7 +4,7 @@ from .moddb import ModDB
 
 from urllib.parse import urlparse
 from requests.exceptions import ConnectionError
-from tenacity import retry, stop_after_attempt, wait_fixed
+from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_fixed
 from pathlib import Path
 
 from launcher.compat import file_digest
@@ -21,6 +21,7 @@ def get_handler_for_url(url: str, host: str = None) -> Base:
 
 @retry(
     reraise=True,
+    retry=retry_if_exception_type(ConnectionError),
     stop=stop_after_attempt(3),
     wait=wait_fixed(5),
 )
