@@ -47,7 +47,6 @@ def download_archive(
             return file
 
         print(f'  - Updating cache file {file.name}')
-        file.unlink()  # Redownload
 
     try:
         e.download(file)
