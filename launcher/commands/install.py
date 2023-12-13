@@ -19,6 +19,16 @@ from .common import read_mod_maker, parse_moddb_data
 guide_url: str = "https://github.com/DravenusRex/stalker-gamma-linux-guide"
 
 
+def check_tmp_free_space(size: int) -> None:
+    with TemporaryDirectory() as dir:
+        _, __, free = disk_usage(dir)
+        if free < (size * 1024 * 1024 * 1024):
+            raise RuntimeError(
+                f"You need at least {size} GiB of space in TMPDIR for this to work.\n"
+                "Please export TMPDIR to a folder with enough space available."
+            )
+
+
 class AnomalyInstall:
 
     arguments: dict = {
@@ -134,15 +144,6 @@ class GammaSetup:
         self._gamma_dir = None
         self._grok_mod_dir = None
 
-    def _check_tmp_free_space(self, size=5*1024*1024*1024) -> None:
-        with TemporaryDirectory(prefix="gamma-launcher-mo-setup-") as dir:
-            _, __, free = disk_usage(dir)
-            if free < size:
-                raise RuntimeError(
-                    "You need at least 5 GiB of space in TMPDIR for this to work.\n"
-                    "Please export TMPDIR to a folder with enough space available."
-                )
-
     def _install_mod_organizer(self, version: str) -> None:
         url = "https://github.com/ModOrganizer2/modorganizer/releases/download/" + \
               f"{version}/Mod.Organizer-{version.lstrip('v')}.7z"
@@ -153,7 +154,7 @@ class GammaSetup:
 
     def run(self, args) -> None:
         if not args.cache_path:
-            self._check_tmp_free_space()
+            self._check_tmp_free_space(5)
 
         self._gamma_dir = Path(args.gamma)
         self._grok_mod_dir = Path(args.gamma) / ".Grok's Modpack Installer" / "G.A.M.M.A"
@@ -385,6 +386,8 @@ AutomaticArchiveInvalidation=false
 """)
 
     def run(self, args):
+        check_tmp_free_space(6)
+
         # Init paths
         self._anomaly_dir = Path(args.anomaly)
         self._gamma_dir = Path(args.gamma)
