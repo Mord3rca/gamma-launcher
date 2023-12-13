@@ -38,6 +38,11 @@ class AnomalyInstall:
             "action": "store_true",
             "dest": "anomaly_purge_cache"
         },
+        "--cache-directory": {
+            "help": "Path to cache directory",
+            "type": str,
+            "dest": "cache_path"
+        },
     }
 
     name: str = "anomaly-install"
@@ -57,10 +62,11 @@ class AnomalyInstall:
 
     def __init__(self) -> None:
         self._anomaly_dir = None
+        self._cache_dir = None
 
     def _dl_component(self, c_data: Dict) -> Path:
         metadata = parse_moddb_data(c_data.get("moddb_page"))
-        return download_archive(c_data.get("dl_link"), self._anomaly_dir, hash=metadata.get('MD5 Hash'))
+        return download_archive(c_data.get("dl_link"), self._cache_dir, hash=metadata.get('MD5 Hash'))
 
     def _install_component(self, comp: str, ext: str = None) -> None:
         c = self.files.get(comp)
