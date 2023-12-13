@@ -376,7 +376,7 @@ class FullInstall:
         settings = p_path / 'settings.txt'
 
         print(f'[+] Installing G.A.M.M.A profile in {p_path}')
-        p_path.mkdir(exist_ok=True)
+        p_path.mkdir(parents=True, exist_ok=True)
         copy2(
             self._grok_mod_dir / 'G.A.M.M.A' / 'modpack_data' / 'modlist.txt',
             p_path
