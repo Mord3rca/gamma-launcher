@@ -3,7 +3,6 @@ from os import name as os_name
 from pathlib import Path
 from requests.exceptions import ConnectionError
 from shutil import copy2, disk_usage, move
-from sys import exit
 from tempfile import TemporaryDirectory
 from typing import Dict, List
 
@@ -181,19 +180,10 @@ class GammaSetup:
             (self._gamma_dir / i).mkdir(exist_ok=True)
 
 
-class FullInstall:
-
-    arguments: dict = {
-        "--anomaly": {
-            "help": "Path to ANOMALY directory",
-            "required": True,
-            "type": str
-        },
-        "--gamma": {
-            "help": "Path to GAMMA directory",
-            "required": True,
-            "type": str
-        },
+def _create_full_install_args() -> Dict:
+    arguments: dict = AnomalyInstall.arguments
+    arguments.update(GammaSetup.arguments)
+    arguments.update({
         "--no-def-update": {
             "help": "Do not update S.T.A.L.K..E.R.: G.A.M.M.A. definition",
             "action": "store_false",
@@ -208,7 +198,14 @@ class FullInstall:
             "help": "Do not overwrite user configuration when patching Anomaly directory",
             "action": "store_true",
         },
-    }
+    })
+
+    return arguments
+
+
+class FullInstall:
+
+    arguments: dict = _create_full_install_args()
 
     name: str = "full-install"
 
@@ -400,18 +397,10 @@ AutomaticArchiveInvalidation=false
         self._dl_dir.mkdir(parents=True, exist_ok=True)
 
         if not (self._anomaly_dir / "bin").is_dir():
-            print(
-                f"Follow this installation guide: {guide_url}\n"
-                "And make sure Anomaly is correctly installed."
-            )
-            exit(1)
+            AnomalyInstall().run(args)
 
         if not (self._mod_dir.is_dir() and self._grok_mod_dir.is_dir()):
-            print(
-                f"Follow this installation guide: {guide_url}\n"
-                "And make sure GAMMA RC3 is correctly installed."
-            )
-            exit(1)
+            GammaSetup().run(args)
 
         # Start installing
         if args.update_def:
