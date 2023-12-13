@@ -10,6 +10,10 @@ from pathlib import Path
 from launcher.hash import check_hash
 
 
+class HashError(Exception):
+    pass
+
+
 def get_handler_for_url(url: str, host: str = None) -> Base:
     host = host or urlparse(url).hostname
     return {
@@ -51,5 +55,9 @@ def download_archive(
         print('  -> Failed, retrying...')
         file.unlink()
         raise e
+
+    # Just in case
+    if hash and hash != e.md5():
+        raise HashError("Checksum error for {file.name} from {url}")
 
     return file
