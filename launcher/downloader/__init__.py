@@ -7,7 +7,7 @@ from requests.exceptions import ConnectionError
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_fixed
 from pathlib import Path
 
-from launcher.compat import file_digest
+from launcher.hash import check_hash
 
 
 def get_handler_for_url(url: str, host: str = None) -> Base:
@@ -38,10 +38,7 @@ def download_archive(
             print(f'  - Using cached {file.name}')
             return file
 
-        with open(file, 'rb') as f:
-            fhash = file_digest(f, hash_type).hexdigest()
-
-        if (fhash == hash):
+        if check_hash(file, hash):
             print(f'  - Using cached {file.name} ({hash})')
             return file
 

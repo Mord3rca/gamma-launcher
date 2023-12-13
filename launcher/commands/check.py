@@ -4,7 +4,7 @@ from os.path import sep
 
 from launcher.commands.common import read_mod_maker, parse_moddb_data
 from launcher.downloader import download_mod
-from launcher.compat import file_digest
+from launcher.hash import check_hash
 
 
 class CheckAnomaly:
@@ -35,10 +35,7 @@ class CheckAnomaly:
         anomaly = Path(args.anomaly)
         errors = []
         for file, hash in self._read_checksums(anomaly):
-            print(f"Checking Anomaly file: {file}...")
-            with file.open("rb") as f:
-                fhash = file_digest(f, "md5").hexdigest()
-            if (not fhash == hash):
+            if not check_hash(file, hash, desc=f"Checking Anomaly file: {file}..."):
                 errors.append(str(file))
 
         if (errors):
@@ -82,17 +79,6 @@ class CheckMD5:
         if show:
             print(f"  !! {err}")
 
-    def _test_hash(self, file: Path, hash: str) -> bool:
-        with open(file, 'rb') as f:
-            md5 = file_digest(f, 'md5').hexdigest()
-
-        valid = md5 == hash
-
-        print(f"{file.name} ({hash}): ", end='')
-        print("OK" if valid else "MISMATCH")
-
-        return valid
-
     def _if_file_missing(self, file: Path, url: str, hash: str) -> None:
         if not self._update_cache:
             self.register_err(f"{file.name} not found on disk", show=False)
@@ -104,7 +90,7 @@ class CheckMD5:
             self._register_err(f"Failed to download {file.name}\n  Reason: {e}")
             return
 
-        if not self._test_hash(file, hash):
+        if not check_hash(file, hash):
             self.register_err(f"Failed to download missing file - {file.name}")
 
     def run(self, args) -> None:  # noqa: C901
@@ -142,7 +128,7 @@ class CheckMD5:
                 self._if_file_missing(file, i['url'], hash)
                 continue
 
-            if self._test_hash(file, info['MD5 Hash']):
+            if check_hash(file, info['MD5 Hash']):
                 continue
 
             if not args.update_cache:
@@ -155,7 +141,7 @@ class CheckMD5:
                 self._register_err(f"Failed to redownload {file.name}\n  Reason: {e}")
                 continue
 
-            if not self._test_hash(file, info['MD5 Hash']):
+            if not check_hash(file, info['MD5 Hash']):
                 self.register_err(f"{file.name} failed MD5 check after being redownloaded")
 
         for err in self._errors:
