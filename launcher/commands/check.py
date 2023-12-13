@@ -3,7 +3,7 @@ from pathlib import Path
 from os.path import sep
 
 from launcher.commands.common import read_mod_maker, parse_moddb_data
-from launcher.downloader import download_archive
+from launcher.downloader import download_archive, HashError
 from launcher.hash import check_hash
 
 
@@ -71,31 +71,11 @@ class CheckMD5:
     def __init__(self) -> None:
         self._gamma = None
         self._dl_dir = None
-        self._errors = []
-        self._update_cache = False
-
-    def register_err(self, err: str, show: bool = True, level: str = "Error") -> None:
-        self._errors += [f"{level}: {err}"]
-        if show:
-            print(f"  !! {err}")
-
-    def _if_file_missing(self, file: Path, url: str, hash: str) -> None:
-        if not self._update_cache:
-            self.register_err(f"{file.name} not found on disk", show=False)
-            return
-
-        try:
-            file = download_archive(url, self._dl_dir, use_cached=False)
-        except ConnectionError as e:
-            self._register_err(f"Failed to download {file.name}\n  Reason: {e}")
-            return
-
-        if not check_hash(file, hash):
-            self.register_err(f"Failed to download missing file - {file.name}")
 
     def run(self, args) -> None:  # noqa: C901
+        errors = []
+
         self._gamma = Path(args.gamma)
-        self._update_cache = args.update_cache
         self._dl_dir = self._gamma / "downloads"
         modpack_data_dir = self._gamma / ".Grok's Modpack Installer" / "G.A.M.M.A" / "modpack_data"
 
@@ -111,38 +91,37 @@ class CheckMD5:
                 file = self._dl_dir / info['Filename']
                 hash = info['MD5 Hash']
             except ConnectionError as e:
-                self.register_err(f"Can't fetch moddb page for {i['info_url']}\n  Reason: {e}")
+                errors.append(f"Can't fetch moddb page for {i['info_url']}\n  Reason: {e}")
                 continue
             except KeyError:
-                self.register_err(f"Can't parse moddb page for {i['info_url']}")
+                errors.append(f"Can't parse moddb page for {i['info_url']}")
                 continue
 
             if info.get('Download', '') not in i['url']:
-                self.register_err(
-                    f"Skipping {file.name} since ModDB info do not match download url",
-                    show=False, level="Warning"
+                errors.append(
+                    f"Skipping {file.name} since ModDB info do not match download url"
                 )
                 continue
 
-            if not file.exists():
-                self._if_file_missing(file, i['url'], hash)
+            if not file.exists() and not args.update_cache:
+                errors.append(f"{file.name} not found on disk")
                 continue
 
-            if check_hash(file, info['MD5 Hash']):
+            if check_hash(file, hash):
                 continue
 
             if not args.update_cache:
-                self.register_err(f"{file.name} MD5 missmatch")
+                errors.append(f"{file.name} MD5 missmatch")
                 continue
 
             try:
-                file = download_archive(i['url'], self._dl_dir, use_cached=False)
+                file = download_archive(i['url'], self._dl_dir, use_cached=False, hash=hash)
             except ConnectionError as e:
-                self._register_err(f"Failed to redownload {file.name}\n  Reason: {e}")
+                errors.append(f"Failed to redownload {file.name}\n  Reason: {e}")
+                continue
+            except HashError:
+                errors.append(f"{file.name} failed MD5 check after being redownloaded")
                 continue
 
-            if not check_hash(file, info['MD5 Hash']):
-                self.register_err(f"{file.name} failed MD5 check after being redownloaded")
-
-        for err in self._errors:
-            print(err)
+        if errors:
+            raise HashError("\n".join(errors))
