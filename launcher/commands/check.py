@@ -3,7 +3,7 @@ from pathlib import Path
 from os.path import sep
 
 from launcher.commands.common import read_mod_maker, parse_moddb_data
-from launcher.downloader import download_mod
+from launcher.downloader import download_archive
 from launcher.hash import check_hash
 
 
@@ -85,7 +85,7 @@ class CheckMD5:
             return
 
         try:
-            file = download_mod(url, self._dl_dir, use_cached=False)
+            file = download_archive(url, self._dl_dir, use_cached=False)
         except ConnectionError as e:
             self._register_err(f"Failed to download {file.name}\n  Reason: {e}")
             return
@@ -136,7 +136,7 @@ class CheckMD5:
                 continue
 
             try:
-                file = download_mod(i['url'], self._dl_dir, use_cached=False)
+                file = download_archive(i['url'], self._dl_dir, use_cached=False)
             except ConnectionError as e:
                 self._register_err(f"Failed to redownload {file.name}\n  Reason: {e}")
                 continue

@@ -53,7 +53,3 @@ def download_archive(
         raise e
 
     return file
-
-
-def download_mod(*args, **kwargs) -> Path:
-    return download_archive(*args, **kwargs)

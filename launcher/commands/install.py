@@ -7,7 +7,7 @@ from tempfile import TemporaryDirectory
 from typing import Dict, List
 
 from launcher.commands import CheckAnomaly
-from launcher.downloader import download_archive, download_mod
+from launcher.downloader import download_archive
 from launcher.downloader.base import g_session
 from launcher.archive import extract_archive
 from launcher.downloader import get_handler_for_url
@@ -320,7 +320,7 @@ class FullInstall:
         print(f'[+] Installing mod: {title}')
 
         try:
-            file = download_mod(url, self._dl_dir)
+            file = download_archive(url, self._dl_dir)
         except ConnectionError as e:
             print(f"[-] Failed to download {url} for {title}\n  Reason: {e}")
             return
