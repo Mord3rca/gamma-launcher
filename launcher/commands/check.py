@@ -1,6 +1,7 @@
 from requests.exceptions import ConnectionError
 from pathlib import Path
 from os.path import sep
+from typing import Iterator, Tuple
 
 from launcher.commands.common import read_mod_maker, parse_moddb_data
 from launcher.downloader import download_archive, HashError
@@ -22,10 +23,10 @@ class CheckAnomaly:
     help: str = "Check Anomaly installation"
 
     @staticmethod
-    def _read_checksums(anomaly: Path):
+    def _read_checksums(anomaly: Path) -> Iterator[Tuple[Path, str]]:
         checksums = anomaly / "tools" / "checksums.md5"
         for line in checksums.read_text().split("\n"):
-            if (not line):
+            if not line:
                 continue
             hash, file = line.split(" ")
             file = anomaly / file.lstrip("*").replace("\\", sep)
@@ -38,7 +39,7 @@ class CheckAnomaly:
             if not check_hash(file, hash, desc=f"Checking Anomaly file: {file}..."):
                 errors.append(str(file))
 
-        if (errors):
+        if errors:
             err_str = "\n".join(errors)
             raise RuntimeError(f"Invalid file(s) detected:\n{err_str}")
 
