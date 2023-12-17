@@ -182,7 +182,8 @@ class GammaSetup:
 
 
 def _create_full_install_args() -> Dict:
-    arguments: dict = AnomalyInstall.arguments
+    arguments: dict = {}
+    arguments.update(AnomalyInstall.arguments)
     arguments.update(GammaSetup.arguments)
     arguments.update({
         "--no-def-update": {
