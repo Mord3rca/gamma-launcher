@@ -154,7 +154,7 @@ class GammaSetup:
 
     def run(self, args) -> None:
         if not args.cache_path:
-            self._check_tmp_free_space(5)
+            check_tmp_free_space(5)
 
         self._gamma_dir = Path(args.gamma)
         self._grok_mod_dir = Path(args.gamma) / ".Grok's Modpack Installer" / "G.A.M.M.A"
