@@ -2,8 +2,9 @@ from pathlib import Path
 from typing import Dict
 
 from launcher.archive import list_archive_content
-from launcher.commands.common import read_mod_maker, parse_moddb_data
+from launcher.commands.common import read_mod_maker
 from launcher.downloader import get_handler_for_url
+from launcher.downloader.moddb import parse_moddb_data
 
 
 class TestModMaker:
