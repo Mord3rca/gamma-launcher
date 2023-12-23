@@ -3,8 +3,9 @@ from pathlib import Path
 from os.path import sep
 from typing import Iterator, Tuple
 
-from launcher.commands.common import read_mod_maker, parse_moddb_data
+from launcher.commands.common import read_mod_maker
 from launcher.downloader import download_archive, HashError
+from launcher.downloader.moddb import parse_moddb_data
 from launcher.hash import check_hash
 
 

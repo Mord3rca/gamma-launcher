@@ -13,7 +13,8 @@ from launcher.archive import extract_archive
 from launcher.downloader import get_handler_for_url
 from launcher.meta import create_ini_file, create_ini_separator_file
 
-from .common import read_mod_maker, parse_moddb_data
+from .common import read_mod_maker
+from launcher.downloader.moddb import parse_moddb_data
 
 
 guide_url: str = "https://github.com/DravenusRex/stalker-gamma-linux-guide"
