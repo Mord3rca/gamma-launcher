@@ -97,10 +97,10 @@ class AnomalyInstall:
         self._cache_dir.mkdir(parents=True, exist_ok=True)
 
         print("[+] Installing base Anomaly 1.5.1")
-        self._install_component("base-1.5.1", ext="7z-bcj2")
+        self._install_component("base-1.5.1", mime="application/x-7z-compressed+bcj2")
 
         print("[+] Installing update Anomaly 1.5.1 to 1.5.2")
-        self._install_component("update-1.5.2", ext="7z-bcj2")
+        self._install_component("update-1.5.2", mime="application/x-7z-compressed+bcj2")
 
         if (args.anomaly_verify):
             CheckAnomaly().run(args)

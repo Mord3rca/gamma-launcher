@@ -1,4 +1,4 @@
-import os.path
+import magic
 
 from os import name as os_name
 from os import system
@@ -34,10 +34,10 @@ if os_name == 'nt':
             )
 
     _extract_func_dict = {
-        '7z': _win32_extract,
-        'rar': _win32_extract,
-        'zip': _win32_extract,
-        '7z-bcj2': _win32_extract,
+        'application/x-7z-compressed': _win32_extract,
+        'application/x-rar': _win32_extract,
+        'application/zip': _win32_extract,
+        'application/x-7z-compressed+bcj2': _win32_extract,
     }
 else:
     def _7zip_bcj2_workaround(f: str, p: str) -> None:
@@ -45,22 +45,22 @@ else:
             raise RuntimeError(f'7z error will decompressing {f}')
 
     _extract_func_dict = {
-        '7z': lambda f, p: SevenZipFile(f).extractall(p),
-        'rar': lambda f, p: RarFile(f).extractall(p),
-        'zip': lambda f, p: ZipFile(f).extractall(p),
-        '7z-bcj2': _7zip_bcj2_workaround
+        'application/x-7z-compressed': lambda f, p: SevenZipFile(f).extractall(p),
+        'application/x-rar': lambda f, p: RarFile(f).extractall(p),
+        'application/zip': lambda f, p: ZipFile(f).extractall(p),
+        'application/x-7z-compressed+bcj2': _7zip_bcj2_workaround
     }
 
 
-def extract_archive(filename: str, path: str, ext: str = None) -> None:
-    ext = ext or os.path.basename(filename).split(os.path.extsep)[-1]
-    _extract_func_dict.get(ext)(filename, path)
+def extract_archive(filename: str, path: str, mime: str = None) -> None:
+    mime = mime or magic.from_file(filename, mime=True)
+    _extract_func_dict.get(mime)(filename, path)
 
 
-def list_archive_content(filename: str, ext: str = None) -> List[str]:
-    ext = ext or os.path.basename(filename).split(os.path.extsep)[-1]
+def list_archive_content(filename: str, mime: str = None) -> List[str]:
+    mime = mime or magic.from_file(filename, mime=True)
     return {
-        '7z': lambda f: SevenZipFile(f).getnames(),
-        'rar': lambda f: RarFile(f).namelist(),
-        'zip': lambda f: ZipFile(f).namelist(),
-    }.get(ext)(filename)
+        'application/x-7z-compressed': lambda f: SevenZipFile(f).getnames(),
+        'application/x-rar': lambda f: RarFile(f).namelist(),
+        'application/zip': lambda f: ZipFile(f).namelist(),
+    }.get(mime)(filename)
