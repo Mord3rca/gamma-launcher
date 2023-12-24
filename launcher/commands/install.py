@@ -278,7 +278,7 @@ class FullInstall:
             return
 
         for path in filter(
-            lambda x: x.name.lower() in self.folder_to_install and x.name != x.name.lower(),
+            lambda x: x.name.lower() in self.folder_to_install,
             dir.glob('**')
         ):
             for file in path.glob('**/*.*'):
@@ -286,7 +286,14 @@ class FullInstall:
                 rp = str(t.parent).lower()
                 nfolder = path.parent / rp
                 nfolder.mkdir(parents=True, exist_ok=True)
-                file.rename(nfolder / file.name)
+                file.rename(nfolder / file.name.lower())
+
+        # Cleanup empty dirs
+        for dir in sorted(dir.glob('**/'), reverse=True):
+            try:
+                dir.rmdir()
+            except OSError:  # Directory may not be empty (err: 39)
+                continue
 
     def _fix_malformed_archive(self, dir: Path) -> None:
         # Do not exec this on windows
@@ -367,6 +374,9 @@ class FullInstall:
 
     def _copy_gamma_modpack(self) -> None:
         path = self._grok_mod_dir / 'G.A.M.M.A' / 'modpack_addons'
+        # Fixing case of overlay tree before copying
+        for d in path.glob('*/'):
+            self._fix_path_case(d)
         print(f'[+] Copying G.A.M.M.A mods in from "{path}" to "{self._mod_dir}"')
         copy_tree(str(path), str(self._mod_dir))
 
