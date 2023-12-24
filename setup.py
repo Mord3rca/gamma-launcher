@@ -25,7 +25,7 @@ setup(
     author_email=about['__author_email__'],
     url=about['__url__'],
     install_requires=["bs4", "py7zr", "rarfile", "requests", 'tenacity', 'tqdm'] + plateform_deps,
-    packages=['launcher', 'launcher.commands', 'launcher.downloader'],
+    packages=['launcher', 'launcher.commands', 'launcher.downloader', 'launcher.mods'],
     entry_points={
         'console_scripts': [
             'gamma-launcher = launcher.cli:main',
