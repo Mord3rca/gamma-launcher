@@ -1,19 +1,16 @@
 from distutils.dir_util import copy_tree
-from os import name as os_name
 from pathlib import Path
-from requests.exceptions import ConnectionError
 from shutil import copy2, disk_usage, move
 from tempfile import TemporaryDirectory
-from typing import Dict, List
+from typing import Dict
 
 from launcher.commands import CheckAnomaly
 from launcher.downloader import download_archive
 from launcher.downloader.base import g_session
 from launcher.archive import extract_archive
 from launcher.downloader import get_handler_for_url
-from launcher.meta import create_ini_file, create_ini_separator_file
 
-from .common import read_mod_maker
+from launcher.mods import read_mod_maker
 from launcher.downloader.moddb import parse_moddb_data
 
 
@@ -214,8 +211,6 @@ class FullInstall:
 
     help: str = "Complete install of S.T.A.L.K.E.R.: G.A.M.M.A."
 
-    folder_to_install: List[str] = ['appdata', 'bin', 'db', 'gamedata']
-
     def __init__(self):
         self._anomaly_dir = None
         self._gamma_dir = None
@@ -223,8 +218,6 @@ class FullInstall:
         self._dl_dir = None
         self._mod_dir = None
         self._grok_mod_dir = None
-
-        self._mods_make = {}
 
     def _update_gamma_definition(self) -> None:
         print('[+] Updating G.A.M.M.A. definition')
@@ -273,98 +266,14 @@ class FullInstall:
         if preserve_user_config:
             copy2(saved_config, user_config)
 
-    def _fix_path_case(self, dir: Path) -> None:
-        # Do not exec this on windows
-        if os_name == 'nt':
-            return
-
-        for path in filter(
-            lambda x: x.name.lower() in self.folder_to_install and x.name != x.name.lower(),
-            dir.glob('**')
-        ):
-            for file in path.glob('**/*.*'):
-                t = file.relative_to(path.parent)
-                rp = str(t.parent).lower()
-                nfolder = path.parent / rp
-                nfolder.mkdir(parents=True, exist_ok=True)
-                file.rename(nfolder / file.name)
-
-    def _fix_malformed_archive(self, dir: Path) -> None:
-        # Do not exec this on windows
-        if os_name == 'nt':
-            return
-
-        for path in dir.glob('*.*'):
-            if '\\' not in path.name:
-                continue
-
-            p = dir / path.name.replace('\\', '/')
-            p.parent.mkdir(parents=True, exist_ok=True)
-            path.rename(dir / p)
-
-    def _install_mod(self, name: str, m: dict) -> None:
-        install_dir = self._mod_dir / name
-
-        # Special case, it's a separator
-        if 'separator' in name:
-            print(f'[+] Installing separator: {name}')
-            install_dir.mkdir(exist_ok=True)
-            create_ini_separator_file(install_dir / 'meta.ini')
-            return
-
-        if not m:
-            return
-
-        url = m['url']
-        title = m['title']
-        install_directives = m['install_directives']
-
-        print(f'[+] Installing mod: {title}')
-
-        try:
-            file = download_archive(url, self._dl_dir)
-        except ConnectionError as e:
-            print(f"[-] Failed to download {url} for {title}\n  Reason: {e}")
-            return
-
-        install_dir.mkdir(exist_ok=True)
-        with TemporaryDirectory(prefix="gamma-launcher-modinstall-") as dir:
-            pdir = Path(dir)
-            extract_archive(file, dir)
-            self._fix_malformed_archive(pdir)
-            self._fix_path_case(pdir)
-
-            iterator = [pdir] + ([Path(dir) / i for i in install_directives] if install_directives else [])
-            for i in iterator:
-                if pdir != i:
-                    print(f'    Installing {i.name} -> {install_dir}')
-
-                if not i.exists():
-                    print(f'    WARNING: {i.name} does not exist')
-
-                # Well, I guess it's a feature now.
-                # Maybe I'm not that lazy after all
-                for gamedir in self.folder_to_install:
-                    pgame_dir = i / gamedir
-
-                    if not pgame_dir.exists():
-                        continue
-
-                    copy_tree(
-                        str(pgame_dir),
-                        str(install_dir / gamedir)
-                    )
-
-        create_ini_file(install_dir / 'meta.ini', file.name, url)
-
     def _install_mods(self) -> None:
-        self._mods_make = read_mod_maker(
+        _mods_make = read_mod_maker(
             self._grok_mod_dir / 'G.A.M.M.A' / 'modpack_data' / 'modlist.txt',
             self._grok_mod_dir / 'G.A.M.M.A' / 'modpack_data' / 'modpack_maker_list.txt'
         )
 
-        for k, v in self._mods_make.items():
-            self._install_mod(k, v)
+        for mod in _mods_make:
+            mod.install(self._dl_dir, self._mod_dir)
 
     def _copy_gamma_modpack(self) -> None:
         path = self._grok_mod_dir / 'G.A.M.M.A' / 'modpack_addons'
