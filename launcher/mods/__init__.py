@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Dict, List
 
 from launcher.mods.base import Base, Default
+from launcher.mods.large_file import GammaLargeFile
 from launcher.mods.separator import Separator
 
 
@@ -55,6 +56,10 @@ def read_mod_maker(mod_list: Path, mod_make: Path) -> List[Base]:
             continue
 
         if not data:
+            continue
+
+        if 'addons/start/222467' in data.get('url') and 'github.com' in data.get('info_url'):
+            result.append(GammaLargeFile(**data))
             continue
 
         result.append(Default(**data))
