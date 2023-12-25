@@ -56,7 +56,7 @@ def download_archive(
         raise e
 
     # Just in case
-    if hash and hash != e.md5():
+    if hash and hash != e.md5:
         raise HashError("Checksum error for {file.name} from {url}")
 
     return file
