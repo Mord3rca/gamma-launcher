@@ -1,3 +1,4 @@
+from pathlib import Path
 from re import compile
 
 from .base import Base, g_session
@@ -14,16 +15,19 @@ class Github(Base):
         self._decode_url()
 
     def _decode_url(self) -> None:
+        user, project = self.regexp_url.match(self._url).groups()
+
         if "release" in self._url or self._url.endswith(".zip"):
+            revision = Path(self._url).name.split('.')[0]
+            self._filename = f"{project}-{revision}.zip"
             return
 
-        user, project = self.regexp_url.match(self._url).groups()
         branch = g_session.get(
             f"https://api.github.com/repos/{user}/{project}",
             headers={"Accept": "application/json"}
         ).json()["default_branch"]
         self._url = f"https://github.com/{user}/{project}/archive/refs/heads/{branch}.zip"
-        self._filename = f"{project}.zip"
+        self._filename = f"{project}-{branch}.zip"
 
     @property
     def filename(self) -> str:
