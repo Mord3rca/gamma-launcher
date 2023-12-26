@@ -267,12 +267,7 @@ class FullInstall:
             copy2(saved_config, user_config)
 
     def _install_mods(self) -> None:
-        _mods_make = read_mod_maker(
-            self._grok_mod_dir / 'G.A.M.M.A' / 'modpack_data' / 'modlist.txt',
-            self._grok_mod_dir / 'G.A.M.M.A' / 'modpack_data' / 'modpack_maker_list.txt'
-        )
-
-        for mod in _mods_make:
+        for mod in read_mod_maker(self._grok_mod_dir / 'G.A.M.M.A' / 'modpack_data'):
             mod.install(self._dl_dir, self._mod_dir)
 
     def _copy_gamma_modpack(self) -> None:

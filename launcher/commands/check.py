@@ -77,13 +77,11 @@ class CheckMD5:
     def run(self, args) -> None:  # noqa: C901
         errors = []
 
-        self._gamma = Path(args.gamma)
+        gamma = Path(args.gamma)
         self._dl_dir = self._gamma / "downloads"
-        modpack_data_dir = self._gamma / ".Grok's Modpack Installer" / "G.A.M.M.A" / "modpack_data"
 
         mod_maker = read_mod_maker(
-            modpack_data_dir / 'modlist.txt',
-            modpack_data_dir / 'modpack_maker_list.txt'
+            gamma / ".Grok's Modpack Installer" / "G.A.M.M.A" / "modpack_data"
         )
 
         print('-- Starting MD5 Check')
