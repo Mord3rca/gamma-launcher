@@ -49,7 +49,7 @@ def read_mod_maker(mod_path: Path) -> List[Base]:
             print(f'   Skipping: {i}')
 
         for i in modlist.keys():
-            if name in i:
+            if data['title'] in i:
                 data['name'] = i
                 modlist[i] = data
 
