@@ -27,18 +27,21 @@ def _read_mod_maker_line(line: str) -> Dict[str, str]:
     }
 
 
-def read_mod_maker(mod_list: Path, mod_make: Path) -> List[Base]:
+def read_mod_maker(mod_path: Path) -> List[Base]:
     result = []
 
-    print(f'[+] Reading mod definition from {mod_make.parent} ...')
+    print(f'[+] Reading mod definition from {mod_path} ...')
     modlist = {
         i[1:].strip(): None for i in filter(
             lambda x: x.startswith('+') or x.startswith('-'),
-            mod_list.read_text().split('\n')
+            (mod_path / 'modlist.txt').read_text().split('\n')
         )
     }
 
-    for i in filter(lambda x: x and not x.startswith(' '), mod_make.read_text().split('\n')):
+    for i in filter(
+        lambda x: x and not x.startswith(' '),
+        (mod_path / 'modpack_maker_list.txt').read_text().split('\n')
+    ):
         try:
             data = _read_mod_maker_line(i)
             name = data['name']
