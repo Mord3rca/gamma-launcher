@@ -9,6 +9,9 @@ class Separator(Base):
     def __init__(self, **kwargs) -> None:
         super().__init__(None, None, kwargs.get('name'))
 
+    def check(self, *args, **kwargs) -> None:
+        pass
+
     def download(self, *args, **kwargs) -> None:
         pass
 

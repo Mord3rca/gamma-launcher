@@ -1,12 +1,12 @@
-from requests.exceptions import ConnectionError
+import sys
+
 from pathlib import Path
 from os.path import sep
 from typing import Iterator, Tuple
 
-from launcher.commands.common import read_mod_maker
-from launcher.downloader import download_archive, HashError
-from launcher.downloader.moddb import parse_moddb_data
 from launcher.hash import check_hash
+from launcher.mods import read_mod_maker
+from launcher.mods.base import CheckHashError
 
 
 class CheckAnomaly:
@@ -70,58 +70,23 @@ class CheckMD5:
 
     help: str = "Check MD5 hash for all addons"
 
-    def __init__(self) -> None:
-        self._gamma = None
-        self._dl_dir = None
-
-    def run(self, args) -> None:  # noqa: C901
+    def run(self, args) -> None:
         errors = []
 
         gamma = Path(args.gamma)
-        self._dl_dir = self._gamma / "downloads"
+        dl_dir = gamma / "downloads"
 
         mod_maker = read_mod_maker(
             gamma / ".Grok's Modpack Installer" / "G.A.M.M.A" / "modpack_data"
         )
 
         print('-- Starting MD5 Check')
-        for i in filter(lambda v: v and v['info_url'], mod_maker.values()):
+        for i in mod_maker:
             try:
-                info = parse_moddb_data(i['info_url'])
-                file = self._dl_dir / info['Filename']
-                hash = info['MD5 Hash']
-            except ConnectionError as e:
-                errors.append(f"Can't fetch moddb page for {i['info_url']}\n  Reason: {e}")
-                continue
-            except KeyError:
-                errors.append(f"Can't parse moddb page for {i['info_url']}")
-                continue
+                i.check(dl_dir, args.update_cache)
+            except CheckHashError as e:
+                errors.append(str(e))
 
-            if info.get('Download', '') not in i['url']:
-                errors.append(
-                    f"Skipping {file.name} since ModDB info do not match download url"
-                )
-                continue
+        print("\n".join(errors))
 
-            if not file.exists() and not args.update_cache:
-                errors.append(f"{file.name} not found on disk")
-                continue
-
-            if check_hash(file, hash):
-                continue
-
-            if not args.update_cache:
-                errors.append(f"{file.name} MD5 missmatch")
-                continue
-
-            try:
-                file = download_archive(i['url'], self._dl_dir, use_cached=False, hash=hash)
-            except ConnectionError as e:
-                errors.append(f"Failed to redownload {file.name}\n  Reason: {e}")
-                continue
-            except HashError:
-                errors.append(f"{file.name} failed MD5 check after being redownloaded")
-                continue
-
-        if errors:
-            raise HashError("\n".join(errors))
+        sys.exit(0 if not errors else 1)

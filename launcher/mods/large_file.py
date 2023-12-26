@@ -24,6 +24,9 @@ class GammaLargeFile(Default):
 
         return set(tmp)
 
+    def check(self, *args, **kwargs) -> None:
+        pass
+
     def install(self, download_dir: Path, mods_dir: Path) -> None:
         if not self._url:
             return
