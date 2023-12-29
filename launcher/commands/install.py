@@ -7,7 +7,7 @@ from typing import Dict
 from launcher.commands import CheckAnomaly
 from launcher.downloader import download_archive
 from launcher.downloader.base import g_session
-from launcher.archive import extract_archive
+from launcher.archive import extract_archive, extract_git_archive
 from launcher.downloader import get_handler_for_url
 
 from launcher.mods import read_mod_maker
@@ -239,12 +239,7 @@ class FullInstall:
             g = get_handler_for_url("https://github.com/Grokitach/Stalker_GAMMA/archive/refs/heads/main.zip")
             g.download(gdef)
 
-        with TemporaryDirectory(prefix="gamma-launcher-") as dir:
-            extract_archive(gdef, dir)
-            copy_tree(
-                str(Path(dir) / 'Stalker_GAMMA-main'),
-                str(self._grok_mod_dir)
-            )
+        extract_git_archive(gdef, self._grok_mod_dir, 'Stalker_GAMMA-main')
 
         move(
             self._grok_mod_dir / 'G.A.M.M.A_definition_version.txt',
