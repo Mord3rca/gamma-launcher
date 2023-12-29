@@ -184,6 +184,12 @@ def _create_full_install_args() -> Dict:
     arguments.update(AnomalyInstall.arguments)
     arguments.update(GammaSetup.arguments)
     arguments.update({
+        "--custom-gamma-definition": {
+            "help": "Set a custom revision for S.T.A.L.K..E.R.: G.A.M.M.A.",
+            "type": str,
+            "dest": "custom_def",
+            "default": None,
+        },
         "--no-def-update": {
             "help": "Do not update S.T.A.L.K..E.R.: G.A.M.M.A. definition",
             "action": "store_false",
@@ -219,12 +225,16 @@ class FullInstall:
         self._mod_dir = None
         self._grok_mod_dir = None
 
-    def _update_gamma_definition(self) -> None:
+    def _update_gamma_definition(self, *args) -> None:
         print('[+] Updating G.A.M.M.A. definition')
         gdef = self._grok_mod_dir / 'GAMMA_definition.zip'
 
         try:
             l_version = Path(self._grok_mod_dir / 'version.txt').read_text().strip()
+            if 'Custom' in l_version:
+                print('  -> Skipped since version is set to a custom one.')
+                return
+
             r_version = g_session.get(
                 'https://raw.githubusercontent.com/Grokitach/Stalker_GAMMA/main/G.A.M.M.A_definition_version.txt'
             ).text.strip()
@@ -245,6 +255,18 @@ class FullInstall:
             self._grok_mod_dir / 'G.A.M.M.A_definition_version.txt',
             self._grok_mod_dir / 'version.txt'
         )
+
+    def _set_custom_gamma_def(self, rev: str) -> None:
+        print(f'[+] Setting custom G.A.M.M.A. definition to: {rev}')
+        gdef = self._grok_mod_dir / 'GAMMA_definition.zip'
+
+        g = get_handler_for_url(f'https://github.com/Grokitach/Stalker_GAMMA/archive/{rev}.zip')
+        g.download(gdef)
+
+        extract_git_archive(gdef, self._grok_mod_dir)
+
+        (self._grok_mod_dir / 'G.A.M.M.A_definition_version.txt').unlink()
+        (self._grok_mod_dir / 'version.txt').write_text(f'Custom: {rev}\n')
 
     def _patch_anomaly(self, preserve_user_config: bool = False) -> None:
         user_config = self._anomaly_dir / 'appdata' / 'user.ltx'
@@ -308,7 +330,7 @@ AutomaticArchiveInvalidation=false
 
         # Start installing
         if args.update_def:
-            self._update_gamma_definition()
+            (self._update_gamma_definition if not args.custom_def else self._set_custom_gamma_def)(args.custom_def)
         if args.anomaly_patch:
             self._patch_anomaly(args.preserve_user_config)
 
