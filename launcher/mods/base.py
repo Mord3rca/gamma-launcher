@@ -160,4 +160,4 @@ class Default(Base):
                         str(install_dir / gamedir)
                     )
 
-        create_ini_file(install_dir / 'meta.ini', archive.name, self._url)
+        create_ini_file(install_dir / 'meta.ini', archive.name, self._info_url or self._url)
