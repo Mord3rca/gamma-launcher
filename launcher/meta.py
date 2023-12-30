@@ -14,13 +14,13 @@ comments=
 notes=
 nexusDescription=
 url={url}
-hasCustomUrl=true
+hasCustomURL=true
 lastNexusQuery=
 lastNexusUpdate=
 nexusLastModified=2021-11-09T18:10:18Z
 converted=false
 validated=false
-color=@Variant(\\0\\0\\0\\x43\\0\\xff\\xff\\0\\0\\0\\0\\0\\0\\0\\0\\0)
+color=@Variant(\\0\\0\\0\\x43\\0\\xff\\xff\\0\\0\\0\\0\\0\\0\\0\\0)
 tracked=0
 
 [installedFiles]
