@@ -75,12 +75,12 @@ class AnomalyInstall:
         metadata = parse_moddb_data(c_data.get("moddb_page"))
         return download_archive(c_data.get("dl_link"), self._cache_dir, hash=metadata.get('MD5 Hash'))
 
-    def _install_component(self, comp: str, ext: str = None) -> None:
+    def _install_component(self, comp: str, mime: str = None) -> None:
         c = self.files.get(comp)
         file = self._dl_component(c)
 
         print("  - Extracting")
-        extract_archive(file, self._anomaly_dir, ext)
+        extract_archive(file, self._anomaly_dir, mime)
 
     def _purge_cache(self) -> None:
         print("[+] Purging Anomaly archives")
