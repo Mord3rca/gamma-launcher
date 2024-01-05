@@ -9,7 +9,6 @@ from launcher.archive import extract_archive
 from launcher.downloader import download_archive, HashError
 from launcher.downloader.moddb import parse_moddb_data
 from launcher.hash import check_hash
-from launcher.meta import create_ini_file
 
 
 class CheckHashError(Exception):
@@ -74,6 +73,37 @@ class Default(Base):
             return
 
         raise CheckHashError(f"{file.name} MD5 missmatch")
+
+    def _write_ini_file(self, inifile: Path, zipfile: Path, url: str) -> None:
+        inifile.write_text(
+            "[General]\n"
+            "gameName=stalkeranomaly\n"
+            "modid=0"
+            f'ignoredversion={zipfile.name}\n'
+            f'version={zipfile.name}\n'
+            f'newestversion={zipfile.name}\n'
+            'category="-1,"\n'
+            'nexusFileStatus=1\n'
+            f'installationFile={zipfile.name}\n'
+            'repository=\n'
+            'comments=\n'
+            'notes=\n'
+            'nexusDescription=\n'
+            f'url={url}\n'
+            'hasCustomURL=true\n'
+            'lastNexusQuery=\n'
+            'lastNexusUpdate=\n'
+            'nexusLastModified=2021-11-09T18:10:18Z\n'
+            'converted=false\n'
+            'validated=false\n'
+            'color=@Variant(\\0\\0\\0\\x43\\0\\xff\\xff\\0\\0\\0\\0\\0\\0\\0\\0)\n'
+            'tracked=0\n'
+            '\n'
+            '[installedFiles]\n'
+            '1\\modid=0\n'
+            '1\\fileid=0\n'
+            'size=1\n'
+        )
 
     def check(self, dl_dir: Path, update_cache: bool = False, *args, **kwargs) -> None:
         if not self._info_url:
@@ -160,4 +190,4 @@ class Default(Base):
                         str(install_dir / gamedir)
                     )
 
-        create_ini_file(install_dir / 'meta.ini', archive.name, self._info_url or self._url)
+        self._write_ini_file(install_dir / 'meta.ini', archive, self._info_url or self._url)

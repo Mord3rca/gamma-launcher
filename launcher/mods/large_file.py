@@ -4,7 +4,6 @@ from tempfile import TemporaryDirectory
 from typing import Set
 
 from launcher.archive import extract_archive
-from launcher.meta import create_ini_file
 from launcher.mods.base import Default
 
 
@@ -55,4 +54,4 @@ class GammaLargeFile(Default):
                         str(install_dir / gamedir)
                     )
 
-        create_ini_file(install_dir / 'meta.ini', archive.name, self._url)
+        self._write_ini_file(install_dir / 'meta.ini', archive, self._info_url or self._url)
