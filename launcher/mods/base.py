@@ -1,9 +1,11 @@
+import xml.etree.ElementTree as ET
+
 from abc import ABC, abstractmethod
 from distutils.dir_util import copy_tree
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from os import name as os_name
-from typing import List
+from typing import Dict, List
 
 from launcher.archive import extract_archive
 from launcher.downloader import download_archive, HashError
@@ -155,6 +157,16 @@ class Default(Base):
             p.parent.mkdir(parents=True, exist_ok=True)
             path.rename(dir / p)
 
+    def _read_fomod_directives(self, dir: Path) -> Dict[Path, Path]:
+        module_config = dir / 'fomod' / 'ModuleConfig.xml'
+        if not module_config.exists():
+            return {}
+
+        return {
+            dir / i.attrib['source']: Path(i.attrib['destination'])
+            for i in filter(lambda x: x.tag == 'folder', ET.parse(module_config).iter())
+        }
+
     def install(self, download_dir: Path, mods_dir: Path) -> None:
         install_dir = mods_dir / self.name
 
@@ -170,12 +182,20 @@ class Default(Base):
             self._fix_path_case(pdir)
 
             iterator = [pdir] + ([Path(dir) / i for i in self._install_directives] if self._install_directives else [])
+            fdirectives = self._read_fomod_directives(pdir)
             for i in iterator:
                 if pdir != i:
                     print(f'    Installing {i.name} -> {install_dir}')
 
                 if not i.exists():
                     print(f'    WARNING: {i.name} does not exist')
+
+                if i in fdirectives.keys():
+                    fdir = install_dir / fdirectives[i]
+                    print(f'        Appying FOMOD directive to {i} -> {fdir}')
+                    fdir.mkdir(exist_ok=True)
+                    copy_tree(str(i), str(fdir))
+                    continue
 
                 # Well, I guess it's a feature now.
                 # Maybe I'm not that lazy after all
