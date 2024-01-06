@@ -67,4 +67,14 @@ def read_mod_maker(mod_path: Path) -> List[Base]:
 
         result.append(Default(**data))
 
+    # Not in the list but installed by Official Launcher. Not gonna ask why.
+    result.append(GammaLargeFile(**{
+        'name': 'Burn\'s Optimised World Models',
+        'url': 'https://www.moddb.com/addons/start/222467',
+        'install_directives': None,
+        'author': 'Burn',
+        'title': 'Burn\'s Optimised World Models',
+        'info_url': 'https://github.com/Grokitach/gamma_large_files_v2',
+    }))
+
     return result
