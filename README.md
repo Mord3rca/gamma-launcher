@@ -97,6 +97,15 @@ Also remove some shaders mods:
 * 190- Screen Space Shaders - Ascii1457
 * 290- Atmospherics Shaders Weathers and Reshade - Hippobot
 
+### ModuleNotFoundError: No module named 'distutils'
+
+The `distutils` module is required to install Python packages but it was removed in Python 3.12. You can still use it by installing `setuptools` (inside the venv): `pip install setuptools`
+
+### rarfile.RarCannotExec: Cannot find working tool
+
+You are missing a tool that extracts RAR files. You can use something like `unrar` on Linux. To install it run the following command:
+- On Ubuntu: `sudo apt install unrar`
+- On Fedora: `sudo dnf install unrar`
 
 ### Something else ?
 
