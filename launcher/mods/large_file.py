@@ -14,8 +14,8 @@ class GammaLargeFile(Default):
         self._url = kwargs.get('info_url', None)
 
     def _find_gamedata(self, pdir: Path) -> Set[Path]:
-        if (pdir / self._title).exists():
-            return {(pdir / self._title)}
+        if (pdir / "gamma_large_files_v2-main" / self._title).exists():
+            return {(pdir / "gamma_large_files_v2-main" / self._title)}
 
         tmp = []
         for i in self.folder_to_install:
