@@ -7,18 +7,22 @@ from launcher.archive import extract_archive
 from launcher.mods.base import Default
 
 
-class GammaLargeFile(Default):
+class GitInstaller(Default):
 
     def __init__(self, url: str) -> None:
         super().__init__(**{
-            'name': 'Gamma Large File Installer',
+            'name': 'Git Installer',
             'url': url,
             'install_directives': None,
             'author': 'Internal',
-            'title': 'Gamma Large File Installer',
+            'title': f'Git Installer for {url}',
             'info_url': url,
         })
         self.mods = []
+
+    @property
+    def url(self) -> str:
+        return self._url
 
     def _find_gamedata(self, pdir: Path, title: str) -> Set[Path]:
         tmp = list(pdir.glob(f"**/{title}"))
@@ -40,7 +44,7 @@ class GammaLargeFile(Default):
         if not self._url:
             return
 
-        print("[+] Installing G.A.M.M.A. Large Files v2")
+        print(f"[+] Installing Git Mod: {self.url}")
         archive = self.download(download_dir)
 
         with TemporaryDirectory(prefix="gamma-launcher-modinstall-") as dir:
