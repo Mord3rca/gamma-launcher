@@ -21,10 +21,14 @@ class GammaLargeFile(Default):
         self.mods = []
 
     def _find_gamedata(self, pdir: Path, title: str) -> Set[Path]:
-        if (pdir / "gamma_large_files_v2-main" / title).exists():
-            return {(pdir / "gamma_large_files_v2-main" / title)}
+        tmp = list(pdir.glob(f"**/{title}"))
+        if tmp:
+            return set(tmp)
 
-        return {}
+        for i in self.folder_to_install:
+            tmp += [v.parent for v in pdir.glob(f"**/{i}")]
+
+        return set(tmp)
 
     def append(self, **kwargs) -> None:
         self.mods.append(kwargs)
