@@ -80,7 +80,7 @@ class Default(Base):
         inifile.write_text(
             "[General]\n"
             "gameName=stalkeranomaly\n"
-            "modid=0"
+            "modid=0\n"
             f'ignoredversion={zipfile.name}\n'
             f'version={zipfile.name}\n'
             f'newestversion={zipfile.name}\n'
