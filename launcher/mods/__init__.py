@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Dict, List
 
 from launcher.mods.base import Base, Default
-from launcher.mods.large_file import GammaLargeFile
+from launcher.mods.git import GitInstaller
 from launcher.mods.separator import Separator
 
 
@@ -27,8 +27,20 @@ def _read_mod_maker_line(line: str) -> Dict[str, str]:
     }
 
 
+def register_git_mod(git_mods, **kwargs):
+    tmp = list(filter(lambda x: x.url == kwargs.get('info_url'), git_mods))
+    if tmp:
+        tmp[0].append(**kwargs)
+        return
+
+    obj = GitInstaller(kwargs.get('info_url'))
+    obj.append(**kwargs)
+    git_mods += [obj]
+
+
 def read_mod_maker(mod_path: Path) -> List[Base]:
     result = []
+    git_mods = []
 
     print(f'[+] Reading mod definition from {mod_path} ...')
     modlist = {
@@ -53,9 +65,6 @@ def read_mod_maker(mod_path: Path) -> List[Base]:
                 data['name'] = i
                 modlist[i] = data
 
-    g_large_file = GammaLargeFile("https://github.com/Grokitach/gamma_large_files_v2")
-    result.append(g_large_file)
-
     for name, data in modlist.items():
         if 'separator' in name:
             result.append(Separator(name=name))
@@ -65,13 +74,13 @@ def read_mod_maker(mod_path: Path) -> List[Base]:
             continue
 
         if 'addons/start/222467' in data.get('url') and 'github.com' in data.get('info_url'):
-            g_large_file.append(**data)
+            register_git_mod(git_mods, **data)
             continue
 
         result.append(Default(**data))
 
     # Not in the list but installed by Official Launcher. Not gonna ask why.
-    g_large_file.append(**{
+    register_git_mod(git_mods, **{
         'name': 'Burn\'s Optimised World Models',
         'url': 'https://www.moddb.com/addons/start/222467',
         'install_directives': None,
@@ -80,4 +89,4 @@ def read_mod_maker(mod_path: Path) -> List[Base]:
         'info_url': 'https://github.com/Grokitach/gamma_large_files_v2',
     })
 
-    return result
+    return git_mods + result
