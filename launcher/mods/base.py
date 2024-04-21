@@ -51,7 +51,7 @@ class Base(ABC):
 
 class Default(Base):
 
-    folder_to_install: List[str] = ['appdata', 'bin', 'db', 'gamedata']
+    folder_to_install: List[str] = ['appdata', 'db', 'gamedata']
 
     def __init__(self, **kwargs) -> None:
         super().__init__(kwargs.get('author'), kwargs.get('title'), kwargs.get('name'))
