@@ -30,6 +30,10 @@ def parse_moddb_data(url: str) -> Dict[str, str]:
     return result
 
 
+class ModDBDownloadError(Exception):
+    pass
+
+
 class ModDB(Base):
 
     def __init__(self, url: str) -> None:
@@ -51,6 +55,8 @@ class ModDB(Base):
     def _get_filename(self) -> None:
         id = self._url.split('/')[-1]
         s = re.search(f'/downloads/mirror/{id}/[^"]*', g_session.get(self._url).text)
+        if not s:
+            raise ModDBDownloadError(f"Download link not found when requesting {self._url}")
         location = g_session.get(f"https://www.moddb.com{s[0]}", allow_redirects=False).headers["location"]
         self._url = location
         self._filename = os.path.basename(urlparse(location).path)
