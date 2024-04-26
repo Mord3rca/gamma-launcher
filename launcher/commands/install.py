@@ -291,6 +291,8 @@ class FullInstall:
 
     def _install_mods(self) -> None:
         for mod in read_mod_maker(self._grok_mod_dir / 'G.A.M.M.A' / 'modpack_data'):
+            if mod.name == "164- Hunger Thirst Sleep UI 0.71 - xcvb":
+                continue
             mod.install(self._dl_dir, self._mod_dir)
 
     def _copy_gamma_modpack(self) -> None:
