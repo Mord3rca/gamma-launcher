@@ -175,8 +175,14 @@ class GammaSetup:
             move(i, self._grok_mod_dir)
         gamma_setup_dir.rmdir()
 
-        for i in ["downloads", "mods"]:
-            (self._gamma_dir / i).mkdir(exist_ok=True)
+        downloads_dir = self._gamma_dir / "downloads"
+        if args.cache_path:
+            downloads_dir.rmdir()
+            downloads_dir.symlink_to(self._cache_dir, target_is_directory=True)
+        else:
+            downloads_dir.mkdir(exist_ok=True)
+
+        (self._gamma_dir / "mods").mkdir(exist_ok=True)
 
 
 def _create_full_install_args() -> Dict:
