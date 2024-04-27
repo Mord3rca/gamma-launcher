@@ -13,23 +13,18 @@ from launcher.downloader.moddb import parse_moddb_data
 from launcher.hash import check_hash
 
 
+folder_to_install: List[str] = ['appdata', 'db', 'gamedata']
+
+
 class CheckHashError(Exception):
     pass
 
 
-class DefaultTempDir(TemporaryDirectory):
+class HotfixPathCase:
 
-    def __init__(self, archive: Path, **kwargs) -> None:
-        TemporaryDirectory.__init__(self, **kwargs)
-        self._archive_name = archive
-
-    def _fix_path_case(self, dir: Path) -> None:
-        # Do not exec this on windows
-        if os_name == 'nt':
-            return
-
+    def _post_decompression_hotfix_fix_path_case(self, dir: Path) -> None:
         for path in filter(
-            lambda x: x.name.lower() in self.folder_to_install and x.name != x.name.lower(),
+            lambda x: x.name.lower() in folder_to_install and x.name != x.name.lower(),
             dir.glob('**')
         ):
             for file in path.glob('**/*.*'):
@@ -39,11 +34,10 @@ class DefaultTempDir(TemporaryDirectory):
                 nfolder.mkdir(parents=True, exist_ok=True)
                 file.rename(nfolder / file.name)
 
-    def _fix_malformed_archive(self, dir: Path) -> None:
-        # Do not exec this on windows
-        if os_name == 'nt':
-            return
 
+class HotfixMalformedArchive:
+
+    def _post_decompression_hotfix_00_malformed_archive(self, dir: Path) -> None:
         for path in dir.glob('*.*'):
             if '\\' not in path.name:
                 continue
@@ -52,11 +46,21 @@ class DefaultTempDir(TemporaryDirectory):
             p.parent.mkdir(parents=True, exist_ok=True)
             path.rename(dir / p)
 
+
+tempDirHotfixes = (HotfixPathCase, HotfixMalformedArchive) if not os_name == 'nt' else ()
+
+
+class DefaultTempDir(TemporaryDirectory, *tempDirHotfixes):
+
+    def __init__(self, archive: Path, **kwargs) -> None:
+        TemporaryDirectory.__init__(self, **kwargs)
+        self._archive_name = archive
+
     def __enter__(self) -> Path:
         s = Path(TemporaryDirectory.__enter__(self))
         extract_archive(self._archive_name, str(s))
-        self._fix_malformed_archive(s)
-        self._fix_path_case(s)
+        for hotfix in sorted(filter(lambda x: 'hotfix' in x, dir(self))):
+            getattr(self, hotfix)(s)
         return s
 
 
@@ -95,8 +99,6 @@ class Base(ABC):
 
 
 class Default(Base):
-
-    folder_to_install: List[str] = ['appdata', 'db', 'gamedata']
 
     def __init__(self, **kwargs) -> None:
         super().__init__(kwargs.get('author'), kwargs.get('title'), kwargs.get('name'))
@@ -210,7 +212,7 @@ class Default(Base):
 
                 # Well, I guess it's a feature now.
                 # Maybe I'm not that lazy after all
-                for gamedir in self.folder_to_install:
+                for gamedir in folder_to_install:
                     pgame_dir = i / gamedir
 
                     if not pgame_dir.exists():
