@@ -2,7 +2,7 @@ from distutils.dir_util import copy_tree
 from pathlib import Path
 from typing import Set
 
-from launcher.mods.base import Default
+from launcher.mods.base import Default, folder_to_install
 
 
 class GitInstaller(Default):
@@ -27,7 +27,7 @@ class GitInstaller(Default):
         if tmp:
             return set(tmp)
 
-        for i in self.folder_to_install:
+        for i in folder_to_install:
             tmp += [v.parent for v in pdir.glob(f"**/{i}")]
 
         return set(tmp)
@@ -57,7 +57,7 @@ class GitInstaller(Default):
 
                 install_dir.mkdir(exist_ok=True)
                 for i in iter:
-                    for gamedir in self.folder_to_install:
+                    for gamedir in folder_to_install:
                         pgame_dir = i / gamedir
 
                         if not pgame_dir.exists():
