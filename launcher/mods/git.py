@@ -1,9 +1,7 @@
 from distutils.dir_util import copy_tree
 from pathlib import Path
-from tempfile import TemporaryDirectory
 from typing import Set
 
-from launcher.archive import extract_archive
 from launcher.mods.base import Default
 
 
@@ -47,12 +45,7 @@ class GitInstaller(Default):
         print(f"[+] Installing Git Mod: {self.url}")
         archive = self.download(download_dir)
 
-        with TemporaryDirectory(prefix="gamma-launcher-modinstall-") as dir:
-            pdir = Path(dir)
-            extract_archive(archive, dir)
-            self._fix_malformed_archive(pdir)
-            self._fix_path_case(pdir)
-
+        with self.tempDir(archive, prefix="gamma-launcher-modinstall-") as pdir:
             for m in self.mods:
                 print(f"  --> Installing {m['name']}")
                 install_dir = mods_dir / m["name"]
