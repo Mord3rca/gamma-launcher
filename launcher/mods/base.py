@@ -17,7 +17,52 @@ class CheckHashError(Exception):
     pass
 
 
+class DefaultTempDir(TemporaryDirectory):
+
+    def __init__(self, archive: Path, **kwargs) -> None:
+        TemporaryDirectory.__init__(self, **kwargs)
+        self._archive_name = archive
+
+    def _fix_path_case(self, dir: Path) -> None:
+        # Do not exec this on windows
+        if os_name == 'nt':
+            return
+
+        for path in filter(
+            lambda x: x.name.lower() in self.folder_to_install and x.name != x.name.lower(),
+            dir.glob('**')
+        ):
+            for file in path.glob('**/*.*'):
+                t = file.relative_to(path.parent)
+                rp = str(t.parent).lower()
+                nfolder = path.parent / rp
+                nfolder.mkdir(parents=True, exist_ok=True)
+                file.rename(nfolder / file.name)
+
+    def _fix_malformed_archive(self, dir: Path) -> None:
+        # Do not exec this on windows
+        if os_name == 'nt':
+            return
+
+        for path in dir.glob('*.*'):
+            if '\\' not in path.name:
+                continue
+
+            p = dir / path.name.replace('\\', '/')
+            p.parent.mkdir(parents=True, exist_ok=True)
+            path.rename(dir / p)
+
+    def __enter__(self) -> Path:
+        s = Path(TemporaryDirectory.__enter__(self))
+        extract_archive(self._archive_name, str(s))
+        self._fix_malformed_archive(s)
+        self._fix_path_case(s)
+        return s
+
+
 class Base(ABC):
+
+    tempDir = DefaultTempDir
 
     def __init__(self, author: str, title: str, name: str) -> None:
         self._author = author
@@ -128,35 +173,6 @@ class Default(Base):
     def download(self, mod_dir: Path) -> Path:
         return download_archive(self._url, mod_dir)
 
-    def _fix_path_case(self, dir: Path) -> None:
-        # Do not exec this on windows
-        if os_name == 'nt':
-            return
-
-        for path in filter(
-            lambda x: x.name.lower() in self.folder_to_install and x.name != x.name.lower(),
-            dir.glob('**')
-        ):
-            for file in path.glob('**/*.*'):
-                t = file.relative_to(path.parent)
-                rp = str(t.parent).lower()
-                nfolder = path.parent / rp
-                nfolder.mkdir(parents=True, exist_ok=True)
-                file.rename(nfolder / file.name)
-
-    def _fix_malformed_archive(self, dir: Path) -> None:
-        # Do not exec this on windows
-        if os_name == 'nt':
-            return
-
-        for path in dir.glob('*.*'):
-            if '\\' not in path.name:
-                continue
-
-            p = dir / path.name.replace('\\', '/')
-            p.parent.mkdir(parents=True, exist_ok=True)
-            path.rename(dir / p)
-
     def _read_fomod_directives(self, dir: Path) -> Dict[Path, Path]:
         module_config = dir / 'fomod' / 'ModuleConfig.xml'
         if not module_config.exists():
@@ -175,13 +191,8 @@ class Default(Base):
 
         install_dir.mkdir(exist_ok=True)
 
-        with TemporaryDirectory(prefix="gamma-launcher-modinstall-") as dir:
-            pdir = Path(dir)
-            extract_archive(archive, dir)
-            self._fix_malformed_archive(pdir)
-            self._fix_path_case(pdir)
-
-            iterator = [pdir] + ([Path(dir) / i for i in self._install_directives] if self._install_directives else [])
+        with self.tempDir(archive, prefix="gamma-launcher-modinstall-") as pdir:
+            iterator = [pdir] + ([pdir / i for i in self._install_directives] if self._install_directives else [])
             fdirectives = self._read_fomod_directives(pdir)
             for i in iterator:
                 if pdir != i:
