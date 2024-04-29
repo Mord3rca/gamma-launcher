@@ -62,6 +62,8 @@ To setup your GAMMA folder:  `gamma-launcher full-install --anomaly <Anomaly pat
 
 Afterwards, you will need to start Mod Organizer and set Anomaly Path (launcher can't do that ... yet.)
 
+Additionally, you may use the `full-install` command to update an existing installation. 
+
 ### Remove ReShade
 
 This will do remove ReShade based on [this guide](https://reshade.me/forum/general-discussion/4398-howto-uninstall-reshade)
