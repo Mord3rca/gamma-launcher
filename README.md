@@ -12,7 +12,10 @@ This is a reimplementation of G.AM.M.A. launcher used for the first setup. You w
 By downloading gamma-launcher from the [latest release](https://github.com/Mord3rca/gamma-launcher/releases/latest),
 you can use it without any installation. Everything is self contained in an executable. Tested on Ubuntu.
 
+Use the `--cache-directory` option to re-use previously downloaded files.
+
 However, if you may have glibc error, in this case, install gamma launcher in a venv.
+
 
 ### Using pip (from source)
 
