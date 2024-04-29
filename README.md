@@ -16,6 +16,8 @@ Use the `--cache-directory` option to re-use previously downloaded files.
 
 If you experience a glibc error, install gamma launcher in a venv.
 
+If you experience a magic error, prepend `MAGIC=/usr/share/file/misc/magic` and/or `LD_PRELOAD=/usr/lib/libmagic.so` to the `./gamma-launcher` command.
+
 ### Using pip (from source)
 
 It's strongly advised to install this in a [venv](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#creating-a-virtual-environment) (Python Virtual Environment)
