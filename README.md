@@ -14,8 +14,7 @@ you can use it without any installation. Everything is self contained in an exec
 
 Use the `--cache-directory` option to re-use previously downloaded files.
 
-However, if you may have glibc error, in this case, install gamma launcher in a venv.
-
+If you experience a glibc error, install gamma launcher in a venv.
 
 ### Using pip (from source)
 
