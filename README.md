@@ -10,13 +10,9 @@ This is a reimplementation of G.AM.M.A. launcher used for the first setup. You w
 ### Using release
 
 By downloading gamma-launcher from the [latest release](https://github.com/Mord3rca/gamma-launcher/releases/latest),
-you can use it without any installation. Everything is self contained in an executable. Tested on Ubuntu.
+you can use it without any installation. Everything is self contained in an executable. Generated with Ubuntu.
 
 Use the `--cache-directory` option to re-use previously downloaded files.
-
-If you experience a glibc error, install gamma launcher in a venv.
-
-If you experience a magic error, prepend `MAGIC=/usr/share/file/misc/magic` and/or `LD_PRELOAD=/usr/lib/libmagic.so` to the `./gamma-launcher` command.
 
 ### Using pip (from source)
 
@@ -112,6 +108,14 @@ The `distutils` module is required to install Python packages but it was removed
 You are missing a tool that extracts RAR files. You can use something like `unrar` on Linux. To install it run the following command:
 - On Ubuntu: `sudo apt install unrar`
 - On Fedora **(RPM Fusion required)**: `sudo dnf install unrar`. Note that before the installation you will need to enable the **non-free** RPM Fusion repository since the default package provided by Fedora will cause problems. [Instructions on how to enable it here](https://rpmfusion.org/Configuration).
+
+### Glibc Errors
+
+Install gamma launcher in a venv.
+
+### Magic Errors
+
+Try to prepend `MAGIC=/usr/share/file/misc/magic` and/or `LD_PRELOAD=/usr/lib/libmagic.so` to the `./gamma-launcher` command.
 
 ### Something else ?
 
