@@ -89,4 +89,14 @@ def read_mod_maker(mod_path: Path) -> List[Base]:
         'info_url': 'https://github.com/Grokitach/gamma_large_files_v2',
     })
 
+    # In the list but don't have info_url so this is ignored.
+    register_git_mod(git_mods, **{
+        'name': 'Retrogue\'s Additional Weapons',
+        'url': 'https://www.moddb.com/addons/start/222467',
+        'install_directives': None,
+        'author': 'Retrogue',
+        'title': 'Retrogue\'s Additional Weapons',
+        'info_url': 'https://github.com/Grokitach/gamma_large_files_v2',
+    })
+
     return git_mods + result
