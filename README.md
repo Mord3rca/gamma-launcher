@@ -90,6 +90,12 @@ To use it: `gamma-launcher test-mod-maker --gamma <GAMMA path>`
 
 Install gamma launcher in a [venv](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#creating-a-virtual-environment). See the *Using pip (from source)* section above.
 
+### Magic Errors
+
+Try prepending `MAGIC=/usr/share/file/misc/magic` or `LD_PRELOAD=/usr/lib/libmagic.so` to the `./gamma-launcher` command.
+
+Otherwise, attempt to run in a [venv](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#creating-a-virtual-environment).
+
 ### Shader compilation error
 
 Remove ReShade with: `gamma-launcher remove-reshade --anomaly <Anomaly path>`
