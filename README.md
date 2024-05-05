@@ -49,11 +49,11 @@ This will perform a MD5 check for all ModDB addons
 
 To run it: `gamma-launcher check-md5 --gamma <GAMMA path>`
 
-### Full Install
+### Full Install / Update
 
-This will install all mods based on [Stalker_GAMMA](https://github.com/Grokitach/Stalker_GAMMA)
+This will install/update all mods based on [Stalker_GAMMA](https://github.com/Grokitach/Stalker_GAMMA)
 
-To setup your GAMMA folder:  `gamma-launcher full-install --anomaly <Anomaly path> --gamma <GAMMA path>`
+To setup/update your GAMMA folder:  `gamma-launcher full-install --anomaly <Anomaly path> --gamma <GAMMA path>`
 
 Afterwards, you will need to start Mod Organizer and set Anomaly Path (launcher can't do that ... yet.)
 
