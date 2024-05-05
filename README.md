@@ -11,7 +11,6 @@ This is a reimplementation of G.AM.M.A. launcher used for the first setup. You w
 
 By downloading gamma-launcher from the [latest release](https://github.com/Mord3rca/gamma-launcher/releases/latest), you can use it without any installation. Everything is self contained in an executable. Release built with Ubuntu.
 
-However, if you may have glibc error, in this case, install gamma launcher in a venv.
 Use the `--cache-directory` option to re-use previously downloaded files.
 
 ### Using pip (from source)
@@ -86,6 +85,10 @@ This command will verify if additonal installation directives are valid
 To use it: `gamma-launcher test-mod-maker --gamma <GAMMA path>`
 
 ## Troubleshoot
+
+### Glibc Errors
+
+Install gamma launcher in a [venv](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#creating-a-virtual-environment). See the *Using pip (from source)* section above.
 
 ### Shader compilation error
 
