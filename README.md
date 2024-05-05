@@ -113,8 +113,9 @@ The `distutils` module is required to install Python packages but it was removed
 ### rarfile.RarCannotExec: Cannot find working tool
 
 You are missing a tool that extracts RAR files. You can use something like `unrar` on Linux. To install it run the following command:
-- On Ubuntu: `sudo apt install unrar`
+- On Ubuntu/Debian: `sudo apt install unrar`
 - On Fedora **(RPM Fusion required)**: `sudo dnf install unrar`. Note that before the installation you will need to enable the **non-free** RPM Fusion repository since the default package provided by Fedora will cause problems. [Instructions on how to enable it here](https://rpmfusion.org/Configuration).
+- On Arch/Manjaro: `sudo pacman -S unrar`
 
 ### Something else ?
 
