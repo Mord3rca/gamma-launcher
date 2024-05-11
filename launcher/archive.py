@@ -1,5 +1,3 @@
-import magic
-
 from distutils.dir_util import copy_tree
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -10,6 +8,23 @@ from py7zr import SevenZipFile
 from rarfile import RarFile
 from typing import List
 from zipfile import ZipFile
+
+
+def get_mime_from_file(filename) -> str:
+    with open(filename, 'rb') as f:
+        d = f.read(16)
+
+    mimes = {
+        'application/zip': lambda d: d[:4] == b'PK\x03\x04',
+        'application/x-rar': lambda d: d[:3] == b'Rar',
+        'application/x-7z-compressed': lambda d: d[:6] == b'\x37\x7A\xBC\xAF\x27\x1C',
+    }
+
+    for n, f in mimes.items():
+        if f(d):
+            return n
+
+    return 'Unknown'
 
 
 if os_name == 'nt':
@@ -57,12 +72,12 @@ else:
 
 
 def extract_archive(filename: str, path: str, mime: str = None) -> None:
-    mime = mime or magic.from_file(filename, mime=True)
+    mime = mime or get_mime_from_file(filename)
     _extract_func_dict.get(mime)(filename, path)
 
 
 def list_archive_content(filename: str, mime: str = None) -> List[str]:
-    mime = mime or magic.from_file(filename, mime=True)
+    mime = mime or get_mime_from_file(filename)
     return {
         'application/x-7z-compressed': lambda f: SevenZipFile(f).getnames(),
         'application/x-rar': lambda f: RarFile(f).namelist(),
