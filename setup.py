@@ -13,8 +13,6 @@ with open(os.path.join(here, 'launcher', '__version__.py'), 'r') as f:
 with open('README.md', 'r') as f:
     readme = f.read()
 
-plateform_deps = ['python-magic'] if os.name != 'nt' else ['python-magic-bin']
-
 setup(
     name=about['__title__'],
     version=about['__version__'],
@@ -24,7 +22,7 @@ setup(
     author=about['__author__'],
     author_email=about['__author_email__'],
     url=about['__url__'],
-    install_requires=["bs4", "py7zr", "rarfile", "requests", 'tenacity', 'tqdm'] + plateform_deps,
+    install_requires=["bs4", "py7zr", "rarfile", "requests", 'tenacity', 'tqdm'],
     packages=['launcher', 'launcher.commands', 'launcher.downloader', 'launcher.mods'],
     entry_points={
         'console_scripts': [
