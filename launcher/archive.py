@@ -3,7 +3,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 
 from os import name as os_name
-from os import system
+from subprocess import run
 from py7zr import SevenZipFile
 from rarfile import RarFile
 from typing import List
@@ -45,7 +45,7 @@ if os_name == 'nt':
         )
 
     def _win32_extract(f: str, p: str) -> None:
-        if system(f'7z x -y "-o{p}" "{f}" >nul 2>&1') != 0:
+        if run(['7z', 'x', '-y', f'-o{p}', f], shell=True).returncode != 0:
             raise Win32ExtractError(
                 f'Error while decompressing with 7z file: {f}\n'
                 'Make sure 7z is installed in default path, if not use '
@@ -60,7 +60,7 @@ if os_name == 'nt':
     }
 else:
     def _7zip_bcj2_workaround(f: str, p: str) -> None:
-        if system(f'7z x -y "-o{p}" "{f}" &>/dev/null') != 0:
+        if run(['7z', 'x', '-y', f'-o{p}', f]).returncode != 0:
             raise RuntimeError(f'7z error will decompressing {f}')
 
     _extract_func_dict = {
