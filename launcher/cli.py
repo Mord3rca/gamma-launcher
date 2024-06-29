@@ -1,4 +1,4 @@
-from launcher.__version__ import __version__
+from launcher.__version__ import __title__, __version__
 from launcher.commands import (
     AnomalyInstall,
     CheckAnomaly,
@@ -11,14 +11,34 @@ from launcher.commands import (
     Usvfs,
 )
 
-from argparse import ArgumentParser
+from argparse import ArgumentParser, Namespace
+from platformdirs import user_config_path
+from sys import argv
+
+common_args = {
+    "--anomaly": {
+        "help": "Path to ANOMALY directory",
+        "type": str
+    },
+    "--gamma": {
+        "help": "Path to GAMMA directory",
+        "type": str
+    },
+    "--cache-directory": {
+        "help": "Path to cache directory",
+        "type": str,
+        "dest": "cache_path"
+    },
+}
 
 
 def command_object_to_dict(o):
+    args = common_args.copy()
+    args.update(o.arguments)
     return {
         o.name: {
             "help": o.help,
-            "arguments": o.arguments,
+            "arguments": args,
             "cobject": o,
         }
     }
@@ -46,8 +66,26 @@ parser_desc = {
 }
 
 
+_config_file_path = user_config_path(__title__) / 'config.ini'
+
+
+def save_configuration(args: Namespace) -> None:
+    # TODO: Smarter way ?
+    save_str = ''
+    if args.anomaly:
+        save_str += f'--anomaly\n{args.anomaly}\n'
+    if args.cache_path:
+        save_str += f'--cache-directory\n{args.cache_path}\n'
+    if args.gamma:
+        save_str += f'--gamma\n{args.gamma}\n'
+
+    _config_file_path.write_text(save_str)
+
+
 def main():
-    parser = ArgumentParser(description=parser_desc["description"])
+    _config_file_path.touch(exist_ok=True)
+
+    parser = ArgumentParser(description=parser_desc["description"], fromfile_prefix_chars='@')
     parser.add_argument('--version', action='version', version=f"%(prog)s {__version__}")
     for m, a in parser_desc['arguments'].items():
         parser.add_argument(m, **a)
@@ -64,5 +102,9 @@ def main():
             subparser.add_argument(m, **a)
         subparser.set_defaults(cobject=p['cobject'])
 
+    if len(argv) >= 2:
+        argv.insert(2, f'@{_config_file_path}')
+
     args = parser.parse_args()
+    save_configuration(args)
     args.cobject().run(args)

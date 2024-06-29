@@ -22,7 +22,7 @@ setup(
     author=about['__author__'],
     author_email=about['__author_email__'],
     url=about['__url__'],
-    install_requires=["bs4", "py7zr", "rarfile", "requests", 'tenacity', 'tqdm'],
+    install_requires=["bs4", "platformdirs", "py7zr", "rarfile", "requests", 'tenacity', 'tqdm'],
     packages=['launcher', 'launcher.commands', 'launcher.downloader', 'launcher.mods'],
     entry_points={
         'console_scripts': [
