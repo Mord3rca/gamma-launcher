@@ -4,6 +4,7 @@ from pathlib import Path
 from os.path import sep
 from typing import Iterator, Tuple
 
+from launcher.common import anomaly_arg, gamma_arg
 from launcher.hash import check_hash
 from launcher.mods import read_mod_maker
 from launcher.mods.base import CheckHashError
@@ -12,11 +13,7 @@ from launcher.mods.base import CheckHashError
 class CheckAnomaly:
 
     arguments: dict = {
-        "--anomaly": {
-            "help": "Path to Anomaly directory",
-            "required": True,
-            "type": str
-        },
+        **anomaly_arg
     }
 
     name: str = "check-anomaly"
@@ -48,11 +45,7 @@ class CheckAnomaly:
 class CheckMD5:
 
     arguments: dict = {
-        "--gamma": {
-            "help": "Path to GAMMA directory",
-            "required": True,
-            "type": str
-        },
+        **gamma_arg,
         "--update-cache": {
             "help": "Update download cache if file is missing or MD5 do not match",
             "required": False,

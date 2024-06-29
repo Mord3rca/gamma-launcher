@@ -2,20 +2,14 @@ from distutils.dir_util import copy_tree, DistutilsFileError
 from pathlib import Path
 from typing import Iterator
 
+from launcher.common import anomaly_arg, gamma_arg
+
 
 class Usvfs:
 
     arguments: dict = {
-        "--anomaly": {
-            "help": "Path to ANOMALY directory",
-            "required": True,
-            "type": str
-        },
-        "--gamma": {
-            "help": "Path to GAMMA directory",
-            "required": True,
-            "type": str
-        },
+        **anomaly_arg,
+        **gamma_arg,
         "--final": {
             "help": "Path to final install directory",
             "required": True,
