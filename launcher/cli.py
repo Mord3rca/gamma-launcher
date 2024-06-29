@@ -11,23 +11,20 @@ from launcher.commands import (
     Usvfs,
 )
 
-from argparse import ArgumentParser, Namespace
+from argparse import ArgumentParser, Namespace, SUPPRESS
 from platformdirs import user_config_path
 from sys import argv
 
 common_args = {
     "--anomaly": {
-        "help": "Path to ANOMALY directory",
-        "type": str
-    },
-    "--gamma": {
-        "help": "Path to GAMMA directory",
-        "type": str
+        "help": SUPPRESS,
     },
     "--cache-directory": {
-        "help": "Path to cache directory",
-        "type": str,
+        "help": SUPPRESS,
         "dest": "cache_path"
+    },
+    "--gamma": {
+        "help": SUPPRESS,
     },
 }
 

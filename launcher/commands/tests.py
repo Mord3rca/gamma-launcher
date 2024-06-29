@@ -1,11 +1,10 @@
+from launcher.common import gamma_arg
+
+
 class TestModMaker:
 
     arguments: dict = {
-        "--gamma": {
-            "help": "Path to GAMMA directory",
-            "required": True,
-            "type": str
-        },
+        **gamma_arg,
     }
 
     name: str = "test-mod-maker"

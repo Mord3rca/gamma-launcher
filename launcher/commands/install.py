@@ -5,6 +5,7 @@ from tempfile import TemporaryDirectory
 from typing import Dict
 
 from launcher.commands import CheckAnomaly
+from launcher.common import anomaly_arg, gamma_arg, cache_dir_arg
 from launcher.downloader import download_archive
 from launcher.downloader.base import g_session
 from launcher.archive import extract_archive, extract_git_archive
@@ -30,11 +31,7 @@ def check_tmp_free_space(size: int) -> None:
 class AnomalyInstall:
 
     arguments: dict = {
-        "--anomaly": {
-            "help": "Path to ANOMALY directory",
-            "required": True,
-            "type": str
-        },
+        **anomaly_arg,
         "--anomaly-skip-verify": {
             "help": "Skip installation verification",
             "action": "store_false",
@@ -45,11 +42,7 @@ class AnomalyInstall:
             "action": "store_true",
             "dest": "anomaly_purge_cache"
         },
-        "--cache-directory": {
-            "help": "Path to cache directory",
-            "type": str,
-            "dest": "cache_path"
-        },
+        **cache_dir_arg,
     }
 
     name: str = "anomaly-install"
@@ -110,11 +103,7 @@ class AnomalyInstall:
 class GammaSetup:
 
     arguments: dict = {
-        "--gamma": {
-            "help": "Path to GAMMA directory",
-            "required": True,
-            "type": str
-        },
+        **gamma_arg,
         "--gamma-no-mod-organizer": {
             "help": "Skip ModOrganizer installation",
             "action": "store_false",
@@ -126,11 +115,7 @@ class GammaSetup:
             "default": "v2.4.4",
             "dest": "mo_version",
         },
-        "--cache-directory": {
-            "help": "Path to cache directory",
-            "type": str,
-            "dest": "cache_path"
-        },
+        **cache_dir_arg,
     }
 
     name: str = "gamma-setup"

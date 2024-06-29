@@ -2,6 +2,8 @@ from os import remove
 from shutil import rmtree
 from pathlib import Path
 
+from launcher.common import anomaly_arg
+
 
 class PurgeShaderCache:
 
@@ -10,11 +12,7 @@ class PurgeShaderCache:
     help: str = 'Purge Anomaly shader cache'
 
     arguments: dict = {
-        "--anomaly": {
-            "help": "Path to ANOMALY directory",
-            "required": True,
-            "type": str
-        }
+        **anomaly_arg,
     }
 
     def run(self, args) -> None:
@@ -31,11 +29,7 @@ class RemoveReshade:
     help: str = 'Remove ReShade from Anomaly bin'
 
     arguments: dict = {
-        "--anomaly": {
-            "help": "Path to ANOMALY directory",
-            "required": True,
-            "type": str
-        }
+        **anomaly_arg,
     }
 
     def run(self, args) -> None:
