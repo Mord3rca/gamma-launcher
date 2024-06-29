@@ -9,7 +9,7 @@ from typing import Dict, Union
 from .base import Base, g_session
 
 # See if we can use git to speedup updates etc
-_with_git = True
+_with_git = getenv('GAMMA_LAUNCHER_NO_GIT') is None
 try:
     run(['git', '--version'], stdout=DEVNULL, stderr=DEVNULL)
 except FileNotFoundError:
@@ -21,12 +21,15 @@ _git_regexp_url = compile("https?://github.com/([\\w_.-]+)/([\\w_.-]+)/?")
 
 class _TqdmProgress(RemoteProgress):
 
-    def __init__(self) -> None:
+    def __init__(self, name: str) -> None:
         super().__init__()
 
-        self._tqdm = tqdm(desc="Fetching origin: ", unit=" object(s)")
+        self._tqdm = tqdm(desc=f"Fetching origin of {name}", unit=" object(s)")
 
     def update(self, op_code, cur_count, max_count=None, msg=None) -> None:
+        if op_code == RemoteProgress.BEGIN:
+            self._tqdm.total = max_count
+
         self._tqdm.update(cur_count)
 
 
@@ -47,11 +50,12 @@ class _WithGitPy(Base):
         p = Path(path)
 
         if not p.is_dir():
-            Repo.clone_from(self._url, p, _TqdmProgress(), mirror=True)
+            Repo.clone_from(self._url, p, _TqdmProgress(self._filename), mirror=True)
             return
 
         # Fetching origin
-        Repo(p).remotes[0].fetch(None, _TqdmProgress())
+        r = Repo(p).remotes[0].fetch(None, _TqdmProgress(self._filename))
+        r.checkout('FETCH_HEAD')
 
 
 class _WithoutGitPy(Base):
@@ -94,7 +98,7 @@ def _git_bootstrap(url: str) -> Union[_WithGitPy, _WithoutGitPy]:
 
     info = _git_project_info(url)
 
-    if not info['is_repo_url'] or not _with_git or getenv('GAMMA_LAUNCHER_NO_GIT', None) is not None:
+    if not info['is_repo_url'] or not _with_git:
         return _WithoutGitPy(url, info)
 
     return _WithGitPy(url, info)
