@@ -1,8 +1,22 @@
 from distutils.dir_util import copy_tree
+from git import Repo
 from pathlib import Path
+from shutil import rmtree
+from tempfile import TemporaryDirectory
 from typing import Set
 
-from launcher.mods.base import Default, folder_to_install
+from launcher.mods.base import Default, DefaultTempDir, folder_to_install
+
+
+class GitTempDir(DefaultTempDir):
+
+    def __enter__(self) -> Path:
+        s = Path(TemporaryDirectory.__enter__(self))
+        Repo.clone_from(f"file://{self._archive_name}", s, depth=1, reference=self._archive_name)
+        rmtree(s / '.git')  # Just to be sure
+        for hotfix in sorted(filter(lambda x: 'hotfix' in x, dir(self))):
+            getattr(self, hotfix)(s)
+        return s
 
 
 class GitInstaller(Default):
@@ -44,6 +58,9 @@ class GitInstaller(Default):
 
         print(f"[+] Installing Git Mod: {self.url}")
         archive = self.download(download_dir)
+
+        if archive.name.endswith('.git'):
+            self.tempDir = GitTempDir
 
         with self.tempDir(archive, prefix="gamma-launcher-modinstall-") as pdir:
             for m in self.mods:

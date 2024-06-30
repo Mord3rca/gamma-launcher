@@ -1,8 +1,10 @@
 from distutils.dir_util import copy_tree
+from git import Repo
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
 from os import getenv, name as os_name
+from shutil import rmtree
 from subprocess import run
 from py7zr import SevenZipFile
 from rarfile import RarFile
@@ -14,7 +16,11 @@ class SevenZipDecompressionError(Exception):
     pass
 
 
-def get_mime_from_file(filename) -> str:
+def get_mime_from_file(filename: Path) -> str:
+    # Yup ... It's a hack.
+    if (filename / 'HEAD').is_file():
+        return 'application/x-git'
+
     with open(filename, 'rb') as f:
         d = f.read(16)
 
@@ -36,6 +42,14 @@ def _7zip_extract(f: str, p: str) -> None:
         raise SevenZipDecompressionError(f'7z error will decompressing {f}')
 
 
+def clone_git_reference(archive: Path, dest: Path) -> None:
+    with TemporaryDirectory(prefix='gamma-launcher-git-extract-') as dir:
+        p = Path(dir)
+        Repo.clone_from(f'file://{archive}', p, depth=1, reference=p)
+        rmtree(p / '.git')
+        copy_tree(str(p), str(dest))
+
+
 if os_name == 'nt':
     from os import environ, pathsep
 
@@ -55,6 +69,7 @@ if os_name == 'nt':
         'application/x-rar': _7zip_extract,
         'application/zip': _7zip_extract,
         'application/x-7z-compressed+bcj2': _7zip_extract,
+        'application/x-git': clone_git_reference,
     }
 else:
     _extract_func_dict = {
@@ -63,16 +78,17 @@ else:
         _7zip_extract if getenv('GAMMA_LAUNCHER_USE_RARFILE', None) is None else
         lambda f, p: RarFile(f).extractall(p),
         'application/zip': lambda f, p: ZipFile(f).extractall(p),
-        'application/x-7z-compressed+bcj2': _7zip_extract
+        'application/x-7z-compressed+bcj2': _7zip_extract,
+        'application/x-git': clone_git_reference,
     }
 
 
-def extract_archive(filename: str, path: str, mime: str = None) -> None:
+def extract_archive(filename: Path, path: str, mime: str = None) -> None:
     mime = mime or get_mime_from_file(filename)
     _extract_func_dict.get(mime)(filename, path)
 
 
-def list_archive_content(filename: str, mime: str = None) -> List[str]:
+def list_archive_content(filename: Path, mime: str = None) -> List[str]:
     mime = mime or get_mime_from_file(filename)
     return {
         'application/x-7z-compressed': lambda f: SevenZipFile(f).getnames(),
