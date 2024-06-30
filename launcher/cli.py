@@ -12,6 +12,7 @@ from launcher.commands import (
 )
 
 from argparse import ArgumentParser, Namespace, SUPPRESS
+from os import getenv
 from platformdirs import user_config_path
 from sys import argv
 
@@ -64,9 +65,13 @@ parser_desc = {
 
 
 _config_file_path = user_config_path(__title__) / 'config.ini'
+_no_config = getenv('GAMMA_LAUNCHER_NO_CONFIG') is not None
 
 
 def save_configuration(args: Namespace) -> None:
+    if _no_config:
+        return
+
     # TODO: Smarter way ?
     save_str = ''
     if args.anomaly:
@@ -99,7 +104,7 @@ def main():
             subparser.add_argument(m, **a)
         subparser.set_defaults(cobject=p['cobject'])
 
-    if len(argv) >= 2:
+    if len(argv) >= 2 and not _no_config:
         argv.insert(2, f'@{_config_file_path}')
 
     args = parser.parse_args()
