@@ -1,34 +1,107 @@
+from git import Repo, RemoteProgress
+from os import getenv
 from pathlib import Path
 from re import compile
+from subprocess import run, DEVNULL
+from tqdm import tqdm
+from typing import Dict, Union
 
 from .base import Base, g_session
 
+# See if we can use git to speedup updates etc
+_with_git = getenv('GAMMA_LAUNCHER_NO_GIT') is None
+try:
+    run(['git', '--version'], stdout=DEVNULL, stderr=DEVNULL)
+except FileNotFoundError:
+    print("[*] git not found on your system or not in PATH, using DL method for git repos")
+    _with_git = False
 
-class Github(Base):
+_git_regexp_url = compile("https?://github.com/([\\w_.-]+)/([\\w_.-]+)/?")
 
-    regexp_url = compile("https?://github.com/([\\w_.-]+)/([\\w_.-]+)/?")
 
-    def __init__(self, url: str) -> None:
+class _TqdmProgress(RemoteProgress):
+
+    def __init__(self, name: str) -> None:
+        super().__init__()
+
+        self._tqdm = tqdm(desc=f"Fetching origin of {name}", unit=" object(s)")
+
+    def update(self, op_code, cur_count, max_count=None, msg=None) -> None:
+        if op_code == RemoteProgress.BEGIN:
+            self._tqdm.total = max_count
+
+        self._tqdm.update(cur_count)
+
+
+class _WithGitPy(Base):
+
+    def __init__(self, url: str, info: Dict) -> None:
         super().__init__(url)
-        self._filename = super().filename
-
-        self._decode_url()
-
-    def _decode_url(self) -> None:
-        user, project = self.regexp_url.match(self._url).groups()
-
-        if "release" in self._url or self._url.endswith(".zip"):
-            revision = Path(self._url).name.split('.')[0]
-            self._filename = f"{project}-{revision}.zip"
-            return
-
-        branch = g_session.get(
-            f"https://api.github.com/repos/{user}/{project}",
-            headers={"Accept": "application/json"}
-        ).json()["default_branch"]
-        self._url = f"https://github.com/{user}/{project}/archive/refs/heads/{branch}.zip"
-        self._filename = f"{project}-{branch}.zip"
+        self._filename = f"{info['project']}.git"
 
     @property
     def filename(self) -> str:
         return self._filename
+
+    def md5(self) -> str:
+        raise NotImplementedError("Not supported by git repos with GitPython")
+
+    def download(self, path: str) -> None:
+        p = Path(path)
+
+        if not p.is_dir():
+            Repo.clone_from(self._url, p, _TqdmProgress(self._filename), mirror=True)
+            return
+
+        # Fetching origin
+        r = Repo(p).remotes[0].fetch(None, _TqdmProgress(self._filename))
+        r.checkout('FETCH_HEAD')
+
+
+class _WithoutGitPy(Base):
+
+    regexp_url = compile("https?://github.com/([\\w_.-]+)/([\\w_.-]+)/?")
+
+    def __init__(self, url: str, info: Dict) -> None:
+        super().__init__(url)
+
+        self._filename = f"{info['project']}-{info['default_branch']}.zip" \
+            if info['is_repo_url'] else f"{info['project']}-{info['revision']}.zip"
+
+    @property
+    def filename(self) -> str:
+        return self._filename
+
+
+def _git_project_info(url: str) -> Dict:
+    info = {'is_repo_url': True}
+    user, project = _git_regexp_url.match(url).groups()
+
+    info['user'] = user
+    info['project'] = project
+
+    if "release" in url or url.endswith(".zip"):
+        info['revision'] = Path(url).name.split('.')[0]
+        info['is_repo_url'] = False
+        return info
+
+    info['default_branch'] = g_session.get(
+        f"https://api.github.com/repos/{user}/{project}",
+        headers={"Accept": "application/json"}
+    ).json()["default_branch"]
+
+    return info
+
+
+# Return correct object based on config detection
+def _git_bootstrap(url: str) -> Union[_WithGitPy, _WithoutGitPy]:
+
+    info = _git_project_info(url)
+
+    if not info['is_repo_url'] or not _with_git:
+        return _WithoutGitPy(url, info)
+
+    return _WithGitPy(url, info)
+
+
+Github = _git_bootstrap
