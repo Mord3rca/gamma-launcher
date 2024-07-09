@@ -117,11 +117,6 @@ You are missing a tool that extracts RAR files. You can use something like `unra
 - On Fedora **(RPM Fusion required)**: `sudo dnf install unrar`. Note that before the installation you will need to enable the **non-free** RPM Fusion repository since the default package provided by Fedora will cause problems. [Instructions on how to enable it here](https://rpmfusion.org/Configuration).
 - On Arch/Manjaro: `sudo pacman -S unrar`
 
-### SevenZipDecompressionError
-
-7zip seems to have trouble with this archive, if this is a rar file, make sure to install `7z` with rar capabilities.
-- On Ubuntu/Debian: `sudo apt install 7zip-rar`
-
 ### Something else ?
 
 Well .... you're alone kid. Good luck. Try downgrading DirectX version or looking at log file.

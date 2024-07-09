@@ -10,10 +10,6 @@ from typing import List
 from zipfile import ZipFile
 
 
-class SevenZipDecompressionError(Exception):
-    pass
-
-
 def get_mime_from_file(filename) -> str:
     with open(filename, 'rb') as f:
         d = f.read(16)
@@ -31,13 +27,11 @@ def get_mime_from_file(filename) -> str:
     return 'Unknown'
 
 
-def _7zip_extract(f: str, p: str) -> None:
-    if run(['7z', 'x', '-y', f'-o{p}', f]).returncode != 0:
-        raise SevenZipDecompressionError(f'7z error will decompressing {f}')
-
-
 if os_name == 'nt':
     from os import environ, getenv, pathsep
+
+    class Win32ExtractError(Exception):
+        pass
 
     # Adding default 7-Zip path or user defined to PATH
     if getenv('LAUNCHER_WIN32_7Z_PATH'):
@@ -50,18 +44,30 @@ if os_name == 'nt':
             }
         )
 
+    def _win32_extract(f: str, p: str) -> None:
+        if run(['7z', 'x', '-y', f'-o{p}', f], shell=True).returncode != 0:
+            raise Win32ExtractError(
+                f'Error while decompressing with 7z file: {f}\n'
+                'Make sure 7z is installed in default path, if not use '
+                'LAUNCHER_WIN32_7Z_PATH to set it'
+            )
+
     _extract_func_dict = {
-        'application/x-7z-compressed': _7zip_extract,
-        'application/x-rar': _7zip_extract,
-        'application/zip': _7zip_extract,
-        'application/x-7z-compressed+bcj2': _7zip_extract,
+        'application/x-7z-compressed': _win32_extract,
+        'application/x-rar': _win32_extract,
+        'application/zip': _win32_extract,
+        'application/x-7z-compressed+bcj2': _win32_extract,
     }
 else:
+    def _7zip_bcj2_workaround(f: str, p: str) -> None:
+        if run(['7z', 'x', '-y', f'-o{p}', f]).returncode != 0:
+            raise RuntimeError(f'7z error will decompressing {f}')
+
     _extract_func_dict = {
         'application/x-7z-compressed': lambda f, p: SevenZipFile(f).extractall(p),
-        'application/x-rar': _7zip_extract,
+        'application/x-rar': lambda f, p: RarFile(f).extractall(p),
         'application/zip': lambda f, p: ZipFile(f).extractall(p),
-        'application/x-7z-compressed+bcj2': _7zip_extract
+        'application/x-7z-compressed+bcj2': _7zip_bcj2_workaround
     }
 
 
