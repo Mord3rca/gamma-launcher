@@ -5,7 +5,7 @@ from tempfile import TemporaryDirectory
 from os import name as os_name
 from subprocess import run
 from py7zr import SevenZipFile
-from rarfile import RarFile
+from unrar.rarfile import RarFile
 from typing import List
 from zipfile import ZipFile
 
@@ -65,7 +65,7 @@ else:
 
     _extract_func_dict = {
         'application/x-7z-compressed': lambda f, p: SevenZipFile(f).extractall(p),
-        'application/x-rar': lambda f, p: RarFile(f).extractall(p),
+        'application/x-rar': lambda f, p: RarFile(f'{f}').extractall(f'{p}'),
         'application/zip': lambda f, p: ZipFile(f).extractall(p),
         'application/x-7z-compressed+bcj2': _7zip_bcj2_workaround
     }

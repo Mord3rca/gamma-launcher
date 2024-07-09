@@ -110,12 +110,27 @@ Also remove some shaders mods:
 
 The `distutils` module is required to install Python packages but it was removed in Python 3.12. You can still use it by installing `setuptools` (inside the venv): `pip install setuptools`
 
-### rarfile.RarCannotExec: Cannot find working tool
+### rarfile.RarCannotExec: Cannot find working tool (older version of gamma-launcher)
 
 You are missing a tool that extracts RAR files. You can use something like `unrar` on Linux. To install it run the following command:
 - On Ubuntu/Debian: `sudo apt install unrar`
 - On Fedora **(RPM Fusion required)**: `sudo dnf install unrar`. Note that before the installation you will need to enable the **non-free** RPM Fusion repository since the default package provided by Fedora will cause problems. [Instructions on how to enable it here](https://rpmfusion.org/Configuration).
 - On Arch/Manjaro: `sudo pacman -S unrar`
+
+### SevenZipDecompressionError (older version of gamma-launcher)
+
+7zip seems to have trouble with this archive, if this is a rar file, make sure to install `7z` with rar capabilities.
+- On Ubuntu/Debian: `sudo apt install 7zip-rar`
+
+You can use `rarfile` module for decompressing by setting **GAMMA_LAUNCHER_USE_RARFILE** env.
+Warning: This may be slow for some archive
+
+### LookupError: Couldn't find path to unrar library.
+You are missing a library that extracts RAR files. You can use something like `libunrar` on Linux. To install it run the following command:
+- On Ubuntu/Debian: `sudo apt install libunrar5t64` or `sudo apt install libunrar5`
+- On Fedora **(RPM Fusion required)**: `sudo dnf install libunrar`. Note that before the installation you will need to enable the **non-free** RPM Fusion repository since the default package provided by Fedora will cause problems. [Instructions on how to enable it here](https://rpmfusion.org/Configuration).
+- On Arch/Manjaro: `sudo pacman -S libunrar`
+
 
 ### Something else ?
 
