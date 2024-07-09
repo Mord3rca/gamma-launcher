@@ -122,9 +122,6 @@ You are missing a tool that extracts RAR files. You can use something like `unra
 7zip seems to have trouble with this archive, if this is a rar file, make sure to install `7z` with rar capabilities.
 - On Ubuntu/Debian: `sudo apt install 7zip-rar`
 
-You can use `rarfile` module for decompressing by setting **GAMMA_LAUNCHER_USE_RARFILE** env.
-Warning: This may be slow for some archive
-
 ### Something else ?
 
 Well .... you're alone kid. Good luck. Try downgrading DirectX version or looking at log file.
