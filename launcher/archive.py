@@ -2,7 +2,7 @@ from distutils.dir_util import copy_tree
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from os import getenv, name as os_name
+from os import name as os_name
 from subprocess import run
 from py7zr import SevenZipFile
 from rarfile import RarFile
@@ -37,7 +37,7 @@ def _7zip_extract(f: str, p: str) -> None:
 
 
 if os_name == 'nt':
-    from os import environ, pathsep
+    from os import environ, getenv, pathsep
 
     # Adding default 7-Zip path or user defined to PATH
     if getenv('LAUNCHER_WIN32_7Z_PATH'):
@@ -59,9 +59,7 @@ if os_name == 'nt':
 else:
     _extract_func_dict = {
         'application/x-7z-compressed': lambda f, p: SevenZipFile(f).extractall(p),
-        'application/x-rar':
-        _7zip_extract if getenv('GAMMA_LAUNCHER_USE_RARFILE', None) is None else
-        lambda f, p: RarFile(f).extractall(p),
+        'application/x-rar': _7zip_extract,
         'application/zip': lambda f, p: ZipFile(f).extractall(p),
         'application/x-7z-compressed+bcj2': _7zip_extract
     }
