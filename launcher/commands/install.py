@@ -161,6 +161,12 @@ def _create_full_install_args() -> Dict:
             "dest": "custom_def",
             "default": None,
         },
+        "--custom-gamma-repository": {
+            "help": "Set a custom repository for S.T.A.L.K..E.R.: G.A.M.M.A.",
+            "type": str,
+            "dest": "custom_repo",
+            "default": 'Grokitach/Stalker_GAMMA',
+        },
         "--no-def-update": {
             "help": "Do not update S.T.A.L.K..E.R.: G.A.M.M.A. definition",
             "action": "store_false",
@@ -195,6 +201,7 @@ class FullInstall:
         self._dl_dir = None
         self._mod_dir = None
         self._grok_mod_dir = None
+        self._repo = None
 
     def _update_gamma_definition(self, *args) -> None:
         print('[+] Updating G.A.M.M.A. definition')
@@ -206,7 +213,7 @@ class FullInstall:
                 return
 
             r_version = g_session.get(
-                'https://raw.githubusercontent.com/Grokitach/Stalker_GAMMA/main/G.A.M.M.A_definition_version.txt'
+                f'https://raw.githubusercontent.com/{self._repo}/main/G.A.M.M.A_definition_version.txt'
             ).text.strip()
             if int(r_version) <= int(l_version):
                 return
@@ -215,7 +222,7 @@ class FullInstall:
         except Exception:
             pass
 
-        g = GithubArchive('https://github.com/Grokitach/Stalker_GAMMA')
+        g = GithubArchive(f'https://github.com/{self._repo}')
         print('    downloading archive...')
         g.download(self._dl_dir, use_cached=True)
         g.extract(self._grok_mod_dir, 'Stalker_GAMMA-*')
@@ -228,7 +235,7 @@ class FullInstall:
     def _set_custom_gamma_def(self, rev: str) -> None:
         print(f'[+] Setting custom G.A.M.M.A. definition to: {rev}')
 
-        g = GithubArchive(f'https://github.com/Grokitach/Stalker_GAMMA/archive/{rev}.zip')
+        g = GithubArchive(f'https://github.com/{self._repo}/archive/{rev}.zip')
         g.download(self._dl_dir)
         g.extract(self._grok_mod_dir, '*')
 
@@ -299,6 +306,8 @@ AutomaticArchiveInvalidation=false
             GammaSetup().run(args)
 
         # Start installing
+        self._repo = args.custom_repo
+
         if args.update_def:
             (self._update_gamma_definition if not args.custom_def else self._set_custom_gamma_def)(args.custom_def)
         if args.anomaly_patch:
