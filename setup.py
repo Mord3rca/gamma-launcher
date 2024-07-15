@@ -3,6 +3,7 @@
 import os
 
 from setuptools import setup
+from sys import version_info
 
 here = os.path.abspath(os.path.dirname(__file__))
 
@@ -13,6 +14,10 @@ with open(os.path.join(here, 'launcher', '__version__.py'), 'r') as f:
 with open('README.md', 'r') as f:
     readme = f.read()
 
+ver_spec_install = []
+if version_info.minor >= 12:
+    ver_spec_install = ['setuptools']
+
 setup(
     name=about['__title__'],
     version=about['__version__'],
@@ -22,7 +27,7 @@ setup(
     author=about['__author__'],
     author_email=about['__author_email__'],
     url=about['__url__'],
-    install_requires=["bs4", "platformdirs", "py7zr", "unrar", "requests", 'tenacity', 'tqdm'],
+    install_requires=["bs4", "platformdirs", "py7zr", "unrar", "requests", 'tenacity', 'tqdm'] + ver_spec_install,
     packages=['launcher', 'launcher.commands', 'launcher.downloader', 'launcher.mods'],
     entry_points={
         'console_scripts': [
@@ -37,5 +42,6 @@ setup(
         'Programming Language :: Python :: 3 :: Only',
         'Programming Language :: Python :: 3.10'
         'Programming Language :: Python :: 3.11'
+        'Programming Language :: Python :: 3.12'
     ]
 )
