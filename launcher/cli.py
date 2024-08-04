@@ -85,6 +85,7 @@ def save_configuration(args: Namespace) -> None:
 
 
 def main():
+    _config_file_path.parent.mkdir(parents=True, exist_ok=True)
     _config_file_path.touch(exist_ok=True)
 
     parser = ArgumentParser(description=parser_desc["description"], fromfile_prefix_chars='@')
