@@ -13,6 +13,18 @@ By downloading gamma-launcher from the [latest release](https://github.com/Mord3
 
 Use the `--cache-directory` option to re-use previously downloaded files.
 
+### Using AUR (Arch Linux)
+
+On Arch Linux and Arch-based operating systems, you can download package from AUR:  
+
+`yay -S gamma-launcher`  
+
+Or you can build it by yourself:
+
+`git clone https://aur.archlinux.org/gamma-launcher.git`  
+`cd gamma-launcher`  
+`makepkg -sri`
+
 ### Using pip (from source)
 
 It's strongly advised to install this in a [venv](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#creating-a-virtual-environment) (Python Virtual Environment)
