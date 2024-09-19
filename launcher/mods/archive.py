@@ -1,12 +1,8 @@
-from distutils.dir_util import copy_tree
-from pathlib import Path
-from tempfile import TemporaryDirectory
-
 from os import name as os_name
-from subprocess import run
 from py7zr import SevenZipFile
-from unrar.rarfile import RarFile
+from subprocess import run
 from typing import List
+from unrar.rarfile import RarFile
 from zipfile import ZipFile
 
 
@@ -83,13 +79,3 @@ def list_archive_content(filename: str, mime: str = None) -> List[str]:
         'application/x-rar': lambda f: RarFile(f).namelist(),
         'application/zip': lambda f: ZipFile(f).namelist(),
     }.get(mime)(filename)
-
-
-def extract_git_archive(archive: Path, dest: Path, glob: str = '*') -> None:
-    with TemporaryDirectory(prefix='gamma-launcher-github-extract-') as dir:
-        pdir = Path(dir)
-        extract_archive(archive, dir)
-        copy_tree(
-            str(list(pdir.glob(glob))[0]),
-            str(dest)
-        )
