@@ -1,21 +1,15 @@
 from pathlib import Path
 
-from launcher.mods.base import Base
+from launcher.mods.base import ModBase
 
 
-class Separator(Base):
+class SeparatorInstaller(ModBase):
 
-    def __init__(self, **kwargs) -> None:
-        super().__init__(None, None, kwargs.get('name'))
+    def __init__(self, name: str) -> None:
+        super().__init__(None, name, None)
 
-    def check(self, *args, **kwargs) -> None:
-        pass
-
-    def download(self, *args, **kwargs) -> None:
-        pass
-
-    def install(self, download_dir: Path, mods_dir: Path) -> None:
-        install_dir = mods_dir / self.name
+    def install(self, to: Path) -> None:
+        install_dir = to / self.name
 
         print(f'[+] Installing separator: {self.name}')
         install_dir.mkdir(exist_ok=True)

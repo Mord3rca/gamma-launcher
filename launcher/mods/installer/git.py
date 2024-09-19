@@ -2,25 +2,23 @@ from distutils.dir_util import copy_tree
 from pathlib import Path
 from typing import Set
 
-from launcher.mods.base import Default, folder_to_install
+from launcher.common import folder_to_install
+from launcher.mods.installer.default import DefaultInstaller
+from launcher.mods.tempfile import DefaultTempDir
 
 
-class GitInstaller(Default):
+class GitInstaller(DefaultInstaller):
 
     def __init__(self, url: str) -> None:
         super().__init__(**{
             'name': 'Git Installer',
             'url': url,
-            'install_directives': None,
+            'add_dirs': None,
             'author': 'Internal',
             'title': f'Git Installer for {url}',
-            'info_url': url,
+            'iurl': url,
         })
         self.mods = []
-
-    @property
-    def url(self) -> str:
-        return self._url
 
     def _find_gamedata(self, pdir: Path, title: str) -> Set[Path]:
         tmp = list(pdir.glob(f"**/{title}"))
@@ -35,20 +33,16 @@ class GitInstaller(Default):
     def append(self, **kwargs) -> None:
         self.mods.append(kwargs)
 
-    def check(self, *args, **kwargs) -> None:
-        pass
-
-    def install(self, download_dir: Path, mods_dir: Path) -> None:
-        if not self._url:
+    def install(self, to: Path) -> None:
+        if not self.url:
             return
 
         print(f"[+] Installing Git Mod: {self.url}")
-        archive = self.download(download_dir)
 
-        with self.tempDir(archive, prefix="gamma-launcher-modinstall-") as pdir:
+        with DefaultTempDir(self, prefix="gamma-launcher-modinstall-") as pdir:
             for m in self.mods:
                 print(f"  --> Installing {m['name']}")
-                install_dir = mods_dir / m["name"]
+                install_dir = to / m["name"]
 
                 iter = self._find_gamedata(pdir, m["title"])
                 if not iter:
@@ -68,4 +62,4 @@ class GitInstaller(Default):
                             str(install_dir / gamedir)
                         )
 
-                self._write_ini_file(install_dir / 'meta.ini', archive, self._url)
+                self._write_ini_file(install_dir / 'meta.ini')
