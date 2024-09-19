@@ -7,7 +7,7 @@ from typing import Iterator, Tuple
 from launcher.common import anomaly_arg, gamma_arg
 from launcher.hash import check_hash
 from launcher.mods import read_mod_maker
-from launcher.mods.base import CheckHashError
+from launcher.exceptions import HashError, ModDBDownloadError
 
 
 class CheckAnomaly:
@@ -77,8 +77,8 @@ class CheckMD5:
         for i in mod_maker:
             try:
                 i.check(dl_dir, args.update_cache)
-            except CheckHashError as e:
-                errors.append(str(e))
+            except (HashError, ModDBDownloadError) as e:
+                errors.append(repr(e))
 
         print("\n".join(errors))
 
