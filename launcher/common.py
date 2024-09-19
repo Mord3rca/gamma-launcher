@@ -1,3 +1,7 @@
+from typing import Tuple
+
+folder_to_install: Tuple[str] = ('appdata', 'db', 'gamedata')
+
 anomaly_arg = {
     "--anomaly": {
         "help": "Path to ANOMALY directory",
