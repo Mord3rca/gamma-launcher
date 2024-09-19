@@ -6,13 +6,9 @@ from typing import Dict
 
 from launcher.commands import CheckAnomaly
 from launcher.common import anomaly_arg, gamma_arg, cache_dir_arg
-from launcher.downloader import download_archive
-from launcher.downloader.base import g_session
-from launcher.archive import extract_archive, extract_git_archive
-from launcher.downloader import get_handler_for_url
+from launcher.mods.downloader import g_session
 
-from launcher.mods import read_mod_maker
-from launcher.downloader.moddb import parse_moddb_data
+from launcher.mods import BaseArchive, GithubArchive, ModDBArchive, read_mod_maker
 
 
 guide_url: str = "https://github.com/DravenusRex/stalker-gamma-linux-guide"
@@ -49,36 +45,9 @@ class AnomalyInstall:
 
     help: str = "Installation of S.T.A.L.K.E.R.: Anomaly"
 
-    files: Dict[str, Dict[str, str]] = {
-        "base-1.5.1": {
-            "dl_link": "https://www.moddb.com/downloads/start/207799",
-            "moddb_page": "https://www.moddb.com/mods/stalker-anomaly/downloads/stalker-anomaly-151",
-        },
-        "update-1.5.2": {
-            "dl_link": "https://www.moddb.com/downloads/start/235237",
-            "moddb_page": "https://www.moddb.com/mods/stalker-anomaly/downloads/stalker-anomaly-151-to-152",
-        },
-    }
-
     def __init__(self) -> None:
         self._anomaly_dir = None
         self._cache_dir = None
-
-    def _dl_component(self, c_data: Dict) -> Path:
-        metadata = parse_moddb_data(c_data.get("moddb_page"))
-        return download_archive(c_data.get("dl_link"), self._cache_dir, hash=metadata.get('MD5 Hash'))
-
-    def _install_component(self, comp: str, mime: str = None) -> None:
-        c = self.files.get(comp)
-        file = self._dl_component(c)
-
-        print("  - Extracting")
-        extract_archive(file, self._anomaly_dir, mime)
-
-    def _purge_cache(self) -> None:
-        print("[+] Purging Anomaly archives")
-        for archive in self._anomaly_dir.glob("*.7z"):
-            archive.unlink()
 
     def run(self, args) -> None:
         self._anomaly_dir = Path(args.anomaly)
@@ -88,16 +57,30 @@ class AnomalyInstall:
         self._cache_dir.mkdir(parents=True, exist_ok=True)
 
         print("[+] Installing base Anomaly 1.5.1")
-        self._install_component("base-1.5.1", mime="application/x-7z-compressed+bcj2")
+        mod_base = ModDBArchive(
+            "base-1.5.1", "https://www.moddb.com/downloads/start/207799",
+            "https://www.moddb.com/mods/stalker-anomaly/downloads/stalker-anomaly-151"
+        )
+        mod_base.download(self._cache_dir, use_cached=True)
+        print("  - Extracting")
+        mod_base.install(self._anomaly_dir)
 
         print("[+] Installing update Anomaly 1.5.1 to 1.5.2")
-        self._install_component("update-1.5.2", mime="application/x-7z-compressed+bcj2")
+        mod_update = ModDBArchive(
+            "update-1.5.2", "https://www.moddb.com/downloads/start/235237",
+            "https://www.moddb.com/mods/stalker-anomaly/downloads/stalker-anomaly-151-to-152"
+        )
+        mod_update.download(self._cache_dir, use_cached=True)
+        print("  - Extracting")
+        mod_update.install(self._anomaly_dir)
 
         if (args.anomaly_verify):
             CheckAnomaly().run(args)
 
         if (args.anomaly_purge_cache):
-            self._purge_cache()
+            print("[+] Purging Anomaly archives")
+            mod_base.archive.unlink()
+            mod_update.archive.unlink()
 
 
 class GammaSetup:
@@ -132,8 +115,9 @@ class GammaSetup:
               f"{version}/Mod.Organizer-{version.lstrip('v')}.7z"
 
         with TemporaryDirectory(prefix="gamma-launcher-mo-setup-") as dir:
-            mo_archive = download_archive(url, self._cache_dir or dir, host='base')
-            extract_archive(mo_archive, self._gamma_dir)
+            mo_archive = BaseArchive(url)
+            mo_archive.download(self._cache_dir or dir, use_cached=True)
+            mo_archive.extract(self._gamma_dir)
 
     def run(self, args) -> None:
         if not args.cache_path:
@@ -152,13 +136,9 @@ class GammaSetup:
             self._install_mod_organizer(args.mo_version)
 
         with TemporaryDirectory(prefix="gamma-launcher-mo-setup-") as dir:
-            file = download_archive("https://github.com/Grokitach/gamma_setup", self._cache_dir or dir)
-            extract_archive(file, self._grok_mod_dir)
-
-        gamma_setup_dir = list(self._grok_mod_dir.glob("gamma_setup-*"))[0]
-        for i in gamma_setup_dir.glob("*"):
-            move(i, self._grok_mod_dir)
-        gamma_setup_dir.rmdir()
+            archive = GithubArchive("https://github.com/Grokitach/gamma_setup")
+            archive.download(self._cache_dir or dir, True)
+            archive.extract(self._grok_mod_dir, "gamma_setup-*")
 
         downloads_dir = self._gamma_dir / "downloads"
         if args.cache_path:
@@ -235,26 +215,22 @@ class FullInstall:
         except Exception:
             pass
 
-        if not gdef.is_file():
-            print('    downloading archive...')
-            g = get_handler_for_url("https://github.com/Grokitach/Stalker_GAMMA/archive/refs/heads/main.zip")
-            g.download(gdef)
-
-        extract_git_archive(gdef, self._grok_mod_dir, 'Stalker_GAMMA-main')
+        g = GithubArchive('https://github.com/Grokitach/Stalker_GAMMA')
+        print('    downloading archive...')
+        g.download(self._grok_mod_dir, filename='GAMMA_definition.zip', use_cached=True)
+        g.extract(self._grok_mod_dir, 'Stalker_GAMMA-main')
 
         move(
             self._grok_mod_dir / 'G.A.M.M.A_definition_version.txt',
-            self._grok_mod_dir / 'version.txt'
+            self._grok_mod_dir / 'version.txt',
         )
 
     def _set_custom_gamma_def(self, rev: str) -> None:
         print(f'[+] Setting custom G.A.M.M.A. definition to: {rev}')
-        gdef = self._grok_mod_dir / 'GAMMA_definition.zip'
 
-        g = get_handler_for_url(f'https://github.com/Grokitach/Stalker_GAMMA/archive/{rev}.zip')
-        g.download(gdef)
-
-        extract_git_archive(gdef, self._grok_mod_dir)
+        g = GithubArchive(f'https://github.com/Grokitach/Stalker_GAMMA/archive/{rev}.zip')
+        g.download(self._grok_mod_dir, filename='GAMMA_definition.zip')
+        g.extract(self._grok_mod_dir, '*')
 
         (self._grok_mod_dir / 'G.A.M.M.A_definition_version.txt').unlink()
         (self._grok_mod_dir / 'version.txt').write_text(f'Custom: {rev}\n')
@@ -278,7 +254,8 @@ class FullInstall:
         for mod in read_mod_maker(self._grok_mod_dir / 'G.A.M.M.A' / 'modpack_data'):
             if mod.name == "164- Hunger Thirst Sleep UI 0.71 - xcvb":
                 continue
-            mod.install(self._dl_dir, self._mod_dir)
+            mod.download(self._dl_dir, use_cached=True)
+            mod.install(self._mod_dir)
 
     def _copy_gamma_modpack(self) -> None:
         path = self._grok_mod_dir / 'G.A.M.M.A' / 'modpack_addons'
