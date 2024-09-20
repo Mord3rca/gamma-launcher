@@ -1,5 +1,6 @@
 import sys
 
+from argparse import SUPPRESS
 from pathlib import Path
 from os.path import sep
 from typing import Iterator, Tuple
@@ -52,7 +53,7 @@ class CheckMD5:
             "action": "store_true"
         },
         "--redownload": {
-            "help": "Here for compatibility, same as --update-cache",
+            "help": SUPPRESS,
             "required": False,
             "dest": "update_cache",
             "action": "store_true"
