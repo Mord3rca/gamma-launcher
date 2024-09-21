@@ -79,7 +79,7 @@ class CheckMD5:
             try:
                 i.check(dl_dir, args.update_cache)
             except (HashError, ModDBDownloadError) as e:
-                errors.append(repr(e))
+                errors.append(e)
 
         print("\n".join(errors))
 

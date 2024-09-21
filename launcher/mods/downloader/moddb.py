@@ -2,6 +2,7 @@ import re
 import os.path
 
 from bs4 import BeautifulSoup
+from requests.exceptions import HTTPError
 from urllib.parse import urlparse
 from pathlib import Path
 from typing import Dict
@@ -41,24 +42,15 @@ def parse_moddb_data(url: str) -> Dict[str, str]:
 
 class ModDBDownloader(DefaultDownloader):
 
-    def _check_with_update(self, file: Path, info: dict, dl_dir: Path, hash: str) -> None:
-        try:
-            self.download(dl_dir, use_cached=True, hash=hash)
-        except ConnectionError as e:
-            raise HashError(f'Failed to redownload {file.name}\n  -> {e}')
-        except HashError:
-            raise HashError(f'{file.name} failed MD5 check after being redownloaded')
+    def _get_download_url(self, url: str) -> str:
+        id = url.split('/')[-1]
+        s = re.search(f'/downloads/mirror/{id}/[^"]*', g_session.get(url).text)
+        if not s:
+            raise ModDBDownloadError(f"Download link not found when requesting {url}")
 
-    def _check_without_update(self, file: Path, info: dict, dl_dir: Path, hash: str) -> None:
-        if not file.exists():
-            raise HashError(f'{file.name} not found on disk')
+        return g_session.get(f"https://www.moddb.com{s[0]}", allow_redirects=False).headers["location"]
 
-        if check_hash(file, hash):
-            return
-
-        raise HashError(f'{file.name} MD5 missmatch')
-
-    def check(self, dl_dir: Path, update_cache: bool = False) -> None:
+    def check(self, dl_dir: Path, update_cache: bool = False) -> None:  # noqa: C901
         if not self._iurl:
             raise HashError(f'No info_url related to {self.name} mod')
 
@@ -70,20 +62,38 @@ class ModDBDownloader(DefaultDownloader):
             raise HashError(f'Error while fetching moddb page for {self._iurl}\n  -> {e}')
         except KeyError:
             raise HashError(f'Error while parsing moddb page for {self._iurl}')
+        except HTTPError as e:
+            raise HashError(f'ModDB parsing error for {self._iurl}\n -> {e}')
 
         if info.get('Download', '') not in self._url:
             raise HashError(f'Skipping {file.name} since ModDB info do not match download url')
 
-        (self._check_with_update if update_cache else self._check_without_update)(file, info, dl_dir, hash)
+        self._url = self._get_download_url(self._url)
+        self._archive = file
+
+        if not self._archive.exists():
+            if update_cache:
+                super().download(dl_dir)
+            return
+
+        if check_hash(self._archive, hash):
+            return
+
+        if not update_cache:
+            raise HashError(f'{file.name} MD5 missmatch')
+
+        self._archive.unlink()
+        super().download(dl_dir)
+        super().download(dl_dir, use_cached=True, hash=hash)  # to check hash
 
     def download(self, to: Path, use_cached: bool = False, *args, **kwargs) -> Path:
-        metadata = parse_moddb_data(self._iurl) if self._iurl else {}
-        hash = metadata.get('MD5 Hash', None) if metadata.get('Download', '') in self._url else None
-        id = id = self._url.split('/')[-1]
-        s = re.search(f'/downloads/mirror/{id}/[^"]*', g_session.get(self._url).text)
-        if not s:
-            raise ModDBDownloadError(f"Download link not found when requesting {self._url}")
+        try:
+            metadata = parse_moddb_data(self._iurl) if self._iurl else {}
+        except Exception:
+            metadata = {}
 
-        self._url = g_session.get(f"https://www.moddb.com{s[0]}", allow_redirects=False).headers["location"]
+        hash = metadata.get('MD5 Hash', None) if metadata.get('Download', '') in self._url else None
+
+        self._url = self._get_download_url(self._url)
         self._archive = to / os.path.basename(urlparse(self._url).path)
         return super().download(to, use_cached, hash=hash)
