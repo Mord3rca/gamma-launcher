@@ -23,8 +23,14 @@ class GithubDownloader(DefaultDownloader):
             f"https://api.github.com/repos/{user}/{project}",
             headers={"Accept": "application/json"}
         ).json()["default_branch"]
+
+        revision = g_session.get(
+            f"https://api.github.com/repos/{user}/{project}/branches/{branch}",
+            headers={"Accept": "application/json"}
+        ).json()["commit"]["sha"]
+
         self._url = f"https://github.com/{user}/{project}/archive/refs/heads/{branch}.zip"
-        self._archive = to / (filename or f"{project}-{branch}.zip")
+        self._archive = to / (filename or f"{project}-{revision}.zip")
 
         return super().download(to, use_cached)
 
