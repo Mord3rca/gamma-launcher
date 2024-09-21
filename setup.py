@@ -27,8 +27,16 @@ setup(
     author=about['__author__'],
     author_email=about['__author_email__'],
     url=about['__url__'],
-    install_requires=["bs4", "platformdirs", "py7zr", "unrar", "requests", 'tenacity', 'tqdm'] + ver_spec_install,
-    packages=['launcher', 'launcher.commands', 'launcher.mods', 'launcher.mods.downloader', 'launcher.mods.installer'],
+    install_requires=[
+        'bs4', 'GitPython', 'platformdirs',
+        'py7zr', 'unrar', 'requests', 'tenacity',
+        'tqdm'
+    ] + ver_spec_install,
+    packages=[
+        'launcher', 'launcher.commands', 'launcher.mods',
+        'launcher.mods.downloader', 'launcher.mods.downloader.github',
+        'launcher.mods.installer'
+    ],
     entry_points={
         'console_scripts': [
             'gamma-launcher = launcher.cli:main',
