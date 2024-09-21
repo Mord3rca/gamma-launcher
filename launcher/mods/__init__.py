@@ -66,7 +66,7 @@ def _register_git_mod(git_mods: List[ModGitInstaller], **kwargs):
     git_mods += [obj]
 
 
-def read_mod_maker(mod_path: Path) -> List[ModBase]:
+def read_mod_maker(mod_path: Path) -> List[ModBase]:  # noqa: C901
     result = []
     git_mods = []
 
