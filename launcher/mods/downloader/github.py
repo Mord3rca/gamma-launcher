@@ -3,7 +3,7 @@ from re import compile
 from shutil import copytree, move
 from tempfile import TemporaryDirectory
 
-from launcher.archive import extract_archive
+from launcher.mods.archive import extract_archive
 from launcher.mods.downloader.base import DefaultDownloader, g_session
 
 

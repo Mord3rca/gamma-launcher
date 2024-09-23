@@ -2,7 +2,7 @@ from os.path import sep
 from pathlib import Path
 from typing import List
 
-from launcher.archive import extract_archive
+from launcher.mods.archive import extract_archive
 from launcher.mods.base import ModBase
 from launcher.mods.installer import GitInstaller, SeparatorInstaller, DefaultInstaller
 from launcher.mods.downloader import ModDBDownloader, GithubDownloader, DefaultDownloader
