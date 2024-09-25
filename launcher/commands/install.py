@@ -116,7 +116,7 @@ class GammaSetup:
 
         with TemporaryDirectory(prefix="gamma-launcher-mo-setup-") as dir:
             mo_archive = BaseArchive(url)
-            mo_archive.download(self._cache_dir or dir, use_cached=True)
+            mo_archive.download(Path(self._cache_dir or dir), use_cached=True)
             mo_archive.extract(self._gamma_dir)
 
     def run(self, args) -> None:
@@ -137,7 +137,7 @@ class GammaSetup:
 
         with TemporaryDirectory(prefix="gamma-launcher-mo-setup-") as dir:
             archive = GithubArchive("https://github.com/Grokitach/gamma_setup")
-            archive.download(self._cache_dir or dir, True)
+            archive.download(Path(self._cache_dir or dir), True)
             archive.extract(self._grok_mod_dir, "gamma_setup-*")
 
         downloads_dir = self._gamma_dir / "downloads"
