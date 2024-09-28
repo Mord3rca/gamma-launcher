@@ -198,7 +198,6 @@ class FullInstall:
 
     def _update_gamma_definition(self, *args) -> None:
         print('[+] Updating G.A.M.M.A. definition')
-        gdef = self._grok_mod_dir / 'GAMMA_definition.zip'
 
         try:
             l_version = Path(self._grok_mod_dir / 'version.txt').read_text().strip()
@@ -209,16 +208,17 @@ class FullInstall:
             r_version = g_session.get(
                 'https://raw.githubusercontent.com/Grokitach/Stalker_GAMMA/main/G.A.M.M.A_definition_version.txt'
             ).text.strip()
-            if int(r_version) > int(l_version):
-                gdef.unlink()
-                print(f"    will be updated from {l_version} to {r_version}")
+            if int(r_version) <= int(l_version):
+                return
+
+            print(f"    will be updated from {l_version} to {r_version}")
         except Exception:
             pass
 
         g = GithubArchive('https://github.com/Grokitach/Stalker_GAMMA')
         print('    downloading archive...')
-        g.download(self._grok_mod_dir, filename='GAMMA_definition.zip', use_cached=True)
-        g.extract(self._grok_mod_dir, 'Stalker_GAMMA-main')
+        g.download(self._dl_dir, use_cached=True)
+        g.extract(self._grok_mod_dir, 'Stalker_GAMMA-*')
 
         move(
             self._grok_mod_dir / 'G.A.M.M.A_definition_version.txt',
@@ -229,7 +229,7 @@ class FullInstall:
         print(f'[+] Setting custom G.A.M.M.A. definition to: {rev}')
 
         g = GithubArchive(f'https://github.com/Grokitach/Stalker_GAMMA/archive/{rev}.zip')
-        g.download(self._grok_mod_dir, filename='GAMMA_definition.zip')
+        g.download(self._dl_dir)
         g.extract(self._grok_mod_dir, '*')
 
         (self._grok_mod_dir / 'G.A.M.M.A_definition_version.txt').unlink()
