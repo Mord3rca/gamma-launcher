@@ -56,23 +56,14 @@ class AnomalyInstall:
         self._cache_dir = Path(args.cache_path or args.anomaly)
         self._cache_dir.mkdir(parents=True, exist_ok=True)
 
-        print("[+] Installing base Anomaly 1.5.1")
+        print("[+] Installing base Anomaly 1.5.3")
         mod_base = ModDBArchive(
-            "base-1.5.1", "https://www.moddb.com/downloads/start/207799",
-            "https://www.moddb.com/mods/stalker-anomaly/downloads/stalker-anomaly-151"
+            "base-1.5.3", "https://www.moddb.com/downloads/start/277404",
+            "https://www.moddb.com/mods/stalker-anomaly/downloads/stalker-anomaly-153"
         )
         mod_base.download(self._cache_dir, use_cached=True)
         print("  - Extracting")
         mod_base.install(self._anomaly_dir)
-
-        print("[+] Installing update Anomaly 1.5.1 to 1.5.2")
-        mod_update = ModDBArchive(
-            "update-1.5.2", "https://www.moddb.com/downloads/start/235237",
-            "https://www.moddb.com/mods/stalker-anomaly/downloads/stalker-anomaly-151-to-152"
-        )
-        mod_update.download(self._cache_dir, use_cached=True)
-        print("  - Extracting")
-        mod_update.install(self._anomaly_dir)
 
         if (args.anomaly_verify):
             CheckAnomaly().run(args)
@@ -80,7 +71,6 @@ class AnomalyInstall:
         if (args.anomaly_purge_cache):
             print("[+] Purging Anomaly archives")
             mod_base.archive.unlink()
-            mod_update.archive.unlink()
 
 
 class GammaSetup:
