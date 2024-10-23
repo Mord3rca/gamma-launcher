@@ -1,5 +1,4 @@
 from pathlib import Path
-from re import compile
 from shutil import copytree, move
 from tempfile import TemporaryDirectory
 
@@ -8,8 +7,6 @@ from launcher.mods.downloader.base import DefaultDownloader, g_session
 
 
 class GithubDownloader(DefaultDownloader):
-
-    regexp_url = compile("https?://github.com/([\\w_.-]+)/([\\w_.-]+)/?")
 
     def download(self, to: Path, use_cached: bool = False, filename: str = None) -> Path:
         user, project = self.regexp_url.match(self._url).groups()

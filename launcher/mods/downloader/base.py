@@ -1,5 +1,6 @@
 from os.path import basename
 from pathlib import Path
+from re import compile
 from requests import Session
 from tqdm import tqdm
 from urllib.parse import urlparse
@@ -12,6 +13,8 @@ g_session.headers.update({'User-Agent': 'pyGammaLauncher'})
 
 
 class DefaultDownloader:
+
+    regexp_url = compile("https?://github.com/([\\w_.-]+)/([\\w_.-]+)/?")
 
     @property
     def archive(self) -> Path:
@@ -29,6 +32,11 @@ class DefaultDownloader:
 
     def download(self, to: Path, use_cached=False, hash: str = None) -> Path:
         self._archive = self._archive or (to / basename(urlparse(self._url).path))
+
+        # Special case for github.com archive link
+        if 'github.com' in self._url:
+            _, project = self.regexp_url.match(self._url).groups()
+            self._archive = to / f"{project}-{basename(urlparse(self._url).path)}"
 
         if self._archive.exists() and use_cached:
             if not hash:
