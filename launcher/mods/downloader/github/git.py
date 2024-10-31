@@ -1,9 +1,14 @@
 from git import Repo
+from os import getenv
 from pathlib import Path
 from shutil import copytree
 from tempfile import TemporaryDirectory
 
 from launcher.mods.downloader.base import DefaultDownloader
+
+
+if getenv("GAMMA_LAUNCHER_NO_GIT", None):
+    raise NotImplementedError("NO_GIT is set, aborting PythonGit implementation")
 
 
 class GithubDownloader(DefaultDownloader):
