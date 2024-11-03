@@ -1,5 +1,5 @@
-from distutils.dir_util import copy_tree
 from pathlib import Path
+from shutil import copytree
 from typing import Dict, List
 import xml.etree.ElementTree as ET
 
@@ -79,7 +79,7 @@ class DefaultInstaller(ModBase):
                     fdir = install_dir / fdirectives[i]
                     print(f'        Appying FOMOD directive to {i} -> {fdir}')
                     fdir.mkdir(exist_ok=True)
-                    copy_tree(str(i), str(fdir))
+                    copytree(i, fdir, dirs_exist_ok=True)
                     continue
 
                 # Well, I guess it's a feature now.
@@ -90,9 +90,6 @@ class DefaultInstaller(ModBase):
                     if not pgame_dir.exists():
                         continue
 
-                    copy_tree(
-                        str(pgame_dir),
-                        str(install_dir / gamedir)
-                    )
+                    copytree(pgame_dir, install_dir / gamedir, dirs_exist_ok=True)
 
         self._write_ini_file(install_dir / 'meta.ini')

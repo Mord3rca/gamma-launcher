@@ -1,5 +1,5 @@
-from distutils.dir_util import copy_tree, DistutilsFileError
 from pathlib import Path
+from shutil import copytree
 from typing import Iterator
 
 from launcher.common import anomaly_arg, gamma_arg
@@ -38,21 +38,15 @@ class Usvfs:
         install_dir.mkdir(parents=True)
 
         print('Copying Anomaly dir to install directory...')
-        copy_tree(str(anomaly_dir), str(install_dir))
+        copytree(anomaly_dir, install_dir, dirs_exist_ok=True)
 
         print('Applying mods...')
         for mod in self._read_modlist(gamma_dir / 'profiles' / 'G.A.M.M.A' / 'modlist.txt'):
             print(f"  Installing {mod}")
             try:
-                copy_tree(
-                    str(gamma_dir / 'mods' / mod),
-                    str(install_dir)
-                )
-            except DistutilsFileError as err:
+                copytree(gamma_dir / 'mods' / mod, install_dir, dirs_exist_ok=True)
+            except FileNotFoundError as err:
                 print(f"    --> Failed: {err}")
 
         print('Reapplying Anomaly binary dir to install directory')
-        copy_tree(
-            str(anomaly_dir / 'bin'),
-            str(install_dir / 'bin')
-        )
+        copytree(anomaly_dir / 'bin', install_dir / 'bin', dirs_exist_ok=True)
