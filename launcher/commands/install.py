@@ -1,6 +1,5 @@
-from distutils.dir_util import copy_tree
 from pathlib import Path
-from shutil import copy2, disk_usage, move
+from shutil import copy2, copytree, disk_usage, move
 from tempfile import TemporaryDirectory
 from typing import Dict
 
@@ -239,9 +238,9 @@ class FullInstall:
         if user_config.is_file():
             copy2(user_config, saved_config)
 
-        copy_tree(
-            str(self._grok_mod_dir / 'G.A.M.M.A' / 'modpack_patches'),
-            str(self._anomaly_dir)
+        copytree(
+            self._grok_mod_dir / 'G.A.M.M.A' / 'modpack_patches',
+            self._anomaly_dir, dirs_exist_ok=True
         )
 
         if preserve_user_config:
@@ -257,7 +256,7 @@ class FullInstall:
     def _copy_gamma_modpack(self) -> None:
         path = self._grok_mod_dir / 'G.A.M.M.A' / 'modpack_addons'
         print(f'[+] Copying G.A.M.M.A mods in from "{path}" to "{self._mod_dir}"')
-        copy_tree(str(path), str(self._mod_dir))
+        copytree(path, self._mod_dir, dirs_exist_ok=True)
 
     def _install_modorganizer_profile(self) -> None:
         p_path = self._gamma_dir / 'profiles' / 'G.A.M.M.A'

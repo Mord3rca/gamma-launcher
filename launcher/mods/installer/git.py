@@ -1,5 +1,5 @@
-from distutils.dir_util import copy_tree
 from pathlib import Path
+from shutil import copytree
 from typing import Set
 
 from launcher.common import folder_to_install
@@ -57,9 +57,6 @@ class GitInstaller(DefaultInstaller):
                         if not pgame_dir.exists():
                             continue
 
-                        copy_tree(
-                            str(pgame_dir),
-                            str(install_dir / gamedir)
-                        )
+                        copytree(pgame_dir, install_dir / gamedir, dirs_exist_ok=True)
 
                 self._write_ini_file(install_dir / 'meta.ini')
