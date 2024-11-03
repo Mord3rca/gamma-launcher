@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gamma-launcher"
+description = "G.A.M.M.A. Launcher module"
+authors = [
+    {name="Mord3rca", email="morderca@morderca.net"},
+]
+readme = {file ="README.md", content-type = "text/markdown"}
+requires-python = ">=3.10"
+license = {text = "GPLv3"}
+dependencies = [
+    "bs4", "GitPython", "platformdirs",
+    "py7zr", "unrar", "requests", "tenacity",
+    "tqdm"
+]
+classifiers = [
+    'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 3 :: Only',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12',
+]
+dynamic = ["version"]
+
+[project.urls]
+Homepage = "https://github.com/Mord3rca/gamma-launcher"
+Issues = "https://github.com/Mord3rca/gamma-launcher/issues"
+
+[project.scripts]
+gamma-launcher = "launcher.cli:main"
+
+[tool.setuptools.dynamic]
+version = {attr = "launcher.__version__"}
+
+[tool.setuptools.packages.find]
+include = ["launcher*"]

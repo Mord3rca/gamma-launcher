@@ -1,4 +1,4 @@
-from launcher.__version__ import __title__, __version__
+from launcher import __title__, __version__
 from launcher.commands import (
     AnomalyInstall,
     CheckAnomaly,
