@@ -81,6 +81,6 @@ class CheckMD5:
             except (HashError, ModDBDownloadError) as e:
                 errors.append(str(e))
 
-        print("\n".join(errors))
+        print("\n".join([str(error) for error in errors])) 
 
         sys.exit(0 if not errors else 1)
