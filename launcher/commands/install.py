@@ -124,17 +124,16 @@ class GammaSetup:
         if args.gamma_install_mo:
             self._install_mod_organizer(args.mo_version)
 
-        with TemporaryDirectory(prefix="gamma-launcher-mo-setup-") as dir:
-            archive = GithubArchive("https://github.com/Grokitach/gamma_setup")
-            archive.download(Path(self._cache_dir or dir), True)
-            archive.extract(self._grok_mod_dir, "gamma_setup-*")
-
         downloads_dir = self._gamma_dir / "downloads"
         if args.cache_path:
             downloads_dir.rmdir()
             downloads_dir.symlink_to(self._cache_dir.absolute(), target_is_directory=True)
         else:
             downloads_dir.mkdir(exist_ok=True)
+
+        archive = GithubArchive("https://github.com/Grokitach/gamma_setup")
+        archive.download(downloads_dir, True)
+        archive.extract(self._grok_mod_dir, "gamma_setup-*")
 
         (self._gamma_dir / "mods").mkdir(exist_ok=True)
 
