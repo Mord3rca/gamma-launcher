@@ -1,15 +1,19 @@
+from cloudscraper import create_scraper
 from os.path import basename
 from pathlib import Path
 from re import compile
-from requests import Session
 from tqdm import tqdm
 from urllib.parse import urlparse
 
+from launcher import __version__
 from launcher.hash import check_hash
 from launcher.mods.archive import extract_archive
 
-g_session = Session()
-g_session.headers.update({'User-Agent': 'pyGammaLauncher'})
+g_session = create_scraper(
+    browser={
+       "custom": f"pyGammaLauncher/{__version__}"
+    }
+)
 
 
 class DefaultDownloader:
