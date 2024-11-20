@@ -12,7 +12,7 @@ readme = {file ="README.md", content-type = "text/markdown"}
 requires-python = ">=3.10"
 license = {text = "GPLv3"}
 dependencies = [
-    "bs4", "GitPython", "platformdirs",
+    "bs4", "cloudscraper", "GitPython", "platformdirs",
     "py7zr", "unrar", "requests", "tenacity",
     "tqdm"
 ]
