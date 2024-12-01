@@ -49,10 +49,10 @@ class AnomalyInstall:
         self._cache_dir = None
 
     def run(self, args) -> None:
-        self._anomaly_dir = Path(args.anomaly)
+        self._anomaly_dir = Path(args.anomaly).expanduser()
         self._anomaly_dir.mkdir(parents=True, exist_ok=True)
 
-        self._cache_dir = Path(args.cache_path or args.anomaly)
+        self._cache_dir = Path(args.cache_path or args.anomaly).expanduser()
         self._cache_dir.mkdir(parents=True, exist_ok=True)
 
         print("[+] Installing base Anomaly 1.5.3")
@@ -112,12 +112,12 @@ class GammaSetup:
         if not args.cache_path:
             check_tmp_free_space(5)
 
-        self._gamma_dir = Path(args.gamma)
-        self._grok_mod_dir = Path(args.gamma) / ".Grok's Modpack Installer" / "G.A.M.M.A"
+        self._gamma_dir = Path(args.gamma).expanduser()
+        self._grok_mod_dir = self._gamma_dir / ".Grok's Modpack Installer" / "G.A.M.M.A"
         self._grok_mod_dir.mkdir(parents=True, exist_ok=True)
 
         if args.cache_path:
-            self._cache_dir = Path(args.cache_path)
+            self._cache_dir = Path(args.cache_path).expanduser()
             self._cache_dir.mkdir(parents=True, exist_ok=True)
 
         print("[+] Installing base setup for GAMMA")
@@ -277,12 +277,12 @@ AutomaticArchiveInvalidation=false
         check_tmp_free_space(6)
 
         # Init paths
-        self._anomaly_dir = Path(args.anomaly)
-        self._gamma_dir = Path(args.gamma)
+        self._anomaly_dir = Path(args.anomaly).expanduser()
+        self._gamma_dir = Path(args.gamma).expanduser()
 
-        self._dl_dir = Path(args.gamma) / "downloads"
-        self._mod_dir = Path(args.gamma) / "mods"
-        self._grok_mod_dir = Path(args.gamma) / ".Grok's Modpack Installer"
+        self._dl_dir = self._gamma_dir / "downloads"
+        self._mod_dir = self._gamma_dir / "mods"
+        self._grok_mod_dir = self._gamma_dir / ".Grok's Modpack Installer"
 
         # Make sure folder are existing
         self._dl_dir.mkdir(parents=True, exist_ok=True)

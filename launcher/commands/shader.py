@@ -16,7 +16,7 @@ class PurgeShaderCache:
     }
 
     def run(self, args) -> None:
-        scache = Path(args.anomaly) / 'appdata' / 'shaders_cache'
+        scache = Path(args.anomaly).expanduser() / 'appdata' / 'shaders_cache'
         if not scache.is_dir():
             return
         rmtree(scache)
@@ -33,7 +33,7 @@ class RemoveReshade:
     }
 
     def run(self, args) -> None:
-        anomaly = Path(args.anomaly)
+        anomaly = Path(args.anomaly).expanduser()
         bin_files = [
             'd3d9.dll', 'dxgi.dll', 'dxgi.log',
             'G.A.M.M.A.Reshade.ini', 'ReShade.ini',
