@@ -32,7 +32,7 @@ class CheckAnomaly:
             yield file, hash
 
     def run(self, args) -> None:
-        anomaly = Path(args.anomaly)
+        anomaly = Path(args.anomaly).expanduser()
         errors = []
         for file, hash in self._read_checksums(anomaly):
             if not check_hash(file, hash, desc=f"Checking Anomaly file: {file}..."):
@@ -67,7 +67,7 @@ class CheckMD5:
     def run(self, args) -> None:
         errors = []
 
-        gamma = Path(args.gamma)
+        gamma = Path(args.gamma).expanduser()
         dl_dir = gamma / "downloads"
 
         mod_maker = read_mod_maker(

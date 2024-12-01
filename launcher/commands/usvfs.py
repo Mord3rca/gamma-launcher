@@ -31,9 +31,9 @@ class Usvfs:
         return reversed(mods)
 
     def run(self, args) -> None:
-        gamma_dir = Path(args.gamma)
-        anomaly_dir = Path(args.anomaly)
-        install_dir = Path(args.final)
+        gamma_dir = Path(args.gamma).expanduser()
+        anomaly_dir = Path(args.anomaly).expanduser()
+        install_dir = Path(args.final).expanduser()
 
         install_dir.mkdir(parents=True)
 
