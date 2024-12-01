@@ -27,6 +27,9 @@ class HotfixMalformedArchive:
         for path in dir.glob('*.*'):
             if '\\' not in path.name:
                 continue
+            # Probably a directory
+            if path.stat().st_size == 0:
+                continue
 
             p = dir / path.name.replace('\\', '/')
             p.parent.mkdir(parents=True, exist_ok=True)
