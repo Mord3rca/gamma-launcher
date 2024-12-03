@@ -1,6 +1,6 @@
 from os.path import sep
 from pathlib import Path
-from typing import List
+from typing import Dict, List, Union
 
 from launcher.mods.archive import extract_archive
 from launcher.mods.base import ModBase
@@ -66,6 +66,26 @@ def _register_git_mod(git_mods: List[ModGitInstaller], **kwargs):
     git_mods += [obj]
 
 
+def _parse_modpack_maker_line(line: str) -> Union[Dict[str, str], None]:
+    try:
+        it = line.split('\t')
+        data = {
+            'name': f'{it[3]}{it[2]}',
+            'url': it[0],
+            'add_dirs': [
+                i.replace('\\', sep).lstrip(sep) for i in it[1].split(':')
+            ] if it[1] != '0' else None,
+            'author': it[2].strip('- '),
+            'title': it[3].strip(),
+            'iurl': it[4] if len(it) >= 5 else '',
+        }
+    except ValueError:
+        print(f'   Skipping: {line}')
+        return None
+
+    return data
+
+
 def read_mod_maker(mod_path: Path) -> List[ModBase]:  # noqa: C901
     result = []
     git_mods = []
@@ -77,31 +97,34 @@ def read_mod_maker(mod_path: Path) -> List[ModBase]:  # noqa: C901
             (mod_path / 'modlist.txt').read_text().split('\n')
         )
     }
+    modmaker = [
+        _parse_modpack_maker_line(i) for i in filter(
+            lambda x: x and not x.startswith(' '),
+            (mod_path / 'modpack_maker_list.txt').read_text().split('\n')
+        )
+    ]
+    modmaker = list(filter(lambda x: x is not None, modmaker))
 
-    for line in filter(
-        lambda x: x and not x.startswith(' '),
-        (mod_path / 'modpack_maker_list.txt').read_text().split('\n')
-    ):
-        try:
-            it = line.split('\t')
-            data = {
-                'name': f'{it[3]}{it[2]}',
-                'url': it[0],
-                'add_dirs': [
-                    i.replace('\\', sep).lstrip(sep) for i in it[1].split(':')
-                ] if it[1] != '0' else None,
-                'author': it[2].strip('- '),
-                'title': it[3].strip(),
-                'iurl': it[4] if len(it) >= 5 else '',
-            }
-            name = data['name']
-        except ValueError:
-            print(f'   Skipping: {line}')
+    # Strict search (match title - author)
+    for i in modlist.keys():
+        for m in modmaker.copy():
+            if m['name'] in i:
+                m['name'] = i
+                modlist[i] = m
+                modmaker.remove(m)
+                break
 
-        for i in modlist.keys():
-            if data['title'] in i:
-                data['name'] = i
-                modlist[i] = data
+    # Not so strict search (match only title)
+    for i in modlist.keys():
+        for m in modmaker.copy():
+            if m['title'] in i:
+                m['name'] = i
+                modlist[i] = m
+                modmaker.remove(m)
+                break
+
+    for m in modmaker:
+        print(f'WARN: No mod folder found for {m["name"]}')
 
     for name, data in modlist.items():
         if 'separator' in name:
