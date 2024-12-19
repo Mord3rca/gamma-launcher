@@ -173,6 +173,15 @@ def _create_full_install_args() -> Dict:
 
     return arguments
 
+def replace_string_in_file(file_path: Path, target_string: str, replacement_string: str):
+    # Read the contents of the file
+    file_contents = file_path.read_text()
+
+    # Replace the target string with the replacement string
+    modified_contents = file_contents.replace(target_string, replacement_string)
+
+    # Write the modified content back to the file
+    file_path.write_text(modified_contents)
 
 class FullInstall:
 
@@ -244,6 +253,9 @@ class FullInstall:
 
         if preserve_user_config:
             copy2(saved_config, user_config)
+        else:
+            replace_string_in_file(user_config, "rs_screenmode fullscreen", "rs_screenmode borderless")
+
 
     def _install_mods(self) -> None:
         for mod in read_mod_maker(self._grok_mod_dir / 'G.A.M.M.A' / 'modpack_data'):
