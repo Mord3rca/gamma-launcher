@@ -173,18 +173,15 @@ def _create_full_install_args() -> Dict:
 
     return arguments
 
-def replace_string_in_file(file_path, target_string, replacement_string):
+def replace_string_in_file(file_path: Path, target_string: str, replacement_string: str):
     # Read the contents of the file
-    with open(file_path, 'r') as file:
-        file_contents = file.read()
+    file_contents = file_path.read_text()
 
     # Replace the target string with the replacement string
     modified_contents = file_contents.replace(target_string, replacement_string)
 
     # Write the modified content back to the file
-    with open(file_path, 'w') as file:
-        file.write(modified_contents)
-
+    file_path.write_text(modified_contents)
 
 class FullInstall:
 
