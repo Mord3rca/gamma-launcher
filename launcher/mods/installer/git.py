@@ -28,7 +28,7 @@ class GitInstaller(DefaultInstaller):
         for i in folder_to_install:
             tmp += [v.parent for v in pdir.glob(f"**/{i}")]
 
-        return set(tmp)
+        return sorted(set(tmp))
 
     def append(self, **kwargs) -> None:
         self.mods.append(kwargs)
