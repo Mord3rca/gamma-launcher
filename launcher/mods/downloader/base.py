@@ -50,7 +50,7 @@ class DefaultDownloader:
                 return self._archive
 
         with open(self._archive, "wb") as f, tqdm(
-            desc=f"  - Downloading {self._archive.name}",
+            desc=f"  - Downloading {self._archive.name} ({self._url})",
             unit="iB", unit_scale=True, unit_divisor=1024
         ) as progress:
             r = g_session.get(self._url, stream=True)
