@@ -1,1 +1,3 @@
 **/__pycache__
+build/
+gamma_launcher.egg-info/
