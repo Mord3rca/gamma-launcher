@@ -9,7 +9,7 @@ from launcher.mods.downloader.base import DefaultDownloader, g_session
 class GithubDownloader(DefaultDownloader):
 
     def download(self, to: Path, use_cached: bool = False, filename: str = None) -> Path:
-        user, project = self.regexp_url.match(self._url).groups()
+        user, project, *_ = self.regexp_url.match(self._url).groups()
 
         if "release" in self._url or self._url.endswith(".zip"):
             revision = Path(self._url).name.split('.')[0]
