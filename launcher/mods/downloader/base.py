@@ -18,7 +18,7 @@ g_session = create_scraper(
 
 class DefaultDownloader:
 
-    regexp_url = compile("https?://github.com/([\\w_.-]+)/([\\w_.-]+)/?")
+    regexp_url = compile("https?://github.com/([\\w_.-]+)/([\\w_.-]+)(/archive/([\\w]+).zip)?")
 
     @property
     def archive(self) -> Path:
@@ -39,7 +39,7 @@ class DefaultDownloader:
 
         # Special case for github.com archive link
         if 'github.com' in self._url:
-            _, project = self.regexp_url.match(self._url).groups()
+            _, project, *_ = self.regexp_url.match(self._url).groups()
             self._archive = to / f"{project}-{basename(urlparse(self._url).path)}"
 
         if self._archive.exists() and use_cached:
