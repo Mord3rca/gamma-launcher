@@ -14,7 +14,7 @@ class GithubDownloader(DefaultDownloader):
         if "release" in self._url or self._url.endswith(".zip"):
             revision = Path(self._url).name.split('.')[0]
             self._archive = to / (filename or f"{project}-{revision}.zip")
-            return
+            return super().download(to, use_cached)
 
         branch = g_session.get(
             f"https://api.github.com/repos/{user}/{project}",
