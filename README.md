@@ -15,9 +15,13 @@ Use the `--cache-directory` option to re-use previously downloaded files.
 
 ### Using AUR (Arch Linux)
 
-On Arch Linux and Arch-based operating systems, you can download package from AUR:  
+(DANGEROUS, NOT OFFICIALLY SUPPORTED) On Arch Linux and Arch-based operating systems, you can download package from AUR:  
 
 `yay -S gamma-launcher`  
+
+AUR package has vulnerable (8.8 RCE) dependencie (js2py-0.74 https://nvd.nist.gov/vuln/detail/CVE-2024-28397)
+
+Use on your own risk!
 
 Or you can build it by yourself:
 
