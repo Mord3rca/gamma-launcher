@@ -21,7 +21,7 @@ Use the `--cache-directory` option to re-use previously downloaded files.
 
 **AUR package has vulnerable (8.8 RCE) dependencie (js2py-0.74 https://nvd.nist.gov/vuln/detail/CVE-2024-28397)**
 
-Use on your own risk!
+Use at your own risk!
 
 Or you can build it by yourself:
 
