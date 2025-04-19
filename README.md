@@ -15,9 +15,11 @@ Use the `--cache-directory` option to re-use previously downloaded files.
 
 ### Using AUR (Arch Linux)
 
-On Arch Linux and Arch-based operating systems, you can download package from AUR:  
+**(NOT OFFICIALLY SUPPORTED)** On Arch Linux and Arch-based operating systems, you can download package from AUR:  
 
 `yay -S gamma-launcher`  
+
+Use at your own risk!
 
 Or you can build it by yourself:
 
