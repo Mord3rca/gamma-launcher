@@ -109,7 +109,6 @@ class GammaSetup:
             mo_archive.extract(self._gamma_dir)
 
     def run(self, args) -> None:
-        if not args.cache_path:
             check_tmp_free_space(12)
 
         self._gamma_dir = Path(args.gamma).expanduser()
