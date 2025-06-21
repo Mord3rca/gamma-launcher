@@ -1,11 +1,13 @@
+import sys
 import threading
+import time
+from io import StringIO
 
 import gi
 gi.require_version('Gtk', '4.0')
-from gi.repository import Gtk
+from gi.repository import GLib, Gtk
 
 from launcher.commands import AnomalyInstall, FullInstall, GammaSetup, Usvfs
-
 
 class Args:
     """Arguments sent to gamma-launcher module."""
@@ -23,6 +25,7 @@ class Args:
         self.final = ''
         self.update_def = True
         self.anomaly_patch = True
+        self.preserve_user_config = False
 
 
 class StackWindow(Gtk.ApplicationWindow):
@@ -48,29 +51,27 @@ class StackWindow(Gtk.ApplicationWindow):
         self.header.set_title_widget(self.stack_switcher)
 
 
-def on_activate(app):
-    # Create window
-    gui = GuiAnomalyInstall()
-    gui.generic_tab('Install Anomaly', ['Anomaly Dir', 'Cache Dir'], gui.anomaly_install)
-    gui.generic_tab(
-        'Full Gamma Setup', ['Anomaly Dir', 'Gamma Dir', 'Custom Gamma Definition', 'Custom Gamma Repository', 'Cache Dir'], gui.full_install
-    )
-    gui.generic_tab('Partial Gamma Setup', ['Anomaly Dir', 'Gamma Dir', 'Custom Gamma Definition', 'Custom Gamma Repository'], gui.gamma_setup)
-    gui.generic_tab('Full Gamma Install', ['Anomaly Dir', 'Gamma Dir', 'Final Gamma Dir'], gui.gamma_usvfs)
-
-
-class GuiAnomalyInstall:
+class GuiAnomalyInstall(Gtk.Application):
     """Gui for Gamma-Launcher."""
 
-    def __init__(self):
+    def do_activate(self):
         self.entries = {'default': []}
         self.thread = threading.Thread()
+        self.output = StringIO()
+        self.textbuffer = Gtk.TextBuffer()
+        self.stderr = sys.stderr
+        self.stdout = sys.stdout
+        sys.stdout = self.output
+        sys.stderr = self.output
         self.win = StackWindow(application=app)
-        checkbutton = Gtk.CheckButton()
-        checkbutton.props.hexpand = True
-        checkbutton.props.halign = Gtk.Align.CENTER
+
         self.win.init_stack()
         self.win.present()
+
+        self.generic_tab('Install Anomaly', ['Anomaly Dir', 'Cache Dir'], self.anomaly_install)
+        self.generic_tab('Full Gamma Setup', ['Anomaly Dir', 'Gamma Dir', 'Custom Gamma Definition', 'Custom Gamma Repository', 'Cache Dir'], self.full_install)
+        self.generic_tab('Partial Gamma Setup', ['Anomaly Dir', 'Gamma Dir', 'Custom Gamma Definition', 'Custom Gamma Repository'], self.gamma_setup)
+        self.generic_tab('Full Gamma Install', ['Anomaly Dir', 'Gamma Dir', 'Final Gamma Dir'], self.gamma_usvfs)
 
     def generic_tab(self, name, list_inputs, install_fnct):
         box_outer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=24)
@@ -90,18 +91,44 @@ class GuiAnomalyInstall:
         self.button.set_label('Execute')
         self.button.connect('clicked', install_fnct)
         hbox.append(self.button)
+        # ===============
+        textview = Gtk.TextView.new_with_buffer(self.textbuffer)
+        textview.set_editable(False)
+        textview.set_cursor_visible(False)
+        scroll = Gtk.ScrolledWindow()
+        scroll.set_child(textview)
+        scroll.set_propagate_natural_height(True)
+        exp = Gtk.Expander()
+        exp.set_child(scroll)
+        exp.set_expanded(True)
+        exp.set_resize_toplevel(True)
+        hbox.append(exp)
+        # =============
         listbox.append(row)
         box_outer.append(listbox)
         self.win.add_titled_to_stack(box_outer, name, name)
         self.win.init_stack()
 
+    def gamma_terminal_worker(self):
+        self.textbuffer.insert(self.textbuffer.get_end_iter(), self.output.getvalue())
+        self.output.truncate(0)
+        self.output.seek(0)
+        time.sleep(0.1)
+        if self.thread.is_alive():
+            return True
+        else:
+            return False
+
     def gamma_launcher_worker(self, target, button, args):
+        GLib.idle_add(self.gamma_terminal_worker)
         try:
             target(args)
         except:
             button.set_label('Failed, Try Again?')
         else:
             button.set_label('Executed, Run Again?')
+        finally:
+            self.gamma_terminal_worker()
 
     def anomaly_install(self, button):
         if self.thread.is_alive():
@@ -171,11 +198,13 @@ class GuiAnomalyInstall:
         self.thread = threading.Thread(target=self.gamma_launcher_worker, args=(gamma_usvfs.run, button, args))
         self.thread.start()
 
-app = Gtk.Application(application_id='org.gamma_launcher')
-app.connect('activate', on_activate)
+
+app = GuiAnomalyInstall()
+
 
 def main():
     app.run(None)
 
-if __name__ == "__main__":
+
+if __name__ == '__main__':
     main()
