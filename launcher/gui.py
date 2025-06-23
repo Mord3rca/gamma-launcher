@@ -1,4 +1,5 @@
 import sys
+import re
 import threading
 import time
 from io import StringIO
@@ -28,6 +29,14 @@ class Args:
         self.preserve_user_config = False
 
 
+class Wrapper():
+    def __init__(self, function, line):
+        self.function = function
+        self.line = line
+    def __call__(self, button, state):
+        self.function(button, state, self.line)
+
+
 class StackWindow(Gtk.ApplicationWindow):
     """Window with stacked tabs."""
 
@@ -44,6 +53,11 @@ class StackWindow(Gtk.ApplicationWindow):
 
     def add_titled_to_stack(self, object_t, name, label):
         self.stack.add_titled(object_t, name, label)
+
+    def remove_titled_from_stack(self, name):
+        child = self.stack.get_child_by_name(name)
+        if child:
+            self.stack.remove(child)
 
     def init_stack(self):
         self.stack_switcher = Gtk.StackSwitcher()
@@ -64,6 +78,7 @@ class GuiAnomalyInstall(Gtk.Application):
         sys.stdout = self.output
         sys.stderr = self.output
         self.win = StackWindow(application=app)
+        self.mods = []
 
         self.win.init_stack()
         self.win.present()
@@ -72,6 +87,7 @@ class GuiAnomalyInstall(Gtk.Application):
         self.generic_tab('Full Gamma Setup', ['Anomaly Dir', 'Gamma Dir', 'Custom Gamma Definition', 'Custom Gamma Repository', 'Cache Dir'], self.full_install)
         self.generic_tab('Partial Gamma Setup', ['Anomaly Dir', 'Gamma Dir', 'Custom Gamma Definition', 'Custom Gamma Repository'], self.gamma_setup)
         self.generic_tab('Full Gamma Install', ['Anomaly Dir', 'Gamma Dir', 'Final Gamma Dir'], self.gamma_usvfs)
+        self.mod_chooser_tab()
 
     def generic_tab(self, name, list_inputs, install_fnct):
         box_outer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=24)
@@ -108,6 +124,80 @@ class GuiAnomalyInstall(Gtk.Application):
         box_outer.append(listbox)
         self.win.add_titled_to_stack(box_outer, name, name)
         self.win.init_stack()
+
+    def load_mods(self, button):
+        self.file_name = self.entries['Mod Chooser'][0].get_chars(0, -1)
+        with open(self.file_name, 'r') as mods:
+            self.mods = mods.readlines()
+        self.win. remove_titled_from_stack('Mod Chooser')
+        self.mod_chooser_tab()
+
+    def do_switch(self, button, state, line):
+        line_content = self.mods [line]
+        if state:
+            cont_state = '+'
+        else:
+            cont_state = '-'
+        line_content = re.sub(r'^[+-]', cont_state, line_content)
+        self.mods[line] = line_content
+        with open(self.file_name, 'w') as mods_cont:
+            mods_cont.write("".join(self.mods))
+
+    def mod_chooser_tab(self):
+        name = 'Mod Chooser'
+        box_outer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=24)
+        listbox = Gtk.ListBox()
+        listbox.props.selection_mode = Gtk.SelectionMode.NONE
+        listbox.props.show_separators = True
+        scroll = Gtk.ScrolledWindow()
+        scroll.set_propagate_natural_height(True)
+        scroll.set_child(listbox)
+        row = Gtk.ListBoxRow()
+        hbox = Gtk.ListBox()
+        hbox.append(Gtk.Label(label='Modlist file'))
+        entry = Gtk.Entry()
+        self.entries[name] = []
+        self.entries[name].append(entry)
+        button = Gtk.Button()
+        button.set_label('Load')
+        hbox.append(entry)
+        hbox.append(button)
+        button.connect('clicked', self.load_mods)
+
+        mods_number = len(self.mods)
+        for i in reversed([j.strip() for j in self.mods]):
+            if len(i) == 0 or i[0] == '#':
+                mods_number -= 1
+                continue
+            if '_separator' in i:
+                mods_number -= 1
+                k = re.split(r"[_ ]", i)[1]
+                hbox.append(Gtk.Separator())
+                hbox.append(Gtk.Label(label=k))
+                hbox.append(Gtk.Separator())
+            else:
+                vbox = Gtk.Box()
+                k = i[1:-1]
+                state = i[0]
+                vbox.set_orientation(Gtk.Orientation.HORIZONTAL)
+                switch = Gtk.Switch()
+                if state == '+':
+                    switch.set_state(True)
+                    switch.set_active(True)
+                else:
+                    switch.set_state(False)
+                    switch.set_active(False)
+                switch.connect('state_set', Wrapper(self.do_switch, mods_number-1))
+                mods_number -= 1
+                vbox.append(switch)
+                vbox.append(Gtk.Label(label=k))
+                hbox.append(vbox)
+        #hbox.append(vbox)
+        row.set_child(hbox)
+        #hbox.append(vbox)
+        listbox.append(row)
+        box_outer.append(scroll)
+        self.win.add_titled_to_stack(box_outer, name, name)
 
     def gamma_terminal_worker(self):
         self.textbuffer.insert(self.textbuffer.get_end_iter(), self.output.getvalue())
