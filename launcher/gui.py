@@ -79,6 +79,7 @@ class GuiAnomalyInstall(Gtk.Application):
         sys.stderr = self.output
         self.win = StackWindow(application=app)
         self.mods = []
+        self.entry_buffers = {}
 
         self.win.init_stack()
         self.win.present()
@@ -100,7 +101,9 @@ class GuiAnomalyInstall(Gtk.Application):
         self.entries[name] = []
         for i in list_inputs:
             hbox.append(Gtk.Label(label=i))
-            entry = Gtk.Entry()
+            if i not in self.entry_buffers:
+                self.entry_buffers[i] = Gtk.EntryBuffer()
+            entry = Gtk.Entry.new_with_buffer(self.entry_buffers[i])
             self.entries[name].append(entry)
             hbox.append(entry)
         self.button = Gtk.Button()
@@ -127,6 +130,7 @@ class GuiAnomalyInstall(Gtk.Application):
 
     def load_mods(self, button):
         self.file_name = self.entries['Mod Chooser'][0].get_chars(0, -1)
+        self.file_name += 'profiles/G.A.M.M.A/modlist.txt'
         with open(self.file_name, 'r') as mods:
             self.mods = mods.readlines()
         self.win. remove_titled_from_stack('Mod Chooser')
@@ -154,8 +158,10 @@ class GuiAnomalyInstall(Gtk.Application):
         scroll.set_child(listbox)
         row = Gtk.ListBoxRow()
         hbox = Gtk.ListBox()
-        hbox.append(Gtk.Label(label='Modlist file'))
-        entry = Gtk.Entry()
+        hbox.append(Gtk.Label(label='Gamma Dir'))
+        if 'Gamma Dir' not in self.entry_buffers:
+            self.entry_buffers['Gamma Dir'] = Gtk.EntryBuffer()
+        entry = Gtk.Entry.new_with_buffer(self.entry_buffers['Gamma Dir'])
         self.entries[name] = []
         self.entries[name].append(entry)
         button = Gtk.Button()
