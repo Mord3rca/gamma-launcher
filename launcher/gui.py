@@ -75,8 +75,12 @@ class GuiAnomalyInstall(Gtk.Application):
         self.textbuffer = Gtk.TextBuffer()
         self.stderr = sys.stderr
         self.stdout = sys.stdout
-        sys.stdout = self.output
-        sys.stderr = self.output
+        if len(sys.argv) > 1 and sys.argv[1] == '--debug':
+            print("stdout and stderr aren't redirected")
+        else:
+            print("Redirecting stdout and stderr")
+            sys.stdout = self.output
+            sys.stderr = self.output
         self.win = StackWindow(application=app)
         self.mods = []
         self.entry_buffers = {}
