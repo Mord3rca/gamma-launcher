@@ -84,6 +84,7 @@ class GuiAnomalyInstall(Gtk.Application):
         self.win = StackWindow(application=app)
         self.mods = []
         self.entry_buffers = {}
+        self.load_button = None
 
         self.win.init_stack()
         self.win.present()
@@ -139,11 +140,14 @@ class GuiAnomalyInstall(Gtk.Application):
             with open(self.file_name, 'r') as mods:
                 self.mods = mods.readlines()
         except:
-            button.set_label("modlist.txt not found, try to Load again")
+            self.win.remove_titled_from_stack('Mod Chooser')
+            self.mods = []
+            self.mod_chooser_tab()
+            self.load_button.set_label("modlist.txt not found, try to Load again?")
         else:
-            button.set_label('Executed, Run Again?')
-        self.win. remove_titled_from_stack('Mod Chooser')
-        self.mod_chooser_tab()
+            self.win.remove_titled_from_stack('Mod Chooser')
+            self.mod_chooser_tab()
+            self.load_button.set_label('Loaded, Run Again?')
 
     def do_switch(self, button, state, line):
         line_content = self.mods [line]
@@ -173,11 +177,11 @@ class GuiAnomalyInstall(Gtk.Application):
         entry = Gtk.Entry.new_with_buffer(self.entry_buffers['Gamma Dir'])
         self.entries[name] = []
         self.entries[name].append(entry)
-        button = Gtk.Button()
-        button.set_label('Load')
+        self.load_button = Gtk.Button()
+        self.load_button.set_label('Load')
         hbox.append(entry)
-        hbox.append(button)
-        button.connect('clicked', self.load_mods)
+        hbox.append(self.load_button)
+        self.load_button.connect('clicked', self.load_mods)
 
         mods_number = len(self.mods)
         for i in reversed([j.strip() for j in self.mods]):
