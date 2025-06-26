@@ -134,9 +134,14 @@ class GuiAnomalyInstall(Gtk.Application):
 
     def load_mods(self, button):
         self.file_name = self.entries['Mod Chooser'][0].get_chars(0, -1)
-        self.file_name += 'profiles/G.A.M.M.A/modlist.txt'
-        with open(self.file_name, 'r') as mods:
-            self.mods = mods.readlines()
+        self.file_name += '/profiles/G.A.M.M.A/modlist.txt'
+        try:
+            with open(self.file_name, 'r') as mods:
+                self.mods = mods.readlines()
+        except:
+            button.set_label("modlist.txt not found, try to Load again")
+        else:
+            button.set_label('Executed, Run Again?')
         self.win. remove_titled_from_stack('Mod Chooser')
         self.mod_chooser_tab()
 
