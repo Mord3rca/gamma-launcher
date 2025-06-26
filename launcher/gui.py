@@ -90,7 +90,7 @@ class GuiAnomalyInstall(Gtk.Application):
 
         self.generic_tab('Install Anomaly', ['Anomaly Dir', 'Cache Dir'], self.anomaly_install)
         self.generic_tab('Full Gamma Setup', ['Anomaly Dir', 'Gamma Dir', 'Custom Gamma Definition', 'Custom Gamma Repository', 'Cache Dir'], self.full_install)
-        self.generic_tab('Partial Gamma Setup', ['Anomaly Dir', 'Gamma Dir', 'Custom Gamma Definition', 'Custom Gamma Repository'], self.gamma_setup)
+        self.generic_tab('Partial Gamma Setup', ['Anomaly Dir', 'Gamma Dir', 'Custom Gamma Definition', 'Custom Gamma Repository', 'Cache Dir'], self.gamma_setup)
         self.generic_tab('Full Gamma Install', ['Anomaly Dir', 'Gamma Dir', 'Final Gamma Dir'], self.gamma_usvfs)
         self.mod_chooser_tab()
 
@@ -272,12 +272,14 @@ class GuiAnomalyInstall(Gtk.Application):
         gamma_dir = self.entries['Partial Gamma Setup'][1].get_chars(0, -1)
         custom_def = self.entries['Partial Gamma Setup'][2].get_chars(0, -1)
         custom_repo = self.entries['Partial Gamma Setup'][3].get_chars(0, -1)
+        cache_dir = self.entries['Full Gamma Setup'][4].get_chars(0, -1)
         gamma_setup = GammaSetup()
         args = Args()
         args.anomaly = anomaly_dir
         args.gamma = gamma_dir
         args.custom_def = custom_def if custom_def else ''
         args.custom_repo = custom_repo if custom_repo else 'Grokitach/Stalker_GAMMA'
+        args.cache_path = cache_dir
 
         self.thread = threading.Thread(target=self.gamma_launcher_worker, args=(gamma_setup.run, button, args))
         self.thread.start()
