@@ -305,6 +305,7 @@ app = GuiAnomalyInstall()
 
 
 def main():
+    GLib.threads_init()
     app.run(None)
 
 
