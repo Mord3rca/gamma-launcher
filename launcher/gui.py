@@ -1,3 +1,4 @@
+import json
 import os
 import pathlib
 import re
@@ -7,11 +8,13 @@ import time
 from io import StringIO
 
 import gi
+gi.require_version('Gtk', '4.0')
 from gi.repository import GLib, Gtk
 
-from launcher.commands import AnomalyInstall, FullInstall, GammaSetup, Usvfs
+from launcher import __title__
+from launcher.commands import AnomalyInstall, FullInstall, Usvfs
 
-gi.require_version('Gtk', '4.0')
+from platformdirs import user_config_path
 
 
 class Args:
@@ -41,6 +44,27 @@ class Wrapper():
 
     def __call__(self, button, state):
         self.function(button, state, self.line)
+
+
+class SavedDefault():
+
+    def __init__(self):
+        self.config_file_path = user_config_path(__title__) / 'gui.json'
+        self.dictionary = {}
+        if self.config_file_path.exists():
+            with open(self.config_file_path, 'r') as file:
+                self.dictionary = json.load(file)
+
+    def add(self, name, text):
+        self.dictionary[name] = text
+        with open(self.config_file_path, 'w') as file:
+            json.dump(self.dictionary, file)
+
+    def get(self, name):
+        if name in self.dictionary:
+            return self.dictionary[name]
+        else:
+            return None
 
 
 class StackWindow(Gtk.ApplicationWindow):
@@ -92,12 +116,13 @@ class GuiAnomalyInstall(Gtk.Application):
         self.entry_buffers = {}
         self.load_button = None
 
+        self.save = SavedDefault()
+
         self.win.init_stack()
         self.win.present()
 
         self.generic_tab('Install Anomaly', ['Anomaly Dir', 'Cache Dir'], self.anomaly_install)
         self.generic_tab('Full Gamma Setup', ['Anomaly Dir', 'Gamma Dir', 'Custom Gamma Definition', 'Custom Gamma Repository', 'Cache Dir'], self.full_install)
-        self.generic_tab('Partial Gamma Setup', ['Anomaly Dir', 'Gamma Dir', 'Custom Gamma Definition', 'Custom Gamma Repository', 'Cache Dir'], self.gamma_setup)
         self.generic_tab('Full Gamma Install', ['Anomaly Dir', 'Gamma Dir', 'Final Gamma Dir'], self.gamma_usvfs)
         self.mod_chooser_tab()
 
@@ -117,6 +142,9 @@ class GuiAnomalyInstall(Gtk.Application):
             hbox.append(Gtk.Label(label=i))
             if i not in self.entry_buffers:
                 self.entry_buffers[i] = Gtk.EntryBuffer()
+                if self.save.get(i):
+                    self.entry_buffers[i].set_text(self.save.get(i), -1)
+
             entry = Gtk.Entry.new_with_buffer(self.entry_buffers[i])
             self.entries[name].append(entry)
             hbox.append(entry)
@@ -183,6 +211,8 @@ class GuiAnomalyInstall(Gtk.Application):
         hbox.append(Gtk.Label(label='Gamma Dir'))
         if 'Gamma Dir' not in self.entry_buffers:
             self.entry_buffers['Gamma Dir'] = Gtk.EntryBuffer()
+            if self.save.get('Gamma Dir'):
+                self.entry_buffers['Gamma Dir'].set_text(self.save.get('Gamma Dir'), -1)
         entry = Gtk.Entry.new_with_buffer(self.entry_buffers['Gamma Dir'])
         self.entries[name] = []
         self.entries[name].append(entry)
@@ -215,7 +245,7 @@ class GuiAnomalyInstall(Gtk.Application):
                 else:
                     switch.set_state(False)
                     switch.set_active(False)
-                switch.connect('state_set', Wrapper(self.do_switch, mods_number-1))
+                switch.connect('state_set', Wrapper(self.do_switch, mods_number - 1))
                 mods_number -= 1
                 vbox.append(switch)
                 vbox.append(Gtk.Label(label=k))
@@ -250,8 +280,14 @@ class GuiAnomalyInstall(Gtk.Application):
         if self.thread.is_alive():
             return
         button.set_label('Executing')
-        anomaly_dir = self.entries['Install Anomaly'][0].get_chars(0, -1)
-        cache_dir = self.entries['Install Anomaly'][1].get_chars(0, -1)
+
+        names = ['Anomaly Dir', 'Cache Dir']
+        name = 'Install Anomaly'
+        anomaly_dir = self.entries[name][0].get_chars(0, -1)
+        self.save.add(names[0], anomaly_dir)
+        cache_dir = self.entries[name][1].get_chars(0, -1)
+        self.save.add(names[1], cache_dir)
+
         anomaly_install = AnomalyInstall()
         args = Args()
         args.anomaly = anomaly_dir
@@ -264,11 +300,19 @@ class GuiAnomalyInstall(Gtk.Application):
         if self.thread.is_alive():
             return
         button.set_label('Executing')
-        anomaly_dir = self.entries['Full Gamma Setup'][0].get_chars(0, -1)
-        gamma_dir = self.entries['Full Gamma Setup'][1].get_chars(0, -1)
-        custom_def = self.entries['Full Gamma Setup'][2].get_chars(0, -1)
-        custom_repo = self.entries['Full Gamma Setup'][3].get_chars(0, -1)
-        cache_dir = self.entries['Full Gamma Setup'][4].get_chars(0, -1)
+
+        names = ['Anomaly Dir', 'Gamma Dir', 'Custom Gamma Definition', 'Custom Gamma Repository', 'Cache Dir']
+        name = 'Full Gamma Setup'
+        anomaly_dir = self.entries[name][0].get_chars(0, -1)
+        self.save.add(names[0], anomaly_dir)
+        gamma_dir = self.entries[name][1].get_chars(0, -1)
+        self.save.add(names[1], gamma_dir)
+        custom_def = self.entries[name][2].get_chars(0, -1)
+        self.save.add(names[2], custom_def)
+        custom_repo = self.entries[name][3].get_chars(0, -1)
+        self.save.add(names[3], custom_repo)
+        cache_dir = self.entries[name][4].get_chars(0, -1)
+        self.save.add(names[4], cache_dir)
         full_install = FullInstall()
         args = Args()
         args.anomaly = anomaly_dir
@@ -280,33 +324,19 @@ class GuiAnomalyInstall(Gtk.Application):
         self.thread = threading.Thread(target=self.gamma_launcher_worker, args=(full_install.run, button, args), daemon=True)
         self.thread.start()
 
-    def gamma_setup(self, button):
-        if self.thread.is_alive():
-            return
-        button.set_label('Executing')
-        anomaly_dir = self.entries['Partial Gamma Setup'][0].get_chars(0, -1)
-        gamma_dir = self.entries['Partial Gamma Setup'][1].get_chars(0, -1)
-        custom_def = self.entries['Partial Gamma Setup'][2].get_chars(0, -1)
-        custom_repo = self.entries['Partial Gamma Setup'][3].get_chars(0, -1)
-        cache_dir = self.entries['Full Gamma Setup'][4].get_chars(0, -1)
-        gamma_setup = GammaSetup()
-        args = Args()
-        args.anomaly = anomaly_dir
-        args.gamma = gamma_dir
-        args.custom_def = custom_def if custom_def else ''
-        args.custom_repo = custom_repo if custom_repo else 'Grokitach/Stalker_GAMMA'
-        args.cache_path = cache_dir
-
-        self.thread = threading.Thread(target=self.gamma_launcher_worker, args=(gamma_setup.run, button, args), daemon=True)
-        self.thread.start()
-
     def gamma_usvfs(self, button):
         if self.thread.is_alive():
             return
         button.set_label('Executing')
-        anomaly_dir = self.entries['Full Gamma Install'][0].get_chars(0, -1)
-        gamma_dir = self.entries['Full Gamma Install'][1].get_chars(0, -1)
-        final = self.entries['Full Gamma Install'][2].get_chars(0, -1)
+
+        names = ['Anomaly Dir', 'Gamma Dir', 'Final Gamma Dir']
+        name = 'Full Gamma Install'
+        anomaly_dir = self.entries[name][0].get_chars(0, -1)
+        self.save.add(names[0], anomaly_dir)
+        gamma_dir = self.entries[name][1].get_chars(0, -1)
+        self.save.add(names[1], gamma_dir)
+        final = self.entries[name][2].get_chars(0, -1)
+        self.save.add(names[2], final)
         gamma_usvfs = Usvfs()
         args = Args()
         args.anomaly = anomaly_dir

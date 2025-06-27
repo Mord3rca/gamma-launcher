@@ -1,2 +1,5 @@
 [flake8]
 max-line-length = 180
+per-file-ignores =
+	launcher/gui.py:E402
+	build/lib/launcher/gui.py:E402
