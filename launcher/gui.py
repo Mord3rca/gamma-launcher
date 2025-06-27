@@ -1,8 +1,10 @@
 import sys
+import os
 import re
 import pathlib
 import threading
 import time
+import signal
 from io import StringIO
 
 import gi
@@ -95,6 +97,9 @@ class GuiAnomalyInstall(Gtk.Application):
         self.generic_tab('Partial Gamma Setup', ['Anomaly Dir', 'Gamma Dir', 'Custom Gamma Definition', 'Custom Gamma Repository', 'Cache Dir'], self.gamma_setup)
         self.generic_tab('Full Gamma Install', ['Anomaly Dir', 'Gamma Dir', 'Final Gamma Dir'], self.gamma_usvfs)
         self.mod_chooser_tab()
+
+    def do_shutdown(self):
+        os._exit(0)
 
     def generic_tab(self, name, list_inputs, install_fnct):
         box_outer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=24)
@@ -233,8 +238,8 @@ class GuiAnomalyInstall(Gtk.Application):
         GLib.idle_add(self.gamma_terminal_worker)
         try:
             target(args)
-        except:
-            button.set_label('Failed, Try Again?')
+        except Exception as err:
+            button.set_label(f'{err}, Try Again?')
         else:
             button.set_label('Executed, Run Again?')
         finally:
@@ -251,7 +256,7 @@ class GuiAnomalyInstall(Gtk.Application):
         args.anomaly = anomaly_dir
         args.cache_path = cache_dir
 
-        self.thread = threading.Thread(target=self.gamma_launcher_worker, args=(anomaly_install.run, button, args))
+        self.thread = threading.Thread(target=self.gamma_launcher_worker, args=(anomaly_install.run, button, args), daemon=True)
         self.thread.start()
 
     def full_install(self, button):
@@ -271,7 +276,7 @@ class GuiAnomalyInstall(Gtk.Application):
         args.custom_repo = custom_repo if custom_repo else 'Grokitach/Stalker_GAMMA'
         args.cache_path = cache_dir
 
-        self.thread = threading.Thread(target=self.gamma_launcher_worker, args=(full_install.run, button, args))
+        self.thread = threading.Thread(target=self.gamma_launcher_worker, args=(full_install.run, button, args), daemon=True)
         self.thread.start()
 
     def gamma_setup(self, button):
@@ -291,7 +296,7 @@ class GuiAnomalyInstall(Gtk.Application):
         args.custom_repo = custom_repo if custom_repo else 'Grokitach/Stalker_GAMMA'
         args.cache_path = cache_dir
 
-        self.thread = threading.Thread(target=self.gamma_launcher_worker, args=(gamma_setup.run, button, args))
+        self.thread = threading.Thread(target=self.gamma_launcher_worker, args=(gamma_setup.run, button, args), daemon=True)
         self.thread.start()
 
     def gamma_usvfs(self, button):
@@ -307,7 +312,7 @@ class GuiAnomalyInstall(Gtk.Application):
         args.gamma = gamma_dir
         args.final = final
 
-        self.thread = threading.Thread(target=self.gamma_launcher_worker, args=(gamma_usvfs.run, button, args))
+        self.thread = threading.Thread(target=self.gamma_launcher_worker, args=(gamma_usvfs.run, button, args), daemon=True)
         self.thread.start()
 
 
