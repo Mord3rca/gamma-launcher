@@ -1,17 +1,18 @@
-import sys
 import os
-import re
 import pathlib
+import re
+import sys
 import threading
 import time
-import signal
 from io import StringIO
 
 import gi
-gi.require_version('Gtk', '4.0')
 from gi.repository import GLib, Gtk
 
 from launcher.commands import AnomalyInstall, FullInstall, GammaSetup, Usvfs
+
+gi.require_version('Gtk', '4.0')
+
 
 class Args:
     """Arguments sent to gamma-launcher module."""
@@ -33,9 +34,11 @@ class Args:
 
 
 class Wrapper():
+
     def __init__(self, function, line):
         self.function = function
         self.line = line
+
     def __call__(self, button, state):
         self.function(button, state, self.line)
 
@@ -79,9 +82,9 @@ class GuiAnomalyInstall(Gtk.Application):
         self.stderr = sys.stderr
         self.stdout = sys.stdout
         if len(sys.argv) > 1 and sys.argv[1] == '--debug':
-            print("stdout and stderr aren't redirected")
+            print('Not redirecting stdout and stderr')
         else:
-            print("Redirecting stdout and stderr")
+            print('Redirecting stdout and stderr')
             sys.stdout = self.output
             sys.stderr = self.output
         self.win = StackWindow(application=app)
@@ -145,18 +148,18 @@ class GuiAnomalyInstall(Gtk.Application):
         try:
             with open(self.file_name, 'r') as mods:
                 self.mods = mods.readlines()
-        except:
+        except Exception as err:
             self.win.remove_titled_from_stack('Mod Chooser')
             self.mods = []
             self.mod_chooser_tab()
-            self.load_button.set_label("modlist.txt not found, try to Load again?")
+            self.load_button.set_label(f'{err}, try to Load again?')
         else:
             self.win.remove_titled_from_stack('Mod Chooser')
             self.mod_chooser_tab()
             self.load_button.set_label('Loaded, Run Again?')
 
     def do_switch(self, button, state, line):
-        line_content = self.mods [line]
+        line_content = self.mods[line]
         if state:
             cont_state = '+'
         else:
@@ -164,7 +167,7 @@ class GuiAnomalyInstall(Gtk.Application):
         line_content = re.sub(r'^[+-]', cont_state, line_content)
         self.mods[line] = line_content
         with open(self.file_name, 'w') as mods_cont:
-            mods_cont.write("".join(self.mods))
+            mods_cont.write(''.join(self.mods))
 
     def mod_chooser_tab(self):
         name = 'Mod Chooser'
@@ -196,7 +199,7 @@ class GuiAnomalyInstall(Gtk.Application):
                 continue
             if '_separator' in i:
                 mods_number -= 1
-                k = re.split(r"[_ ]", i)[1]
+                k = re.split(r'[_ ]', i)[1]
                 hbox.append(Gtk.Separator())
                 hbox.append(Gtk.Label(label=k))
                 hbox.append(Gtk.Separator())
@@ -217,9 +220,7 @@ class GuiAnomalyInstall(Gtk.Application):
                 vbox.append(switch)
                 vbox.append(Gtk.Label(label=k))
                 hbox.append(vbox)
-        #hbox.append(vbox)
         row.set_child(hbox)
-        #hbox.append(vbox)
         listbox.append(row)
         box_outer.append(scroll)
         self.win.add_titled_to_stack(box_outer, name, name)
