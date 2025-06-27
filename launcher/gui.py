@@ -1,5 +1,6 @@
 import sys
 import re
+import pathlib
 import threading
 import time
 from io import StringIO
@@ -135,7 +136,7 @@ class GuiAnomalyInstall(Gtk.Application):
 
     def load_mods(self, button):
         self.file_name = self.entries['Mod Chooser'][0].get_chars(0, -1)
-        self.file_name += '/profiles/G.A.M.M.A/modlist.txt'
+        self.file_name = pathlib.Path(self.file_name) / 'profiles' / 'G.A.M.M.A' / 'modlist.txt'
         try:
             with open(self.file_name, 'r') as mods:
                 self.mods = mods.readlines()
