@@ -13,8 +13,7 @@ requires-python = ">=3.10"
 license = {text = "GPLv3"}
 dependencies = [
     "beautifulsoup4", "cloudscraper", "GitPython", "platformdirs",
-    "py7zr", "unrar", "requests", "tenacity",
-    "tqdm", "PyGObject"
+    "py7zr", "unrar", "requests", "tenacity", "tqdm"
 ]
 classifiers = [
     'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
@@ -30,8 +29,13 @@ dynamic = ["version"]
 Homepage = "https://github.com/Mord3rca/gamma-launcher"
 Issues = "https://github.com/Mord3rca/gamma-launcher/issues"
 
+[project.optional-dependencies]
+gui = ["PyGObject"]
+
 [project.scripts]
 gamma-launcher = "launcher.cli:main"
+
+[project.gui-scripts]
 gui-gamma-launcher = "launcher.gui:main"
 
 [tool.setuptools.dynamic]

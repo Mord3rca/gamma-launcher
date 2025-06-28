@@ -23,6 +23,8 @@ If currently in your gamma-launcher folder, you can simply type `pip install .` 
 
 If all went well, you can now use the `gamma-launcher` command as intended.
 
+To allow `gui-gamma-launcher` to run, which is a GTK frontend, install this source with: `pip install directory[gui]`
+
 (Type `deactivate` to leave the virtual environment. Use the previous `source` command to re-enter it.)
 
 ### Using release
