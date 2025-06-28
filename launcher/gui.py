@@ -50,6 +50,26 @@ class Wrapper():
         self.function(button, state, self.line)
 
 
+class FileWrapper():
+
+    def __init__(self, function, line):
+        self.function = function
+        self.line = line
+
+    def __call__(self, button):
+        self.function(button, self.line)
+
+
+class FileDialogWrapper():
+
+    def __init__(self, function, line):
+        self.function = function
+        self.line = line
+
+    def __call__(self, button, result):
+        self.function(button, result, self.line)
+
+
 class SavedDefault():
 
     def __init__(self):
@@ -133,6 +153,19 @@ class GuiAnomalyInstall(Gtk.Application):
     def do_shutdown(self):
         os._exit(0)
 
+    def fill_folder_entry(self, dialog, result, name):
+        try:
+            folder = dialog.select_folder_finish(result)
+        except Gtk.DialogError:
+            pass
+        else:
+            self.entry_buffers[name].set_text(f'{folder.get_path()}', -1)
+            self.save.add(name, f'{folder.get_path()}')
+
+    def fill_folder(self, button, name):
+        file_d = Gtk.FileDialog()
+        file_d.select_folder(None, None, FileDialogWrapper(self.fill_folder_entry, name))
+
     def generic_tab(self, name, list_inputs, install_fnct):
         box_outer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=24)
         listbox = Gtk.ListBox()
@@ -148,10 +181,20 @@ class GuiAnomalyInstall(Gtk.Application):
                 self.entry_buffers[i] = Gtk.EntryBuffer()
                 if self.save.get(i):
                     self.entry_buffers[i].set_text(self.save.get(i), -1)
-
+            vbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
             entry = Gtk.Entry.new_with_buffer(self.entry_buffers[i])
+            entry.set_hexpand(True)
             self.entries[name].append(entry)
-            hbox.append(entry)
+            vbox.append(entry)
+
+            if 'Custom' not in i:
+                button = Gtk.Button()
+                button.set_icon_name('folder')
+                button.connect('clicked', FileWrapper(self.fill_folder, i))
+                vbox.append(button)
+            hbox.append(vbox)
+            hbox.append(Gtk.Separator())
+
         self.button = Gtk.Button()
         self.button.set_label('Execute')
         self.button.connect('clicked', install_fnct)
