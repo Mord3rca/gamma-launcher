@@ -7,9 +7,13 @@ import threading
 import time
 from io import StringIO
 
-import gi
-gi.require_version('Gtk', '4.0')
-from gi.repository import GLib, Gtk
+try:
+    import gi
+    gi.require_version('Gtk', '4.0')
+    from gi.repository import GLib, Gtk
+except ImportError:
+    print("Please reinstall from source with '[gui]' extra to use this command.", file=sys.stderr)
+    sys.exit(1)
 
 from launcher import __title__
 from launcher.commands import AnomalyInstall, FullInstall, Usvfs
