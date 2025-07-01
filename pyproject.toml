@@ -43,3 +43,7 @@ version = {attr = "launcher.__version__"}
 
 [tool.setuptools.packages.find]
 include = ["launcher*"]
+
+[tool.setuptools.data-files]
+"share/applications" = ["gamma-launcher.desktop"]
+"share/icons/hicolor/256x256/apps/" = ["gamma-launcher.png"]
