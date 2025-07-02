@@ -104,13 +104,23 @@ To use it: `gamma-launcher test-mod-maker --gamma <GAMMA path>`
 
 ### Glibc Errors
 
-Install gamma launcher in a [venv](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#creating-a-virtual-environment). See the *Using pip (from source)* section above.
+Install gamma launcher in a venv. See the [Using pip (from source)](#using-pip-from-source) section above.
 
-### Magic Errors
+### ModuleNotFoundError: No module named 'distutils'
 
-Try prepending `MAGIC=/usr/share/file/misc/magic` or `LD_PRELOAD=/usr/lib/libmagic.so` to the `./gamma-launcher` command.
+The `distutils` module is required to install Python packages but it was removed in Python 3.12.
+You can still use it by installing `setuptools` (inside the venv):
 
-Otherwise, attempt to run in a [venv](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#creating-a-virtual-environment).
+```sh
+(venv) $ pip install setuptools
+```
+
+### LookupError: Couldn't find path to unrar library.
+You are missing a library that extracts RAR files. You can use something like `libunrar` on Linux. To install it run the following command:
+- On Debian **(non-free APT repository required)**: `sudo apt install libunrar5`
+- On Ubuntu: `sudo apt install libunrar5t64`
+- On Fedora **(RPM Fusion required)**: `sudo dnf install libunrar`. Note that before the installation you will need to enable the **non-free** RPM Fusion repository since the default package provided by Fedora will cause problems. [Instructions on how to enable it here](https://rpmfusion.org/Configuration).
+- On Arch/Manjaro: `sudo pacman -S libunrar`
 
 ### Shader compilation error
 
@@ -122,30 +132,34 @@ Also remove some shaders mods:
 * 190- Screen Space Shaders - Ascii1457
 * 290- Atmospherics Shaders Weathers and Reshade - Hippobot
 
-### ModuleNotFoundError: No module named 'distutils'
+### Magic Errors
 
-The `distutils` module is required to install Python packages but it was removed in Python 3.12. You can still use it by installing `setuptools` (inside the venv): `pip install setuptools`
+Only **older version** of the launcher are affected
 
-### rarfile.RarCannotExec: Cannot find working tool (older version of gamma-launcher)
+Try prepending `MAGIC=/usr/share/file/misc/magic` or `LD_PRELOAD=/usr/lib/libmagic.so` to the `./gamma-launcher` command.
+
+Otherwise, attempt to run in a venv. See the [Using pip (from source)](#using-pip-from-source) section above.
+
+### rarfile.RarCannotExec: Cannot find working tool
+
+Only **older version** of the launcher are affected
 
 You are missing a tool that extracts RAR files. You can use something like `unrar` on Linux. To install it run the following command:
 - On Ubuntu/Debian: `sudo apt install unrar`
-- On Fedora **(RPM Fusion required)**: `sudo dnf install unrar`. Note that before the installation you will need to enable the **non-free** RPM Fusion repository since the default package provided by Fedora will cause problems. [Instructions on how to enable it here](https://rpmfusion.org/Configuration).
+- On Fedora **(RPM Fusion required)**: `sudo dnf install unrar`. Note that before the installation you will need to enable the **non-free**
+  RPM Fusion repository since the default package provided by Fedora will cause problems.
+  [Instructions on how to enable it here](https://rpmfusion.org/Configuration).
 - On Arch/Manjaro: `sudo pacman -S unrar`
 
-### SevenZipDecompressionError (older version of gamma-launcher)
+### SevenZipDecompressionError
+
+Only **older version** of the launcher are affected
 
 7zip seems to have trouble with this archive, if this is a rar file, make sure to install `7z` with rar capabilities.
 - On Ubuntu/Debian: `sudo apt install 7zip-rar`
 
 You can use `rarfile` module for decompressing by setting **GAMMA_LAUNCHER_USE_RARFILE** env.
 Warning: This may be slow for some archive
-
-### LookupError: Couldn't find path to unrar library.
-You are missing a library that extracts RAR files. You can use something like `libunrar` on Linux. To install it run the following command:
-- On Ubuntu/Debian: `sudo apt install libunrar5t64` or `sudo apt install libunrar5`
-- On Fedora **(RPM Fusion required)**: `sudo dnf install libunrar`. Note that before the installation you will need to enable the **non-free** RPM Fusion repository since the default package provided by Fedora will cause problems. [Instructions on how to enable it here](https://rpmfusion.org/Configuration).
-- On Arch/Manjaro: `sudo pacman -S libunrar`
 
 
 ### Something else ?
