@@ -1,5 +1,5 @@
 from git import Repo
-from os import getenv
+from os import getenv, environ
 from pathlib import Path
 from shutil import copytree
 from tempfile import TemporaryDirectory
@@ -14,6 +14,9 @@ if getenv("GAMMA_LAUNCHER_NO_GIT", None):
 class GithubDownloader(DefaultDownloader):
 
     def download(self, to: Path, use_cached: bool = False, filename: str = None) -> Path:
+        if getenv('_PYI_ARCHIVE_FILE') and getenv('LD_LIBRARY_PATH'):
+            del environ['LD_LIBRARY_PATH']
+
         user, project, *_ = self.regexp_url.match(self._url).groups()
         self._archive = to / f"{project}.git"
 
