@@ -7,26 +7,6 @@ This is a reimplementation of G.AM.M.A. launcher used for the first setup. You w
 
 ## Installation
 
-### Using release
-
-By downloading gamma-launcher from the [latest release](https://github.com/Mord3rca/gamma-launcher/releases/latest), you can use it without any installation. Everything is self contained in an executable. Release built with Ubuntu.
-
-Use the `--cache-directory` option to re-use previously downloaded files.
-
-### Using AUR (Arch Linux)
-
-**(NOT OFFICIALLY SUPPORTED)** On Arch Linux and Arch-based operating systems, you can download package from AUR:  
-
-`yay -S gamma-launcher`  
-
-Use at your own risk!
-
-Or you can build it by yourself:
-
-`git clone https://aur.archlinux.org/gamma-launcher.git`  
-`cd gamma-launcher`  
-`makepkg -sri`
-
 ### Using pip (from source)
 
 It's strongly advised to install this in a [venv](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#creating-a-virtual-environment) (Python Virtual Environment)
@@ -44,6 +24,28 @@ If currently in your gamma-launcher folder, you can simply type `pip install .` 
 If all went well, you can now use the `gamma-launcher` command as intended.
 
 (Type `deactivate` to leave the virtual environment. Use the previous `source` command to re-enter it.)
+
+### Using release
+
+By downloading gamma-launcher from the [latest release](https://github.com/Mord3rca/gamma-launcher/releases/latest), you can use it without any installation. Everything is self contained in an executable. Release built with Ubuntu.
+
+Use the `--cache-directory` option to re-use previously downloaded files.
+
+### Using AUR (Arch Linux)
+
+This installation method is **not supported** on this repo, contact [AUR maintainers](https://aur.archlinux.org/packages/gamma-launcher) for any issue with this installation method.
+
+On Arch Linux and Arch-based operating systems, you can download package from AUR:
+
+`yay -S gamma-launcher`
+
+Use at your own risk!
+
+Or you can build it by yourself:
+
+`git clone https://aur.archlinux.org/gamma-launcher.git`
+`cd gamma-launcher`
+`makepkg -sri`
 
 ## Commands
 
