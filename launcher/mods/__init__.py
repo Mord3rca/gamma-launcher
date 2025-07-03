@@ -164,4 +164,21 @@ def read_mod_maker(mod_path: Path) -> List[ModBase]:  # noqa: C901
         'iurl': 'https://github.com/Grokitach/gamma_large_files_v2',
     })
 
+    _register_git_mod(git_mods, **{
+        'name': '405- IWP Benelli - frostychun',
+        'url': 'https://www.moddb.com/addons/start/222467',
+        'add_dirs': None,
+        'author': 'frostychun',
+        'title': 'IWP Benelli',
+        'iurl': 'https://github.com/Grokitach/gamma_large_files_v2',
+    })
+    _register_git_mod(git_mods, **{
+        'name': '407- IWP MP9 - frostychun',
+        'url': 'https://www.moddb.com/addons/start/222467',
+        'add_dirs': None,
+        'author': 'frostychun',
+        'title': 'IWP MP9',
+        'iurl': 'https://github.com/Grokitach/gamma_large_files_v2',
+    })
+
     return git_mods + result
