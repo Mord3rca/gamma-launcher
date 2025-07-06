@@ -1,6 +1,6 @@
 from pathlib import Path
 from platform import system
-from os import environ, execve, getenv
+from os import environ, execve, getenv, pathsep
 from sys import argv, stderr
 
 
@@ -46,8 +46,35 @@ def __pyi_ssl_certs_workaround() -> None:
     )
 
 
+def __find_7z_path() -> None:
+    # Adding default 7-Zip path or user defined to PATH
+    if getenv('LAUNCHER_WIN32_7Z_PATH'):
+        environ['PATH'] += pathsep + getenv('LAUNCHER_WIN32_7Z_PATH')
+        return
+
+    default_install_path = (
+        'C:\\Program Files\\7-Zip',
+        'C:\\Program Files (x86)\\7-Zip',
+    )
+
+    for dir in default_install_path:
+        if Path(dir).exists():
+            environ['PATH'] += pathsep + dir
+            break
+    else:
+        print(
+            '[~] 7z default path not found. '
+            'Set LAUNCHER_WIN32_7Z_PATH env variable to allow archive manipulation',
+            file=stderr
+        )
+
+
 def __linux_bootstrap() -> None:
     __pyi_ssl_certs_workaround()
+
+
+def __windows_bootstrap() -> None:
+    __find_7z_path()
 
 
 def __noop() -> None:
@@ -56,7 +83,8 @@ def __noop() -> None:
 
 def bootstrap() -> None:
     {
-        'Linux': __linux_bootstrap
+        'Linux': __linux_bootstrap,
+        'Windows': __windows_bootstrap,
     }.get(system(), __noop)()
 
 
