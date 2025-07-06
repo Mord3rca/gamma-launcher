@@ -4,9 +4,13 @@ from os import environ, execve, getenv
 from sys import argv, stderr
 
 
+def is_in_pyinstaller_context() -> bool:
+    return bool(getenv("_PYI_ARCHIVE_FILE"))
+
+
 def pyi_ssl_certs_workaround() -> None:
     # Will only run on linux if in a Pyinstaller context
-    if not (system() == 'linux' or getenv("_PYI_ARCHIVE_FILE")):
+    if not (system() == 'linux' or is_in_pyinstaller_context()):
         return
 
     if getenv('SSL_CERT_DIR') or getenv('SSL_CERT_FILE'):
