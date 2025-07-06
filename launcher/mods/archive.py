@@ -24,21 +24,8 @@ def get_mime_from_file(filename) -> str:
 
 
 if system() == 'Windows':
-    from os import environ, getenv, pathsep
-
     class Win32ExtractError(Exception):
         pass
-
-    # Adding default 7-Zip path or user defined to PATH
-    if getenv('LAUNCHER_WIN32_7Z_PATH'):
-        environ['PATH'] += pathsep + getenv('LAUNCHER_WIN32_7Z_PATH')
-    else:
-        environ['PATH'] += pathsep + pathsep.join(
-            {
-                'C:\\Program Files\\7-Zip',
-                'C:\\Program Files (x86)\\7-Zip',
-            }
-        )
 
     def _win32_extract(f: str, p: str) -> None:
         if run(['7z', 'x', '-y', f'-o{p}', f], shell=True).returncode != 0:
