@@ -1,6 +1,6 @@
 from pathlib import Path
+from platform import system
 from tempfile import TemporaryDirectory
-from os import name as os_name
 
 from launcher.common import folder_to_install
 from launcher.mods import ModBase
@@ -36,7 +36,7 @@ class HotfixMalformedArchive:
             path.rename(dir / p)
 
 
-tempDirHotfixes = (HotfixPathCase, HotfixMalformedArchive) if not os_name == 'nt' else ()
+tempDirHotfixes = (HotfixPathCase, HotfixMalformedArchive) if not system() == 'Windows' else ()
 
 
 class DefaultTempDir(TemporaryDirectory, *tempDirHotfixes):

@@ -1,4 +1,4 @@
-from os import name as os_name
+from platform import system
 from py7zr import SevenZipFile
 from subprocess import run
 from typing import List
@@ -23,7 +23,7 @@ def get_mime_from_file(filename) -> str:
     raise Exception(f'File {filename} download failed, output is a unknown file type')
 
 
-if os_name == 'nt':
+if system() == 'Windows':
     from os import environ, getenv, pathsep
 
     class Win32ExtractError(Exception):
