@@ -1,5 +1,5 @@
 from pathlib import Path
-from platform import system
+from platform import machine, system
 from os import environ, execve, getenv, pathsep
 from sys import argv, stderr
 
@@ -69,12 +69,38 @@ def __find_7z_path() -> None:
         )
 
 
+def __find_unrardll() -> None:
+    # Already set by user, do nothing
+    if getenv('UNRAR_LIB_PATH'):
+        return
+
+    install_path = {
+        'AMD64': 'C:\\Program Files (x86)\\UnrarDLL\\x64\\UnRAR64.dll',
+    }
+
+    lib_path = install_path.get(machine())
+    if not lib_path:
+        print(f'[~] Unsupported architecture ({machine()}) for UnRARDLL auto-detect', file=stderr)
+        return
+
+    if not Path(lib_path).exists():
+        print(
+            '[~] UnRARDLL is not installed at its default location. Precise it with UNRAR_LIB_PATH env variable or '
+            'download it from here https://www.rarlab.com/rar_add.htm (select UnRAR.dll package)',
+            file=stderr
+        )
+        return
+
+    environ['UNRAR_LIB_PATH'] = lib_path
+
+
 def __linux_bootstrap() -> None:
     __pyi_ssl_certs_workaround()
 
 
 def __windows_bootstrap() -> None:
     __find_7z_path()
+    __find_unrardll()
 
 
 def __noop() -> None:
