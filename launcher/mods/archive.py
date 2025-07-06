@@ -20,7 +20,7 @@ def get_mime_from_file(filename) -> str:
         if f(d):
             return n
 
-    return 'Unknown'
+    raise Exception(f'File {filename} download failed, output is a unknown file type')
 
 
 if os_name == 'nt':
