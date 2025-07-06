@@ -4,6 +4,7 @@ from pathlib import Path
 from shutil import copytree
 from tempfile import TemporaryDirectory
 
+from launcher.bootstrap import is_in_pyinstaller_context
 from launcher.mods.downloader.base import DefaultDownloader
 
 
@@ -14,7 +15,7 @@ if getenv("GAMMA_LAUNCHER_NO_GIT", None):
 class GithubDownloader(DefaultDownloader):
 
     def download(self, to: Path, use_cached: bool = False, filename: str = None) -> Path:
-        if getenv('_PYI_ARCHIVE_FILE') and getenv('LD_LIBRARY_PATH'):
+        if is_in_pyinstaller_context() and getenv('LD_LIBRARY_PATH'):
             del environ['LD_LIBRARY_PATH']
 
         user, project, *_ = self.regexp_url.match(self._url).groups()
