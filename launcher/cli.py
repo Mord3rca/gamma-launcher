@@ -1,5 +1,6 @@
+import launcher.bootstrap  # noqa: F401
+
 from launcher import __title__, __version__
-from launcher.bootstrap import pyi_ssl_certs_workaround
 from launcher.commands import (
     AnomalyInstall,
     CheckAnomaly,
@@ -86,8 +87,6 @@ def save_configuration(args: Namespace) -> None:
 
 
 def main():
-    pyi_ssl_certs_workaround()
-
     _config_file_path.parent.mkdir(parents=True, exist_ok=True)
     _config_file_path.touch(exist_ok=True)
 
