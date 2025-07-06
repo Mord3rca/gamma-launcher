@@ -8,9 +8,9 @@ def is_in_pyinstaller_context() -> bool:
     return bool(getenv("_PYI_ARCHIVE_FILE"))
 
 
-def pyi_ssl_certs_workaround() -> None:
-    # Will only run on linux if in a Pyinstaller context
-    if not (system() == 'linux' or is_in_pyinstaller_context()):
+def __pyi_ssl_certs_workaround() -> None:
+    # Only run in Pyinstaller context
+    if not is_in_pyinstaller_context():
         return
 
     if getenv('SSL_CERT_DIR') or getenv('SSL_CERT_FILE'):
@@ -44,3 +44,20 @@ def pyi_ssl_certs_workaround() -> None:
         'set SSL_CERT_DIR or SSL_CERT_FILE env variable.',
         file=stderr
     )
+
+
+def __linux_bootstrap() -> None:
+    __pyi_ssl_certs_workaround()
+
+
+def __noop() -> None:
+    pass
+
+
+def bootstrap() -> None:
+    {
+        'Linux': __linux_bootstrap
+    }.get(system(), __noop)()
+
+
+bootstrap()
