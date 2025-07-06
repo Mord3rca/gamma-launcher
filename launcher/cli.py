@@ -14,8 +14,9 @@ from launcher.commands import (
 from argparse import ArgumentParser, Namespace, SUPPRESS
 from os import environ, execve, getenv
 from pathlib import Path
+from platform import system
 from platformdirs import user_config_path
-from sys import argv, platform, stderr
+from sys import argv, stderr
 
 common_args = {
     "--anomaly": {
@@ -87,7 +88,7 @@ def save_configuration(args: Namespace) -> None:
 
 def pyi_ssl_certs_workaround() -> None:
     # Will only run on linux if in a Pyinstaller context
-    if not (platform == 'linux' or getenv("_PYI_ARCHIVE_FILE")):
+    if not (system() == 'linux' or getenv("_PYI_ARCHIVE_FILE")):
         return
 
     if getenv('SSL_CERT_DIR') or getenv('SSL_CERT_FILE'):
