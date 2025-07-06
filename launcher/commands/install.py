@@ -1,4 +1,5 @@
 from pathlib import Path
+from platform import system
 from shutil import copy2, copytree, disk_usage, move
 from tempfile import TemporaryDirectory
 from typing import Dict
@@ -124,7 +125,7 @@ class GammaSetup:
             self._install_mod_organizer(args.mo_version)
 
         downloads_dir = self._gamma_dir / "downloads"
-        if args.cache_path:
+        if args.cache_path and system() != "Windows":
             downloads_dir.rmdir()
             downloads_dir.symlink_to(self._cache_dir.absolute(), target_is_directory=True)
         else:
