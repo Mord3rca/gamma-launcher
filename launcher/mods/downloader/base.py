@@ -49,11 +49,12 @@ class DefaultDownloader:
             if check_hash(self._archive, hash):
                 return self._archive
 
+        r = g_session.get(self._url, stream=True)
+        r.raise_for_status()
         with open(self._archive, "wb") as f, tqdm(
             desc=f"  - Downloading {self._archive.name} ({self._url})",
             unit="iB", unit_scale=True, unit_divisor=1024
         ) as progress:
-            r = g_session.get(self._url, stream=True)
             for chunk in r.iter_content(chunk_size=1 * 1024 * 1024):
                 if chunk:
                     progress.update(f.write(chunk))
