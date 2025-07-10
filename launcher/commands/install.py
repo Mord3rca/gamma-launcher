@@ -273,6 +273,10 @@ class FullInstall:
         p_path = self._gamma_dir / 'profiles' / 'G.A.M.M.A'
         settings = p_path / 'settings.txt'
 
+        if Path(p_path / 'modlist.txt').exists():
+            print(f'[+] Backing up G.A.M.M.A profile in {p_path}')
+            copy2(p_path / 'modlist.txt', p_path / 'modlist.txt.bak')
+
         print(f'[+] Installing G.A.M.M.A profile in {p_path}')
         p_path.mkdir(parents=True, exist_ok=True)
         copy2(

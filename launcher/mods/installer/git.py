@@ -1,5 +1,5 @@
 from pathlib import Path
-from shutil import copytree
+from shutil import copytree, rmtree
 from typing import Set
 
 from launcher.common import folder_to_install
@@ -48,6 +48,10 @@ class GitInstaller(DefaultInstaller):
                 if not iter:
                     print("  /!\\ Failed to install, directory not found /!\\")
                     continue
+
+                if install_dir.exists():
+                    print(f'    Removing conflicting directory: {install_dir}')
+                    rmtree(install_dir)
 
                 install_dir.mkdir(exist_ok=True)
                 for i in iter:

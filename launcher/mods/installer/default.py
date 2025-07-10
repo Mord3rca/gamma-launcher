@@ -1,5 +1,5 @@
 from pathlib import Path
-from shutil import copytree
+from shutil import copytree, rmtree
 from typing import Dict, List
 import xml.etree.ElementTree as ET
 
@@ -62,6 +62,10 @@ class DefaultInstaller(ModBase):
         install_dir = to / self.name
 
         print(f'[+] Installing mod: {self.title}')
+
+        if install_dir.exists():
+            print(f'    Removing conflicting directory: {install_dir}')
+            rmtree(install_dir)
 
         install_dir.mkdir(exist_ok=True)
 
