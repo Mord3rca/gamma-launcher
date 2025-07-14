@@ -1,6 +1,6 @@
 from pathlib import Path
 from platform import system
-from shutil import copy2, copytree, disk_usage, move
+from shutil import copy2, copytree, disk_usage, move, rmtree
 from tempfile import TemporaryDirectory
 from typing import Dict
 
@@ -126,8 +126,12 @@ class GammaSetup:
 
         downloads_dir = self._gamma_dir / "downloads"
         if args.cache_path and system() != "Windows":
-            downloads_dir.rmdir()
-            downloads_dir.symlink_to(self._cache_dir.absolute(), target_is_directory=True)
+            if not downloads_dir.is_symlink():
+                downloads_dir.rmdir()
+                downloads_dir.symlink_to(self._cache_dir.absolute(), target_is_directory=True)
+            else:
+                downloads_dir.unlink()
+                downloads_dir.symlink_to(self._cache_dir.absolute(), target_is_directory=True)
         else:
             downloads_dir.mkdir(exist_ok=True)
 
@@ -298,10 +302,19 @@ AutomaticArchiveInvalidation=false
         self._grok_mod_dir = self._gamma_dir / ".Grok's Modpack Installer"
 
         # Make sure folder are existing
-        self._dl_dir.mkdir(parents=True, exist_ok=True)
+        if not self._dl_dir.exists():
+            self._dl_dir.mkdir(parents=True, exist_ok=True)
 
         if not (self._anomaly_dir / "bin").is_dir():
             AnomalyInstall().run(args)
+
+        if args.update_def:
+            print(f'[+] Removing old subdirectory: {self._grok_mod_dir}')
+            if self._grok_mod_dir.exists():
+                rmtree(self._grok_mod_dir)
+            print(f'[+] Removing old subdirectory: {self._mod_dir}')
+            if self._mod_dir.exists():
+                rmtree(self._mod_dir)
 
         if not (self._mod_dir.is_dir() and self._grok_mod_dir.is_dir()):
             GammaSetup().run(args)
