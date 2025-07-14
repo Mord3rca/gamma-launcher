@@ -37,7 +37,7 @@ class Args:
         self.final = ''
         self.update_def = True
         self.anomaly_patch = True
-        self.preserve_user_config = False
+        self.preserve_user_config = True
 
 
 class Wrapper():
@@ -314,14 +314,17 @@ class GuiAnomalyInstall(Gtk.Application):
 
     def gamma_launcher_worker(self, target, button, args):
         GLib.idle_add(self.gamma_terminal_worker)
-        try:
+        if len(sys.argv) > 1 and sys.argv[1] == '--debug':
             target(args)
-        except Exception as err:
-            button.set_label(f'{err}, Try Again?')
         else:
-            button.set_label('Executed, Run Again?')
-        finally:
-            self.gamma_terminal_worker()
+            try:
+                target(args)
+            except Exception as err:
+                button.set_label(f'{err}, Try Again?')
+            else:
+                button.set_label('Executed, Run Again?')
+            finally:
+                self.gamma_terminal_worker()
 
     def anomaly_install(self, button):
         if self.thread.is_alive():
