@@ -276,7 +276,9 @@ class GuiAnomalyInstall(Gtk.Application):
                 continue
             if '_separator' in i:
                 mods_number -= 1
-                k = re.split(r'[_ ]', i)[1]
+                k = re.sub('_separator', '', i)
+                k = re.sub('\\+[0-9]*\\- ', '', k)
+                k = re.sub('\\+', '', k)
                 hbox.append(Gtk.Separator())
                 hbox.append(Gtk.Label(label=k))
                 hbox.append(Gtk.Separator())
