@@ -280,6 +280,10 @@ class FullInstall:
 
         print(f'[+] Installing G.A.M.M.A profile in {p_path}')
         p_path.mkdir(parents=True, exist_ok=True)
+
+        if Path(p_path  / 'modlist.txt').exists():
+            copy2(p_path  / 'modlist.txt', p_path  / 'modlist.txt~')
+
         copy2(
             self._grok_mod_dir / 'G.A.M.M.A' / 'modpack_data' / 'modlist.txt',
             p_path

@@ -1,5 +1,5 @@
 from pathlib import Path
-from shutil import copytree, rmtree
+from shutil import copy2, copytree, rmtree
 from typing import Iterator
 
 from launcher.common import anomaly_arg, gamma_arg
@@ -39,6 +39,8 @@ class Usvfs:
             rmtree(install_dir / 'db', ignore_errors=True)
             rmtree(install_dir / 'gamedata', ignore_errors=True)
             rmtree(install_dir / 'appdata' / 'shaders_cache', ignore_errors=True)
+            if Path(install_dir / 'appdata' / 'user.ltx').exists():
+                copy2(install_dir / 'appdata' / 'user.ltx', install_dir / 'appdata' / 'user.ltx~')
         else:
             print('Fresh install')
             install_dir.mkdir(parents=True)
@@ -56,3 +58,5 @@ class Usvfs:
 
         print('Reapplying Anomaly binary dir to install directory')
         copytree(anomaly_dir / 'bin', install_dir / 'bin', dirs_exist_ok=True)
+        if Path(install_dir / 'appdata' / 'user.ltx~').exists():
+            copy2(install_dir / 'appdata' / 'user.ltx~', install_dir / 'appdata' / 'user.ltx')
