@@ -220,6 +220,7 @@ class GuiAnomalyInstall(Gtk.Application):
     def load_mods(self, button):
         self.file_name = self.entries['Mod Chooser'][0].get_chars(0, -1)
         self.file_name = pathlib.Path(self.file_name) / 'profiles' / 'G.A.M.M.A' / 'modlist.txt'
+        self.file_name = self.file_name.expanduser()
         try:
             with open(self.file_name, 'r') as mods:
                 self.mods = mods.readlines()
