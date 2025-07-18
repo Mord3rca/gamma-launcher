@@ -271,7 +271,7 @@ class GuiAnomalyInstall(Gtk.Application):
         self.load_button.connect('clicked', self.load_mods)
 
         mods_number = len(self.mods)
-        for i in reversed([j.strip() for j in self.mods]):
+        for i in reversed([j for j in self.mods]):
             if len(i) == 0 or i[0] == '#':
                 mods_number -= 1
                 continue
@@ -280,6 +280,7 @@ class GuiAnomalyInstall(Gtk.Application):
                 k = re.sub('_separator', '', i)
                 k = re.sub('\\+[0-9]*\\- ', '', k)
                 k = re.sub('\\+', '', k)
+                k = k.strip()
                 hbox.append(Gtk.Separator())
                 hbox.append(Gtk.Label(label=k))
                 hbox.append(Gtk.Separator())
