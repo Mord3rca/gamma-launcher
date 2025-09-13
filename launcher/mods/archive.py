@@ -40,6 +40,7 @@ if system() == 'Windows':
         'application/x-7z-compressed': _win32_extract,
         'application/x-rar': _win32_extract,
         'application/zip': _win32_extract,
+        'application/x-7z-compressed+bcj2': _win32_extract,
     }
 else:
     def _7zip_bcj2_workaround(f: str, p: str) -> None:
@@ -58,6 +59,7 @@ else:
         'application/x-7z-compressed': _7zip_extractall,
         'application/x-rar': lambda f, p: RarFile(f'{f}').extractall(f'{p}'),
         'application/zip': lambda f, p: ZipFile(f).extractall(p),
+        'application/x-7z-compressed+bcj2': _7zip_bcj2_workaround
     }
 
 
