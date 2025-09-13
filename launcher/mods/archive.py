@@ -1,68 +1,115 @@
-from platform import system
-from py7zr import SevenZipFile
+import os
+import sys
 from subprocess import run
+from shutil import which
 from typing import List
 from unrar.rarfile import RarFile
 from zipfile import ZipFile
 
 
-def get_mime_from_file(filename) -> str:
-    with open(filename, 'rb') as f:
-        d = f.read(16)
+# --- Dependency Checks ---
+def check_dependencies() -> None:
+    """Ensure required external tools are available before running."""
+    missing = []
+    if which('7z') is None:
+        missing.append("7z (system 7z / p7zip must be installed)")
+    if which('unrar') is None:
+        missing.append("unrar (needed for RAR extraction)")
 
-    mimes = {
-        'application/zip': lambda d: d[:4] == b'PK\x03\x04',
-        'application/x-rar': lambda d: d[:3] == b'Rar',
-        'application/x-7z-compressed': lambda d: d[:6] == b'\x37\x7A\xBC\xAF\x27\x1C',
+    if missing:
+        print("=== MISSING DEPENDENCIES ===")
+        for dep in missing:
+            print(f" - {dep}")
+        print("These tools are required for archive handling.\n"
+              "Install them and try again.")
+        sys.exit(1)
+
+
+check_dependencies()
+
+
+def get_mime_from_file(filename: str) -> str:
+    """Detect archive type based on magic bytes."""
+    with open(str(filename), 'rb') as f:
+        header = f.read(16)
+
+    signatures = {
+        b'PK\x03\x04': 'application/zip',
+        b'Rar': 'application/x-rar',
+        b'\x37\x7A\xBC\xAF\x27\x1C': 'application/x-7z-compressed',
     }
 
-    for n, f in mimes.items():
-        if f(d):
-            return n
+    for sig, mime in signatures.items():
+        if header.startswith(sig):
+            return mime
 
-    raise Exception(f'File {filename} download failed, output is a unknown file type')
+    raise Exception(f"File {filename} has unknown or unsupported archive type")
 
 
-if system() == 'Windows':
-    class Win32ExtractError(Exception):
-        pass
+def _system_7z_extract(archive: str, dest: str) -> None:
+    """Extract 7z archive using system 7z."""
+    print(f"Extracting {os.path.basename(archive)} with system 7z...")
+    result = run(['7z', 'x', '-y', f'-o{dest}', str(archive)],
+                 capture_output=True, text=True)
+    if result.returncode != 0:
+        print(result.stdout)
+        print(result.stderr)
+        raise RuntimeError(f"7z extraction failed for {archive}")
+    print(f"Extraction complete: {os.path.basename(archive)}")
 
-    def _win32_extract(f: str, p: str) -> None:
-        if run(['7z', 'x', '-y', f'-o{p}', f], shell=True).returncode != 0:
-            raise Win32ExtractError(
-                f'Error while decompressing with 7z file: {f}\n'
-                'Make sure 7z is installed in default path, if not use '
-                'LAUNCHER_WIN32_7Z_PATH to set it'
-            )
 
-    _extract_func_dict = {
-        'application/x-7z-compressed': _win32_extract,
-        'application/x-rar': _win32_extract,
-        'application/zip': _win32_extract,
-        'application/x-7z-compressed+bcj2': _win32_extract,
-    }
-else:
-    def _7zip_bcj2_workaround(f: str, p: str) -> None:
-        if run(['7z', 'x', '-y', f'-o{p}', f]).returncode != 0:
-            raise RuntimeError(f'7z error will decompressing {f}')
+def _system_7z_list(archive: str) -> List[str]:
+    """List contents of a 7z archive using system 7z."""
+    result = run(['7z', 'l', '-slt', str(archive)],
+                 capture_output=True, text=True)
+    if result.returncode != 0:
+        print(result.stdout)
+        print(result.stderr)
+        raise RuntimeError(f"Cannot list 7z archive contents: {archive}")
 
-    _extract_func_dict = {
-        'application/x-7z-compressed': lambda f, p: SevenZipFile(f).extractall(p),
-        'application/x-rar': lambda f, p: RarFile(f'{f}').extractall(f'{p}'),
-        'application/zip': lambda f, p: ZipFile(f).extractall(p),
-        'application/x-7z-compressed+bcj2': _7zip_bcj2_workaround
-    }
+    filenames = []
+    for line in result.stdout.splitlines():
+        if line.startswith('Path = '):
+            path = line.replace('Path = ', '').strip()
+            if path:
+                filenames.append(path)
+    return filenames
+
+
+def _rar_extract(f: str, p: str) -> None:
+    """Extract RAR archive using unrar library."""
+    RarFile(str(f)).extractall(str(p))
+
+
+# --- Extraction function mapping ---
+_extract_func_dict = {
+    'application/x-7z-compressed': _system_7z_extract,
+    'application/x-rar': _rar_extract,
+    'application/zip': lambda f, p: ZipFile(str(f)).extractall(str(p)),
+}
 
 
 def extract_archive(filename: str, path: str, mime: str = None) -> None:
+    """Extract an archive to the given path."""
     mime = mime or get_mime_from_file(filename)
-    _extract_func_dict.get(mime)(filename, path)
+    print(f"=== EXTRACTING: {os.path.basename(filename)} ===")
+    print(f"MIME type: {mime}")
+    print(f"Destination: {path}")
+    func = _extract_func_dict.get(mime)
+    if func is None:
+        raise Exception(f"No extraction method for MIME type: {mime}")
+    func(filename, path)
+    print(f"=== EXTRACTION COMPLETE ===\n")
 
 
 def list_archive_content(filename: str, mime: str = None) -> List[str]:
+    """List contents of an archive without extracting it."""
     mime = mime or get_mime_from_file(filename)
+
+    if mime == 'application/x-7z-compressed':
+        return _system_7z_list(filename)
+
     return {
-        'application/x-7z-compressed': lambda f: SevenZipFile(f).getnames(),
-        'application/x-rar': lambda f: RarFile(f).namelist(),
-        'application/zip': lambda f: ZipFile(f).namelist(),
+        'application/x-rar': lambda f: RarFile(str(f)).namelist(),
+        'application/zip': lambda f: ZipFile(str(f)).namelist(),
     }.get(mime)(filename)
