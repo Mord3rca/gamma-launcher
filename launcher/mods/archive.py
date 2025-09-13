@@ -81,7 +81,7 @@ def _rar_extract(f: str, p: str) -> None:
     RarFile(str(f)).extractall(str(p))
 
 
-# --- Extraction function mapping ---
+# ---  Extraction function mapping  ---
 _extract_func_dict = {
     'application/x-7z-compressed': _system_7z_extract,
     'application/x-rar': _rar_extract,
