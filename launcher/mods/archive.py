@@ -81,7 +81,7 @@ def _rar_extract(f: str, p: str) -> None:
     RarFile(str(f)).extractall(str(p))
 
 
-# ---  Extraction function mapping  ---
+# --- Extraction function mapping ---
 _extract_func_dict = {
     'application/x-7z-compressed': _system_7z_extract,
     'application/x-rar': _rar_extract,
@@ -92,6 +92,11 @@ _extract_func_dict = {
 def extract_archive(filename: str, path: str, mime: str = None) -> None:
     """Extract an archive to the given path."""
     mime = mime or get_mime_from_file(filename)
+
+    # Normalize any 7z variant (bcj2, lzma2, etc.) for future-proofing
+    if mime.startswith("application/x-7z-compressed"):
+        mime = "application/x-7z-compressed"
+
     print(f"=== EXTRACTING: {os.path.basename(filename)} ===")
     print(f"MIME type: {mime}")
     print(f"Destination: {path}")
@@ -105,6 +110,10 @@ def extract_archive(filename: str, path: str, mime: str = None) -> None:
 def list_archive_content(filename: str, mime: str = None) -> List[str]:
     """List contents of an archive without extracting it."""
     mime = mime or get_mime_from_file(filename)
+
+    # Normalize 7z variants
+    if mime.startswith("application/x-7z-compressed"):
+        mime = "application/x-7z-compressed"
 
     if mime == 'application/x-7z-compressed':
         return _system_7z_list(filename)
