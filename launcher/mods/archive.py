@@ -2,6 +2,7 @@ from platform import system
 from py7zr import SevenZipFile
 from subprocess import run
 from typing import List
+from py7zr.exceptions import UnsupportedCompressionMethodError
 from unrar.rarfile import RarFile
 from zipfile import ZipFile
 
@@ -44,10 +45,18 @@ if system() == 'Windows':
 else:
     def _7zip_bcj2_workaround(f: str, p: str) -> None:
         if run(['7z', 'x', '-y', f'-o{p}', f]).returncode != 0:
-            raise RuntimeError(f'7z error will decompressing {f}')
+            raise RuntimeError(f'7z error while decompressing {f}')
+
+    def _7zip_extractall(f: str, p: str) -> None:
+        try:
+            SevenZipFile(f).extractall(p)
+        except UnsupportedCompressionMethodError as e:
+            print(e.message)
+            print("Fallback to 7z binary for extraction.")
+            _7zip_bcj2_workaround(f, p)
 
     _extract_func_dict = {
-        'application/x-7z-compressed': lambda f, p: SevenZipFile(f).extractall(p),
+        'application/x-7z-compressed': _7zip_extractall,
         'application/x-rar': lambda f, p: RarFile(f'{f}').extractall(f'{p}'),
         'application/zip': lambda f, p: ZipFile(f).extractall(p),
         'application/x-7z-compressed+bcj2': _7zip_bcj2_workaround
