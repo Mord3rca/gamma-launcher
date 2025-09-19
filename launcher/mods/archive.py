@@ -104,7 +104,7 @@ def extract_archive(filename: str, path: str, mime: str = None) -> None:
     if func is None:
         raise Exception(f"No extraction method for MIME type: {mime}")
     func(filename, path)
-    print(f"=== EXTRACTION COMPLETE ===\n")
+    print("=== EXTRACTION COMPLETE ===\n")  # fixed (no f-string)
 
 
 def list_archive_content(filename: str, mime: str = None) -> List[str]:
