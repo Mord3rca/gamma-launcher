@@ -3,7 +3,7 @@ from py7zr import SevenZipFile
 from subprocess import run
 from typing import List
 from py7zr.exceptions import UnsupportedCompressionMethodError
-from unrar.rarfile import RarFile
+from rarfile import RarFile
 from zipfile import ZipFile
 
 
