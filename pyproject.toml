@@ -13,7 +13,7 @@ requires-python = ">=3.10"
 license = {text = "GPLv3"}
 dependencies = [
     "beautifulsoup4", "cloudscraper", "GitPython", "platformdirs",
-    "py7zr", "unrar", "rarfile, "requests", "tenacity",
+    "py7zr", "unrar", "rarfile", "requests", "tenacity",
     "tqdm"
 ]
 classifiers = [
