@@ -42,13 +42,22 @@ def parse_moddb_data(url: str) -> Dict[str, str]:
 
 class ModDBDownloader(DefaultDownloader):
 
+    fallback_mirror = 'fmt1.dl.dbolical.com'
+    defective_mirrors = {
+        'sjc3.dl.dbolical.com'
+    }
+
     def _get_download_url(self, url: str) -> str:
         id = url.split('/')[-1]
         s = re.search(f'/downloads/mirror/{id}/[^"]*', g_session.get(url).text)
         if not s:
             raise ModDBDownloadError(f"Download link not found when requesting {url}")
 
-        return g_session.get(f"https://www.moddb.com{s[0]}", allow_redirects=False).headers["location"]
+        url = g_session.get(f"https://www.moddb.com{s[0]}", allow_redirects=False).headers["location"]
+        mirror_host = urlparse(url).netloc
+        if mirror_host in self.defective_mirrors:
+            url = url.replace(mirror_host, self.fallback_mirror)
+        return url
 
     def check(self, dl_dir: Path, update_cache: bool = False) -> None:  # noqa: C901
         if not self._iurl:
