@@ -2,6 +2,7 @@ import re
 import os.path
 
 from bs4 import BeautifulSoup
+from os import getenv
 from requests.exceptions import HTTPError
 from urllib.parse import urlparse
 from pathlib import Path
@@ -42,7 +43,7 @@ def parse_moddb_data(url: str) -> Dict[str, str]:
 
 class ModDBDownloader(DefaultDownloader):
 
-    fallback_mirror = 'fmt1.dl.dbolical.com'
+    fallback_mirror = getenv('GAMMA_LAUNCHER_MODDB_FALLBACK_MIRROR', 'fmt1.dl.dbolical.com')
     defective_mirrors = {
         'sjc3.dl.dbolical.com'
     }
