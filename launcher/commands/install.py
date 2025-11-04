@@ -126,7 +126,10 @@ class GammaSetup:
 
         downloads_dir = self._gamma_dir / "downloads"
         if args.cache_path and system() != "Windows":
-            downloads_dir.rmdir()
+            try:
+                downloads_dir.rmdir()
+            except (FileNotFoundError, NotADirectoryError):
+                pass
             downloads_dir.symlink_to(self._cache_dir.absolute(), target_is_directory=True)
         else:
             downloads_dir.mkdir(exist_ok=True)
