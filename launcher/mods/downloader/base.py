@@ -5,7 +5,6 @@ from re import compile
 from tqdm import tqdm
 from urllib.parse import urlparse
 import time
-import requests
 
 from launcher import __version__
 from launcher.hash import check_hash
@@ -65,7 +64,14 @@ class DefaultDownloader:
                 ) as progress:
                     for chunk in r.iter_content(chunk_size=1 * 1024 * 1024):
                         if chunk:
-                            progress.update(f.write(chunk))
+                            progress.update(f.write(chunk))./launcher/mods/downloader/base.py:8:1: F401 'requests' imported but unused
+./launcher/mods/downloader/base.py:39:5: C901 'DefaultDownloader.download' is too complex (11)
+./launcher/mods/downloader/base.py:76:1: W293 blank line contains whitespace
+./launcher/mods/downloader/base.py:78:23: F541 f-string is missing placeholders
+1     C901 'DefaultDownloader.download' is too complex (11)
+1     F401 'requests' imported but unused
+1     F541 f-string is missing placeholders
+1     W293 blank line contains whitespace
 
                 break  # Success, exit the loop
 
@@ -73,9 +79,9 @@ class DefaultDownloader:
                 retry_count += 1
                 if retry_count >= max_retries:
                     raise RuntimeError(f"Failed to download [{self._url}] after [{max_retries}]") from e
-                
+
                 print(f"Download failed of [{self._url}] (attempt [{retry_count}/{max_retries}]): {e}")
-                print(f"Retrying in 30 seconds...")
+                print("Retrying in 30 seconds...")
                 time.sleep(30)
         return self._archive
 
