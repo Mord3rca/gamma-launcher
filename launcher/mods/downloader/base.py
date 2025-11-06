@@ -4,6 +4,8 @@ from pathlib import Path
 from re import compile
 from tqdm import tqdm
 from urllib.parse import urlparse
+import time
+import requests
 
 from launcher import __version__
 from launcher.hash import check_hash
@@ -35,30 +37,46 @@ class DefaultDownloader:
         return (dl_dir / basename(urlparse(self._url).path)).exists()
 
     def download(self, to: Path, use_cached=False, hash: str = None) -> Path:
-        self._archive = self._archive or (to / basename(urlparse(self._url).path))
+        max_retries = 100
+        retry_count = 0
 
-        # Special case for github.com archive link
-        if 'github.com' in self._url:
-            _, project, *_ = self.regexp_url.match(self._url).groups()
-            self._archive = to / f"{project}-{basename(urlparse(self._url).path)}"
+        while retry_count < max_retries:
+            try:
+                self._archive = self._archive or (to / basename(urlparse(self._url).path))
 
-        if self._archive.exists() and use_cached:
-            if not hash:
-                return self._archive
+                # Special case for github.com archive link
+                if 'github.com' in self._url:
+                    _, project, *_ = self.regexp_url.match(self._url).groups()
+                    self._archive = to / f"{project}-{basename(urlparse(self._url).path)}"
 
-            if check_hash(self._archive, hash):
-                return self._archive
+                if self._archive.exists() and use_cached:
+                    if not hash:
+                        return self._archive
 
-        r = g_session.get(self._url, stream=True)
-        r.raise_for_status()
-        with open(self._archive, "wb") as f, tqdm(
-            desc=f"  - Downloading {self._archive.name} ({self._url})",
-            unit="iB", unit_scale=True, unit_divisor=1024
-        ) as progress:
-            for chunk in r.iter_content(chunk_size=1 * 1024 * 1024):
-                if chunk:
-                    progress.update(f.write(chunk))
+                    if check_hash(self._archive, hash):
+                        return self._archive
 
+                r = g_session.get(self._url, stream=True)
+                r.raise_for_status()
+
+                with open(self._archive, "wb") as f, tqdm(
+                    desc=f"  - Downloading {self._archive.name} ({self._url})",
+                    unit="iB", unit_scale=True, unit_divisor=1024
+                ) as progress:
+                    for chunk in r.iter_content(chunk_size=1 * 1024 * 1024):
+                        if chunk:
+                            progress.update(f.write(chunk))
+
+                break  # Success, exit the loop
+
+            except Exception as e:
+                retry_count += 1
+                if retry_count >= max_retries:
+                    raise RuntimeError(f"Failed to download [{self._url}] after [{max_retries}]") from e
+                
+                print(f"Download failed of [{self._url}] (attempt [{retry_count}/{max_retries}]): {e}")
+                print(f"Retrying in 30 seconds...")
+                time.sleep(30)
         return self._archive
 
     def extract(self, to: Path, tmpdir: str = None) -> None:
