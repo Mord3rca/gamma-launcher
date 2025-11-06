@@ -64,14 +64,7 @@ class DefaultDownloader:
                 ) as progress:
                     for chunk in r.iter_content(chunk_size=1 * 1024 * 1024):
                         if chunk:
-                            progress.update(f.write(chunk))./launcher/mods/downloader/base.py:8:1: F401 'requests' imported but unused
-./launcher/mods/downloader/base.py:39:5: C901 'DefaultDownloader.download' is too complex (11)
-./launcher/mods/downloader/base.py:76:1: W293 blank line contains whitespace
-./launcher/mods/downloader/base.py:78:23: F541 f-string is missing placeholders
-1     C901 'DefaultDownloader.download' is too complex (11)
-1     F401 'requests' imported but unused
-1     F541 f-string is missing placeholders
-1     W293 blank line contains whitespace
+                            progress.update(f.write(chunk))
 
                 break  # Success, exit the loop
 
