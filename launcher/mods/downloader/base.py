@@ -2,6 +2,8 @@ from cloudscraper import create_scraper
 from os.path import basename
 from pathlib import Path
 from re import compile
+from requests.exceptions import ConnectionError
+from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_fixed
 from tqdm import tqdm
 from urllib.parse import urlparse
 
@@ -34,6 +36,13 @@ class DefaultDownloader:
     def check(self, dl_dir: Path, update_cache: bool = False) -> None:
         return (dl_dir / basename(urlparse(self._url).path)).exists()
 
+    @retry(
+        before_sleep=lambda _: print("Connection error, retrying in 30s..."),
+        reraise=True,
+        retry=retry_if_exception_type(ConnectionError),
+        stop=stop_after_attempt(3),
+        wait=wait_fixed(30)
+    )
     def download(self, to: Path, use_cached=False, hash: str = None) -> Path:
         self._archive = self._archive or (to / basename(urlparse(self._url).path))
 
