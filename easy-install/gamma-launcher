@@ -1,0 +1,29 @@
+#!/bin/bash
+
+set -eu
+
+VENV_PATH=
+
+find_venv() {
+	local installdir
+	installdir="$(dirname "${0}")"
+
+	VENV_PATH="$(realpath "${installdir}/../share/gamma-launcher-venv")"
+
+	[ -d "${VENV_PATH}" ]
+}
+
+find_venv "${0}" || {
+	echo -e "VENV was not found\n"\
+		"Expecting it here: ${VENV_PATH}\n"\
+		"Set VENV_PATH to the correct location or rerun easy-install"
+	exit 1
+} >&2
+
+
+: "${UNRAR_LIB_PATH:=${VENV_PATH}/lib/libunrar.so}"
+export UNRAR_LIB_PATH
+
+#shellcheck source=/dev/null
+source "${VENV_PATH}/bin/activate"
+gamma-launcher "${@}"
