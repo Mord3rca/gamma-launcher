@@ -25,6 +25,16 @@ If all went well, you can now use the `gamma-launcher` command as intended.
 
 (Type `deactivate` to leave the virtual environment. Use the previous `source` command to re-enter it.)
 
+### Using easy-install
+
+Make sure you have a toolchain available to compile `7z` and *libunrar.so* and python3-venv installed then:
+
+```sh
+$ cd easy-install
+$ make -j$(nproc)
+$ sudo make install
+```
+
 ### Using release
 
 By downloading gamma-launcher from the [latest release](https://github.com/Mord3rca/gamma-launcher/releases/latest), you can use it without any installation. Everything is self contained in an executable. Release built with Ubuntu.

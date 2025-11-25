@@ -6,15 +6,27 @@ Avoid Linux distro dependencies issue and install gamma-launcher easily
 
 The following programs a required to run this script:
 
-* c++
+* C & C++ toolchain
 * make
-* sed
 * wget
 
-If you are on Debian/Ubuntu, your can use `apt install build-essential python3-venv wget` to install every requirement in one go.
+If you are on Debian/Ubuntu, your can use `apt install build-essential git python3-venv wget` to install every requirement in one go.
 
-## Usage
+## System-wide installation
 
-Use `make` to create BASH wrapper script and **libunrar.so**
+This will compile & install everything to run `gamma-launcher` in */usr/local*
 
-then `make install` to install everything in your *${HOME}/.local* folder by default
+```sh
+$ make -j$(nproc)
+$ sudo make install
+```
+
+## User installation
+
+To install `gamma-launcher` without root privilege use:
+```sh
+$ make -j$(nproc)
+$ make PREFIX="${HOME}/.local" install
+```
+
+You will be able to run `gamma-launcher` by calling *${HOME}/.local/bin/gamma-launcher*
