@@ -1,3 +1,7 @@
 **/__pycache__
 build/
+easy-install/*.tar.gz
+easy-install/*.tar.xz
+easy-install/unrar/
+easy-install/7zsrc/
 gamma_launcher.egg-info/
