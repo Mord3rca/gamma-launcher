@@ -1,12 +1,11 @@
 from pathlib import Path
 from platform import system
-from shutil import copy2, copytree, disk_usage, move
+from shutil import copy2, copytree, disk_usage
 from tempfile import TemporaryDirectory
 from typing import Dict
 
 from launcher.commands import CheckAnomaly
 from launcher.common import anomaly_arg, gamma_arg, cache_dir_arg
-from launcher.mods.downloader import g_session
 
 from launcher.mods import BaseArchive, GithubArchive, ModDBArchive, read_mod_maker
 
@@ -205,41 +204,36 @@ class FullInstall:
     def _update_gamma_definition(self, *args) -> None:
         print('[+] Updating G.A.M.M.A. definition')
 
+        rev_file = self._grok_mod_dir / 'revision.txt'
+        g = GithubArchive(f'https://github.com/{self._repo}')
+        g.download(self._dl_dir, use_cached=True)
+
         try:
-            l_version = Path(self._grok_mod_dir / 'version.txt').read_text().strip()
-            if 'Custom' in l_version:
-                print('  -> Skipped since version is set to a custom one.')
+            crev = rev_file.read_text().strip()
+
+            if crev.startswith('Custom'):
+                print('[*] --custom-gamma-definition was used to init this installation, skipping...')
                 return
 
-            r_version = g_session.get(
-                f'https://raw.githubusercontent.com/{self._repo}/main/G.A.M.M.A_definition_version.txt'
-            ).text.strip()
-            if int(r_version) <= int(l_version):
+            if crev == g.revision():
+                print('[*] Already on the same revision, skipping...')
                 return
-
-            print(f"    will be updated from {l_version} to {r_version}")
-        except Exception:
+        except FileNotFoundError:
             pass
 
-        g = GithubArchive(f'https://github.com/{self._repo}')
-        print('    downloading archive...')
-        g.download(self._dl_dir, use_cached=True)
         g.extract(self._grok_mod_dir, 'Stalker_GAMMA-*')
 
-        move(
-            self._grok_mod_dir / 'G.A.M.M.A_definition_version.txt',
-            self._grok_mod_dir / 'version.txt',
-        )
+        rev_file.write_text(f'{g.revision()}\n')
 
     def _set_custom_gamma_def(self, rev: str) -> None:
+        rev_file = self._grok_mod_dir / 'revision.txt'
         print(f'[+] Setting custom G.A.M.M.A. definition to: {rev}')
 
         g = GithubArchive(f'https://github.com/{self._repo}/archive/{rev}.zip')
         g.download(self._dl_dir)
         g.extract(self._grok_mod_dir, '*')
 
-        (self._grok_mod_dir / 'G.A.M.M.A_definition_version.txt').unlink()
-        (self._grok_mod_dir / 'version.txt').write_text(f'Custom: {rev}\n')
+        rev_file.write_text(f'Custom: {rev}\n')
 
     def _patch_anomaly(self, preserve_user_config: bool = False) -> None:
         user_config = self._anomaly_dir / 'appdata' / 'user.ltx'

@@ -16,6 +16,7 @@ class DefaultInstaller(ModBase):
         self._url = url
         self._iurl = iurl
         self._archive = None
+        self._revision = None
 
     def _read_fomod_directives(self, dir: Path) -> Dict[Path, Path]:
         module_config = dir / 'fomod' / 'ModuleConfig.xml'
