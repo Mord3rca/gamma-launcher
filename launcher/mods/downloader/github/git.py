@@ -3,6 +3,7 @@ from os import getenv, environ
 from pathlib import Path
 from shutil import copytree
 from tempfile import TemporaryDirectory
+from typing import Optional
 
 from launcher.bootstrap import is_in_pyinstaller_context
 from launcher.mods.downloader.base import DefaultDownloader
@@ -18,8 +19,9 @@ class GithubDownloader(DefaultDownloader):
         if is_in_pyinstaller_context() and getenv('LD_LIBRARY_PATH'):
             del environ['LD_LIBRARY_PATH']
 
-        user, project, *_ = self.regexp_url.match(self._url).groups()
+        user, project, *_, revision = self.regexp_url.match(self._url).groups()
         self._archive = to / f"{project}.git"
+        self._revision = revision if revision else f"{user}/main"
 
         if not self._archive.is_dir():
             Repo.init(self._archive, bare=True)
@@ -34,14 +36,15 @@ class GithubDownloader(DefaultDownloader):
         return self._archive
 
     def extract(self, to: Path, r: str = None, tmpdir: str = None) -> None:
-        user, *_, revision = self.regexp_url.match(self._url).groups()
-        revision = revision if revision else f"{user}/main"
         repo = Repo(self._archive)
 
         with TemporaryDirectory(prefix='gamma-launcher-github-extract-') as dir:
             pdir = Path(tmpdir or dir)
-            repo.git().execute(['git', 'worktree', 'add', '--detach', str(pdir), revision])
+            repo.git().execute(['git', 'worktree', 'add', '--detach', str(pdir), self._revision])
             if pdir != to:
                 copytree(pdir, to, dirs_exist_ok=True)
 
         repo.git().execute(['git', 'worktree', 'prune'])
+
+    def revision(self) -> Optional[str]:
+        return Repo(self._archive).rev_parse(self._revision).hexsha if self._revision else None

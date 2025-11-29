@@ -1,6 +1,7 @@
 from pathlib import Path
 from shutil import copytree, move
 from tempfile import TemporaryDirectory
+from typing import Optional
 
 from launcher.mods.archive import extract_archive
 from launcher.mods.downloader.base import DefaultDownloader, g_session
@@ -12,8 +13,8 @@ class GithubDownloader(DefaultDownloader):
         user, project, *_ = self.regexp_url.match(self._url).groups()
 
         if "release" in self._url or self._url.endswith(".zip"):
-            revision = Path(self._url).name.split('.')[0]
-            self._archive = to / (filename or f"{project}-{revision}.zip")
+            self._revision = Path(self._url).name.split('.')[0]
+            self._archive = to / (filename or f"{project}-{self._revision}.zip")
             return super().download(to, use_cached)
 
         branch = g_session.get(
@@ -21,13 +22,13 @@ class GithubDownloader(DefaultDownloader):
             headers={"Accept": "application/json"}
         ).json()["default_branch"]
 
-        revision = g_session.get(
+        self._revision = g_session.get(
             f"https://api.github.com/repos/{user}/{project}/branches/{branch}",
             headers={"Accept": "application/json"}
         ).json()["commit"]["sha"]
 
         self._url = f"https://github.com/{user}/{project}/archive/refs/heads/{branch}.zip"
-        self._archive = to / (filename or f"{project}-{revision}.zip")
+        self._archive = to / (filename or f"{project}-{self._revision}.zip")
 
         return super().download(to, use_cached)
 
@@ -46,3 +47,6 @@ class GithubDownloader(DefaultDownloader):
                 return
 
             copytree(pdir, to, dirs_exist_ok=True)
+
+    def revision(self) -> Optional[str]:
+        return self._revision

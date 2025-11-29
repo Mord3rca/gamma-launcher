@@ -73,3 +73,6 @@ class DefaultDownloader:
     def extract(self, to: Path, tmpdir: str = None) -> None:
         print(f'Extracting {self.archive}')
         extract_archive(self.archive, to)
+
+    def revision(self) -> None:
+        pass
