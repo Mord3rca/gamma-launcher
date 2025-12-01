@@ -1,0 +1,23 @@
+gamma-launcher (2.5-4) experimental; urgency=medium
+
+  * Fixed flak8.
+
+ -- Krzysztof Sobiecki <sobkas@sobkas.io>  Mon, 01 Dec 2025 22:41:04 +0100
+
+gamma-launcher (2.5-3) experimental; urgency=medium
+
+  * Fixes.
+
+ -- Krzysztof Sobiecki <sobkas@sobkas.io>  Sat, 22 Nov 2025 17:00:47 +0100
+
+gamma-launcher (2.5-2) experimental; urgency=medium
+
+  * New release.
+
+ -- Krzysztof Sobiecki <sobkas@sobkas.io>  Sat, 22 Nov 2025 16:59:05 +0100
+
+gamma-launcher (2.5-1) experimental; urgency=medium
+
+  * Initial release.
+
+ -- Krzysztof Sobiecki <sobkas@sobkas.io>  Tue, 01 Jul 2025 18:18:06 +0200

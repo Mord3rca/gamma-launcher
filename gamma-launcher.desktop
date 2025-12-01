@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Gamma Launcher
+GenericName=Game Installer
+Comment=Installs S.T.A.L.K.E.R.: G.A.M.M.A
+Keywords=GAMMA;STALKER;G.A.M.M.A;S.T.A.L.K.E.R;Anomaly;Game
+Exec=gui-gamma-launcher
+Icon=gamma-launcher
+Terminal=false
+Categories=Game Installer
+StartupNotify=true
+StartupWMClass=gamma-launcher
