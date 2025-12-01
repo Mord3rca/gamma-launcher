@@ -32,6 +32,7 @@ else:
 if not rar_extract and not rar_list:
     raise Exception('Unable to find unrar/unrardll library')
 
+
 def get_mime_from_file(filename) -> str:
     with open(filename, 'rb') as f:
         d = f.read(16)
