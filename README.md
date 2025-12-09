@@ -2,8 +2,21 @@
 
 Starting G.A.M.M.A. .NET Launcher is not possible on GNU/Linux because of .NET / powershell scripts
 
-This is a reimplementation of G.AM.M.A. launcher used for the first setup. You will need to follow
-[DravenusRex's guide](https://github.com/DravenusRex/stalker-gamma-linux-guide) to have a working game.
+This is a reimplementation of G.AM.M.A. launcher used for the first setup.
+You will need to follow [DravenusRex's guide](https://github.com/DravenusRex/stalker-gamma-linux-guide) or
+the newer [Red007Master's guide](https://github.com/Red007Master/Red-s-Guide-on-Installing-G.A.M.M.A.-on-Linux)
+to have a working game.
+
+## Table of contents
+
+* [Installation](#installation)
+  * [Using pip](#using-pip-from-source)
+  * [Using easy-install](#using-easy-install)
+  * [Using release](#using-release)
+  * [Using AUR](#using-aur-arch-linux)
+* [Commands](#commands)
+* [Troubleshoot](#troubleshoot)
+* [Contributing](CONTRIBUTING.md)
 
 ## Installation
 
@@ -142,48 +155,6 @@ Also remove some shaders mods:
 * 190- Screen Space Shaders - Ascii1457
 * 290- Atmospherics Shaders Weathers and Reshade - Hippobot
 
-### Magic Errors
-
-Only **older version** of the launcher are affected
-
-Try prepending `MAGIC=/usr/share/file/misc/magic` or `LD_PRELOAD=/usr/lib/libmagic.so` to the `./gamma-launcher` command.
-
-Otherwise, attempt to run in a venv. See the [Using pip (from source)](#using-pip-from-source) section above.
-
-### rarfile.RarCannotExec: Cannot find working tool
-
-Only **older version** of the launcher are affected
-
-You are missing a tool that extracts RAR files. You can use something like `unrar` on Linux. To install it run the following command:
-- On Ubuntu/Debian: `sudo apt install unrar`
-- On Fedora **(RPM Fusion required)**: `sudo dnf install unrar`. Note that before the installation you will need to enable the **non-free**
-  RPM Fusion repository since the default package provided by Fedora will cause problems.
-  [Instructions on how to enable it here](https://rpmfusion.org/Configuration).
-- On Arch/Manjaro: `sudo pacman -S unrar`
-
-### SevenZipDecompressionError
-
-Only **older version** of the launcher are affected
-
-7zip seems to have trouble with this archive, if this is a rar file, make sure to install `7z` with rar capabilities.
-- On Ubuntu/Debian: `sudo apt install 7zip-rar`
-
-You can use `rarfile` module for decompressing by setting **GAMMA_LAUNCHER_USE_RARFILE** env.
-Warning: This may be slow for some archive
-
-
-### Something else ?
-
-Well .... you're alone kid. Good luck. Try downgrading DirectX version or looking at log file.
-
 ## Contributing
 
-You can do a PR but make sure you respect `flake8` coding style.
-
-Also, avoid OS specific code. I plan to build it with pyinstaller for Windows users.
-
-## Disclaimer
-
-I did not have access to the official launcher so, I can only guess how it's done.
-
-Miraculously, it works on my side. Feel free to contribute if something is wrong.
+See [CONTRIBUTING.md](CONTRIBUTING.md)
