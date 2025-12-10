@@ -25,7 +25,7 @@ distro.
 
 If you distro do not distribute it, use *easy-install* to install gamma-launcher in parallel of `7z` & *libunrar*
 
-### But why not python-unrar ?
+### But why not rarfile ?
 
 Slow as fuck. Will decompress each file one by one ... making a `fork()` for each one.
 See [#127 (comment)](https://github.com/Mord3rca/gamma-launcher/issues/127#issuecomment-2197656991)
