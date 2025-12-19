@@ -1,16 +1,45 @@
-from git import Repo
+from git import Repo, RemoteProgress
 from os import getenv, environ
 from pathlib import Path
 from shutil import copytree
 from tempfile import TemporaryDirectory
 from typing import Optional
+import time
 
 from launcher.bootstrap import is_in_pyinstaller_context
 from launcher.mods.downloader.base import DefaultDownloader
 
-
 if getenv("GAMMA_LAUNCHER_NO_GIT", None):
     raise NotImplementedError("NO_GIT is set, aborting PythonGit implementation")
+
+
+class ProgressPrinter(RemoteProgress):
+    """
+    A portable, clean, and clear progress printer for GitPython fetch operations.
+    Prints progress on a single line with elapsed time in [HH:MM:SS] format.
+    Uses only standard Python and ANSI codes for best portability.
+    """
+    def __init__(self):
+        super().__init__()
+        self._start_time = time.monotonic()
+
+    def update(self, op_code, cur_count, max_count=None, message=''):
+        if not message:
+            return
+        elapsed = int(time.monotonic() - self._start_time)
+        hms = time.strftime("%H:%M:%S", time.gmtime(elapsed))
+        line = f"[git fetch] {message} | [{hms}]"
+        clear = '\033[K' if self._is_ansi() else ''
+        # Pad to 80 chars for clean overwrite
+        print(f"\r{clear}{line:<80}", end='', flush=True)
+
+    def _is_ansi(self):
+        # Basic check for ANSI support (most modern terminals)
+        import sys
+        return hasattr(sys.stdout, 'isatty') and sys.stdout.isatty()
+
+    def __del__(self):
+        print()  # Ensure the next print starts on a new line
 
 
 class GithubDownloader(DefaultDownloader):
@@ -31,7 +60,8 @@ class GithubDownloader(DefaultDownloader):
             if user not in repo.remotes else repo.remotes[user]
 
         print(f"    Fetching remote {user} from {self._archive.name}...")
-        remote.fetch()
+        remote.fetch(progress=ProgressPrinter())
+        print()  # Ensure the next print starts on a new line after fetch
 
         return self._archive
 
