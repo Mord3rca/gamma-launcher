@@ -19,13 +19,13 @@ class ModDefault(DefaultInstaller, DefaultDownloader, ModBase):
 class BaseArchive(DefaultInstaller, DefaultDownloader, ModBase):
 
     def __init__(self, url: str) -> None:
-        super().__init__(None, url, None, None, None, None)
+        super().__init__({"url": url})
 
 
 class ModDBArchive(ModDBDownloader, ModDefault):
 
     def __init__(self, name: str, url: str, iurl: str) -> None:
-        super().__init__(name, url, None, None, iurl, None)
+        super().__init__({"name": name, "url": url, "iurl": iurl})
 
     def check(self, *args, **kwargs) -> None:
         raise NotImplementedError("Not available")
@@ -40,7 +40,7 @@ class ModDBArchive(ModDBDownloader, ModDefault):
 class GithubArchive(GithubDownloader, ModDefault):
 
     def __init__(self, url: str) -> None:
-        super().__init__(None, url, None, None, None, None)
+        super().__init__({"url": url})
 
 
 class ModDBInstaller(ModDBDownloader, DefaultInstaller):
@@ -55,14 +55,14 @@ class ModGitInstaller(GithubDownloader, GitInstaller, ModDefault):
     pass
 
 
-def _register_git_mod(git_mods: List[ModGitInstaller], **kwargs):
-    tmp = list(filter(lambda x: x.url == kwargs.get('iurl'), git_mods))
+def _register_git_mod(git_mods: List[ModGitInstaller], data: dict):
+    tmp = list(filter(lambda x: x.url == data.get('iurl'), git_mods))
     if tmp:
-        tmp[0].append(**kwargs)
+        tmp[0].append(data)
         return
 
-    obj = ModGitInstaller(kwargs.get('iurl'))
-    obj.append(**kwargs)
+    obj = ModGitInstaller(data.get('iurl'))
+    obj.append(data)
     git_mods += [obj]
 
 
@@ -135,17 +135,17 @@ def read_mod_maker(mod_path: Path) -> List[ModBase]:  # noqa: C901
             continue
 
         if 'addons/start/222467' in data.get('url') and 'github.com' in data.get('iurl'):
-            _register_git_mod(git_mods, **data)
+            _register_git_mod(git_mods, data)
             continue
 
         if 'moddb.com' in data.get('url'):
-            result.append(ModDBInstaller(**data))
+            result.append(ModDBInstaller(data))
             continue
 
-        result.append(ModDefault(**data))
+        result.append(ModDefault(data))
 
     # Not in the list but installed by Official Launcher. Not gonna ask why.
-    _register_git_mod(git_mods, **{
+    _register_git_mod(git_mods, {
         'name': 'Burn\'s Optimised World Models',
         'url': 'https://www.moddb.com/addons/start/222467',
         'subdirs': None,
@@ -155,7 +155,7 @@ def read_mod_maker(mod_path: Path) -> List[ModBase]:  # noqa: C901
     })
 
     # In the list but don't have iurl so this is ignored.
-    _register_git_mod(git_mods, **{
+    _register_git_mod(git_mods, {
         'name': 'Retrogue\'s Additional Weapons',
         'url': 'https://www.moddb.com/addons/start/222467',
         'subdirs': None,
@@ -164,7 +164,7 @@ def read_mod_maker(mod_path: Path) -> List[ModBase]:  # noqa: C901
         'iurl': 'https://github.com/Grokitach/gamma_large_files_v2',
     })
 
-    _register_git_mod(git_mods, **{
+    _register_git_mod(git_mods, {
         'name': '405- IWP Benelli - frostychun',
         'url': 'https://www.moddb.com/addons/start/222467',
         'subdirs': None,
@@ -172,7 +172,7 @@ def read_mod_maker(mod_path: Path) -> List[ModBase]:  # noqa: C901
         'title': 'IWP Benelli',
         'iurl': 'https://github.com/Grokitach/gamma_large_files_v2',
     })
-    _register_git_mod(git_mods, **{
+    _register_git_mod(git_mods, {
         'name': '407- IWP MP9 - frostychun',
         'url': 'https://www.moddb.com/addons/start/222467',
         'subdirs': None,

@@ -1,6 +1,6 @@
 from pathlib import Path
 from shutil import copytree
-from typing import Dict, List
+from typing import Dict
 import xml.etree.ElementTree as ET
 
 from launcher.common import folder_to_install
@@ -10,11 +10,11 @@ from launcher.mods.tempfile import DefaultTempDir
 
 class DefaultInstaller(ModBase):
 
-    def __init__(self, name: str, url: str, author: str, title: str, iurl: str, subdirs: List[str]) -> None:
-        super().__init__(author, name, title)
-        self._subdirs = subdirs
-        self._url = url
-        self._iurl = iurl
+    def __init__(self, data: dict) -> None:
+        super().__init__(data)
+        self._subdirs = data.get('subdirs', None)
+        self._url = data.get('url')
+        self._iurl = data.get('iurl')
         self._archive = None
         self._revision = None
 

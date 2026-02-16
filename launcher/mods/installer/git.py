@@ -10,7 +10,7 @@ from launcher.mods.tempfile import DefaultTempDir
 class GitInstaller(DefaultInstaller):
 
     def __init__(self, url: str) -> None:
-        super().__init__(**{
+        super().__init__({
             'name': 'Git Installer',
             'url': url,
             'subdirs': None,
@@ -30,8 +30,8 @@ class GitInstaller(DefaultInstaller):
 
         return sorted(set(tmp))
 
-    def append(self, **kwargs) -> None:
-        self.mods.append(kwargs)
+    def append(self, data: dict) -> None:
+        self.mods.append(data)
 
     def install(self, to: Path) -> None:
         if not self.url:
