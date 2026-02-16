@@ -72,7 +72,7 @@ def _parse_modpack_maker_line(line: str) -> Union[Dict[str, str], None]:
         data = {
             'name': f'{it[3]}{it[2]}',
             'url': it[0],
-            'add_dirs': [
+            'subdirs': [
                 i.replace('\\', sep).lstrip(sep) for i in it[1].split(':')
             ] if it[1] != '0' else None,
             'author': it[2].strip('- '),
@@ -148,7 +148,7 @@ def read_mod_maker(mod_path: Path) -> List[ModBase]:  # noqa: C901
     _register_git_mod(git_mods, **{
         'name': 'Burn\'s Optimised World Models',
         'url': 'https://www.moddb.com/addons/start/222467',
-        'add_dirs': None,
+        'subdirs': None,
         'author': 'Burn',
         'title': 'Burn\'s Optimised World Models',
         'iurl': 'https://github.com/Grokitach/gamma_large_files_v2',
@@ -158,7 +158,7 @@ def read_mod_maker(mod_path: Path) -> List[ModBase]:  # noqa: C901
     _register_git_mod(git_mods, **{
         'name': 'Retrogue\'s Additional Weapons',
         'url': 'https://www.moddb.com/addons/start/222467',
-        'add_dirs': None,
+        'subdirs': None,
         'author': 'Retrogue',
         'title': 'Retrogue\'s Additional Weapons',
         'iurl': 'https://github.com/Grokitach/gamma_large_files_v2',
@@ -167,7 +167,7 @@ def read_mod_maker(mod_path: Path) -> List[ModBase]:  # noqa: C901
     _register_git_mod(git_mods, **{
         'name': '405- IWP Benelli - frostychun',
         'url': 'https://www.moddb.com/addons/start/222467',
-        'add_dirs': None,
+        'subdirs': None,
         'author': 'frostychun',
         'title': 'IWP Benelli',
         'iurl': 'https://github.com/Grokitach/gamma_large_files_v2',
@@ -175,7 +175,7 @@ def read_mod_maker(mod_path: Path) -> List[ModBase]:  # noqa: C901
     _register_git_mod(git_mods, **{
         'name': '407- IWP MP9 - frostychun',
         'url': 'https://www.moddb.com/addons/start/222467',
-        'add_dirs': None,
+        'subdirs': None,
         'author': 'frostychun',
         'title': 'IWP MP9',
         'iurl': 'https://github.com/Grokitach/gamma_large_files_v2',
