@@ -10,9 +10,9 @@ from launcher.mods.tempfile import DefaultTempDir
 
 class DefaultInstaller(ModBase):
 
-    def __init__(self, name: str, url: str, author: str, title: str, iurl: str, add_dirs: List[str]) -> None:
+    def __init__(self, name: str, url: str, author: str, title: str, iurl: str, subdirs: List[str]) -> None:
         super().__init__(author, name, title)
-        self._add_dirs = add_dirs
+        self._subdirs = subdirs
         self._url = url
         self._iurl = iurl
         self._archive = None
@@ -67,7 +67,7 @@ class DefaultInstaller(ModBase):
         install_dir.mkdir(exist_ok=True)
 
         with DefaultTempDir(self, prefix="gamma-launcher-modinstall-") as pdir:
-            iterator = [pdir] + ([pdir / i for i in self._add_dirs] if self._add_dirs else [])
+            iterator = [pdir] + ([pdir / i for i in self._subdirs] if self._subdirs else [])
             fdirectives = self._read_fomod_directives(pdir)
             for i in iterator:
                 if pdir != i:

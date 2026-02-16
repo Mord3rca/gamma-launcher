@@ -13,7 +13,7 @@ class GitInstaller(DefaultInstaller):
         super().__init__(**{
             'name': 'Git Installer',
             'url': url,
-            'add_dirs': None,
+            'subdirs': None,
             'author': 'Internal',
             'title': f'Git Installer for {url}',
             'iurl': url,
