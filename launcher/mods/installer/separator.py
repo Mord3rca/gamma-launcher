@@ -6,7 +6,7 @@ from launcher.mods.base import ModBase
 class SeparatorInstaller(ModBase):
 
     def __init__(self, name: str) -> None:
-        super().__init__(None, name, None)
+        super().__init__({'name': name})
 
     def install(self, to: Path) -> None:
         install_dir = to / self.name

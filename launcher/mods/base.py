@@ -3,10 +3,8 @@ from pathlib import Path
 
 class ModBase:
 
-    def __init__(self, author: str, name: str, title: str, *args) -> None:
-        self._name = name
-        self._title = title
-        self._author = author
+    def __init__(self, data: dict) -> None:
+        self._data = data
 
     def check(self, dl_dir: Path, update_cache: bool = False) -> None:
         pass
@@ -26,12 +24,12 @@ class ModBase:
 
     @property
     def author(self) -> str:
-        return self._author
+        return self._data.get('author')
 
     @property
     def name(self) -> str:
-        return self._name
+        return self._data.get('name')
 
     @property
     def title(self) -> str:
-        return self._title
+        return self._data.get('title')
