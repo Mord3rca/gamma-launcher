@@ -1,9 +1,9 @@
 from pathlib import Path
 from platform import system
 from tempfile import TemporaryDirectory
+from typing import Callable
 
 from launcher.common import folder_to_install
-from launcher.mods import ModBase
 
 
 class HotfixPathCase:
@@ -41,13 +41,13 @@ tempDirHotfixes = (HotfixPathCase, HotfixMalformedArchive) if not system() == 'W
 
 class DefaultTempDir(TemporaryDirectory, *tempDirHotfixes):
 
-    def __init__(self, mod: ModBase, **kwargs) -> None:
-        TemporaryDirectory.__init__(self, **kwargs)
-        self._mod = mod
+    def __init__(self, extract_func: Callable[[Path], None], *args, **kwargs) -> None:
+        TemporaryDirectory.__init__(self, *args, **kwargs)
+        self._extract_func = extract_func
 
     def __enter__(self) -> Path:
         s = Path(TemporaryDirectory.__enter__(self))
-        self._mod.extract(s, tmpdir=s)
+        self._extract_func(s)
         for hotfix in sorted(filter(lambda x: 'hotfix' in x, dir(self))):
             getattr(self, hotfix)(s)
         return s

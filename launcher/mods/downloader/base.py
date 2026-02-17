@@ -9,7 +9,7 @@ from urllib.parse import urlparse
 
 from launcher import __version__
 from launcher.hash import check_hash
-from launcher.mods.archive import extract_archive
+from launcher.archive import extract_archive
 
 g_session = create_scraper(
     browser={
@@ -21,6 +21,10 @@ g_session = create_scraper(
 class DefaultDownloader:
 
     regexp_url = compile("https?://github.com/([\\w_.-]+)/([\\w_.-]+)(/archive/([\\w]+).zip)?")
+
+    def __init__(self, url: str) -> None:
+        self._url = url
+        self._archive = None
 
     @property
     def archive(self) -> Path:
@@ -70,9 +74,5 @@ class DefaultDownloader:
 
         return self._archive
 
-    def extract(self, to: Path, tmpdir: str = None) -> None:
-        print(f'Extracting {self.archive}')
+    def extract(self, to: Path) -> None:
         extract_archive(self.archive, to)
-
-    def revision(self) -> None:
-        pass

@@ -7,6 +7,7 @@ from tqdm import tqdm
 from typing import Optional
 
 from launcher.bootstrap import is_in_pyinstaller_context
+from launcher.mods.info import ModInfo
 from launcher.mods.downloader.base import DefaultDownloader
 
 if getenv("GAMMA_LAUNCHER_NO_GIT", None):
@@ -36,6 +37,10 @@ class ProgressPrinter(RemoteProgress):
 
 class GithubDownloader(DefaultDownloader):
 
+    def __init__(self, info: ModInfo) -> None:
+        super().__init__(info)
+        self._revision = None
+
     def download(self, to: Path, use_cached: bool = False, filename: str = None) -> Path:
         if is_in_pyinstaller_context() and getenv('LD_LIBRARY_PATH'):
             del environ['LD_LIBRARY_PATH']
@@ -55,16 +60,17 @@ class GithubDownloader(DefaultDownloader):
 
         return self._archive
 
-    def extract(self, to: Path, r: str = None, tmpdir: str = None) -> None:
+    def extract(self, to: Path) -> None:
         repo = Repo(self._archive)
 
         with TemporaryDirectory(prefix='gamma-launcher-github-extract-') as dir:
-            pdir = Path(tmpdir or dir)
+            pdir = Path(dir)
             repo.git().execute(['git', 'worktree', 'add', '--detach', str(pdir), self._revision])
             if pdir != to:
                 copytree(pdir, to, dirs_exist_ok=True)
 
         repo.git().execute(['git', 'worktree', 'prune'])
 
+    @property
     def revision(self) -> Optional[str]:
         return Repo(self._archive).rev_parse(self._revision).hexsha if self._revision else None

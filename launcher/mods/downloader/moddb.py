@@ -42,7 +42,12 @@ def parse_moddb_data(url: str) -> Dict[str, str]:
 
 class ModDBDownloader(DefaultDownloader):
 
-    def _get_download_url(self, url: str) -> str:
+    def __init__(self, url: str, iurl: str) -> None:
+        super().__init__(url)
+        self._iurl = iurl
+
+    @staticmethod
+    def _get_download_url(url: str) -> str:
         id = url.split('/')[-1]
         s = re.search(f'/downloads/mirror/{id}/[^"]*', g_session.get(url).text)
         if not s:
