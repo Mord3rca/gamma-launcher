@@ -1,72 +1,54 @@
 from os.path import sep
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import List
 
-from launcher.mods.archive import extract_archive
-from launcher.mods.base import ModBase
-from launcher.mods.installer import GitInstaller, SeparatorInstaller, DefaultInstaller
-from launcher.mods.downloader import ModDBDownloader, GithubDownloader, DefaultDownloader
+from launcher.mods.info import ModInfo
+from launcher.mods.installer import BaseInstaller, DefaultInstaller, GitResourceInstaller, SeparatorInstaller
 
 __all__ = [
     'read_mod_maker'
 ]
 
 
-class ModDefault(DefaultInstaller, DefaultDownloader, ModBase):
+class ModDefault(DefaultInstaller):
     pass
 
 
-class BaseArchive(DefaultInstaller, DefaultDownloader, ModBase):
+class BaseArchive(BaseInstaller):
 
     def __init__(self, url: str) -> None:
-        super().__init__({"url": url})
+        super().__init__(ModInfo({"url": url}))
 
 
-class ModDBArchive(ModDBDownloader, ModDefault):
+GithubArchive = BaseArchive  # For compat: DownloaderFactory will instanciate correct handler
+
+
+class ModDBArchive(BaseInstaller):
 
     def __init__(self, name: str, url: str, iurl: str) -> None:
-        super().__init__({"name": name, "url": url, "iurl": iurl})
-
-    def check(self, *args, **kwargs) -> None:
-        raise NotImplementedError("Not available")
-
-    def install(self, to: Path) -> None:
-        if not self._archive:
-            raise RuntimeError("Use download() method first")
-
-        extract_archive(self._archive, to, "application/x-7z-compressed+bcj2")
+        super().__init__(ModInfo({"name": name, "url": url, "iurl": iurl}))
 
 
-class GithubArchive(GithubDownloader, ModDefault):
-
-    def __init__(self, url: str) -> None:
-        super().__init__({"url": url})
-
-
-class ModDBInstaller(ModDBDownloader, DefaultInstaller):
+class ModDBInstaller(DefaultInstaller):
     pass
 
 
-class ModSeparator(SeparatorInstaller, ModBase):
-    pass
+class ModSeparator(SeparatorInstaller):
+
+    def download(self, *args, **kwargs) -> None:
+        pass
+
+    def extract(self, *args, **kwargs) -> None:
+        pass
 
 
-class ModGitInstaller(GithubDownloader, GitInstaller, ModDefault):
-    pass
+class GitResource(GitResourceInstaller):
+
+    def __init__(self, url: str, gamedata: bool = False) -> None:
+        super().__init__(ModInfo({'url': url}), gamedata)
 
 
-def _register_git_mod(git_mods: List[ModGitInstaller], data: dict):
-    tmp = list(filter(lambda x: x.url == data.get('iurl'), git_mods))
-    if tmp:
-        tmp[0].append(data)
-        return
-
-    obj = ModGitInstaller(data.get('iurl'))
-    obj.append(data)
-    git_mods += [obj]
-
-
-def _parse_modpack_maker_line(line: str) -> Union[Dict[str, str], None]:
+def _parse_modpack_maker_line(line: str) -> ModInfo:
     try:
         it = line.split('\t')
         data = {
@@ -83,12 +65,11 @@ def _parse_modpack_maker_line(line: str) -> Union[Dict[str, str], None]:
         print(f'   Skipping: {line}')
         return None
 
-    return data
+    return ModInfo(data)
 
 
-def read_mod_maker(mod_path: Path) -> List[ModBase]:  # noqa: C901
+def read_mod_maker(mod_path: Path) -> List[ModSeparator | ModDBInstaller | ModDefault]:  # noqa: C901
     result = []
-    git_mods = []
 
     print(f'[+] Reading mod definition from {mod_path} ...')
     modlist = {
@@ -108,8 +89,8 @@ def read_mod_maker(mod_path: Path) -> List[ModBase]:  # noqa: C901
     # Strict search (match title - author)
     for i in modlist.keys():
         for m in modmaker.copy():
-            if m['name'] in i:
-                m['name'] = i
+            if m.name in i:
+                m.name = i
                 modlist[i] = m
                 modmaker.remove(m)
                 break
@@ -117,14 +98,14 @@ def read_mod_maker(mod_path: Path) -> List[ModBase]:  # noqa: C901
     # Not so strict search (match only title)
     for i in modlist.keys():
         for m in modmaker.copy():
-            if m['title'] in i:
-                m['name'] = i
+            if m.title in i:
+                m.name = i
                 modlist[i] = m
                 modmaker.remove(m)
                 break
 
     for m in modmaker:
-        print(f'WARN: No mod folder found for {m["name"]}')
+        print(f'WARN: No mod folder found for {m.name}')
 
     for name, data in modlist.items():
         if 'separator' in name:
@@ -134,51 +115,14 @@ def read_mod_maker(mod_path: Path) -> List[ModBase]:  # noqa: C901
         if not data:
             continue
 
-        if 'addons/start/222467' in data.get('url') and 'github.com' in data.get('iurl'):
-            _register_git_mod(git_mods, data)
+        # Placeholder for Git provided mods
+        if 'addons/start/222467' in data.url and 'github.com' in data.iurl:
             continue
 
-        if 'moddb.com' in data.get('url'):
+        if 'moddb.com' in data.url:
             result.append(ModDBInstaller(data))
             continue
 
         result.append(ModDefault(data))
 
-    # Not in the list but installed by Official Launcher. Not gonna ask why.
-    _register_git_mod(git_mods, {
-        'name': 'Burn\'s Optimised World Models',
-        'url': 'https://www.moddb.com/addons/start/222467',
-        'subdirs': None,
-        'author': 'Burn',
-        'title': 'Burn\'s Optimised World Models',
-        'iurl': 'https://github.com/Grokitach/gamma_large_files_v2',
-    })
-
-    # In the list but don't have iurl so this is ignored.
-    _register_git_mod(git_mods, {
-        'name': 'Retrogue\'s Additional Weapons',
-        'url': 'https://www.moddb.com/addons/start/222467',
-        'subdirs': None,
-        'author': 'Retrogue',
-        'title': 'Retrogue\'s Additional Weapons',
-        'iurl': 'https://github.com/Grokitach/gamma_large_files_v2',
-    })
-
-    _register_git_mod(git_mods, {
-        'name': '405- IWP Benelli - frostychun',
-        'url': 'https://www.moddb.com/addons/start/222467',
-        'subdirs': None,
-        'author': 'frostychun',
-        'title': 'IWP Benelli',
-        'iurl': 'https://github.com/Grokitach/gamma_large_files_v2',
-    })
-    _register_git_mod(git_mods, {
-        'name': '407- IWP MP9 - frostychun',
-        'url': 'https://www.moddb.com/addons/start/222467',
-        'subdirs': None,
-        'author': 'frostychun',
-        'title': 'IWP MP9',
-        'iurl': 'https://github.com/Grokitach/gamma_large_files_v2',
-    })
-
-    return git_mods + result
+    return result

@@ -4,21 +4,14 @@ from typing import Dict
 import xml.etree.ElementTree as ET
 
 from launcher.common import folder_to_install
-from launcher.mods.base import ModBase
-from launcher.mods.tempfile import DefaultTempDir
+from launcher.tempfile import DefaultTempDir
+from launcher.mods.installer.base import BaseInstaller
 
 
-class DefaultInstaller(ModBase):
+class DefaultInstaller(BaseInstaller):
 
-    def __init__(self, data: dict) -> None:
-        super().__init__(data)
-        self._subdirs = data.get('subdirs', None)
-        self._url = data.get('url')
-        self._iurl = data.get('iurl')
-        self._archive = None
-        self._revision = None
-
-    def _read_fomod_directives(self, dir: Path) -> Dict[Path, Path]:
+    @staticmethod
+    def _read_fomod_directives(dir: Path) -> Dict[Path, Path]:
         module_config = dir / 'fomod' / 'ModuleConfig.xml'
         if not module_config.exists():
             return {}
@@ -43,7 +36,7 @@ class DefaultInstaller(ModBase):
             'comments=\n'
             'notes=\n'
             'nexusDescription=\n'
-            f'url={self._iurl or self._url}\n'
+            f'url={self.info.iurl or self.info.url}\n'
             'hasCustomURL=true\n'
             'lastNexusQuery=\n'
             'lastNexusUpdate=\n'
@@ -60,14 +53,14 @@ class DefaultInstaller(ModBase):
         )
 
     def install(self, to: Path) -> None:
-        install_dir = to / self.name
+        install_dir = to / self.info.name
 
-        print(f'[+] Installing mod: {self.title}')
+        print(f'[+] Installing mod: {self.info.title}')
 
         install_dir.mkdir(exist_ok=True)
 
-        with DefaultTempDir(self, prefix="gamma-launcher-modinstall-") as pdir:
-            iterator = [pdir] + ([pdir / i for i in self._subdirs] if self._subdirs else [])
+        with DefaultTempDir(lambda x: self.extract(x), prefix="gamma-launcher-modinstall-") as pdir:
+            iterator = [pdir] + ([pdir / i for i in self.info.subdirs] if self.info.subdirs else [])
             fdirectives = self._read_fomod_directives(pdir)
             for i in iterator:
                 if pdir != i:

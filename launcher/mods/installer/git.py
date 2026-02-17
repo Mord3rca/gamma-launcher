@@ -1,62 +1,37 @@
 from pathlib import Path
 from shutil import copytree
-from typing import Set
+from tempfile import TemporaryDirectory
+from typing import Iterator
 
-from launcher.common import folder_to_install
-from launcher.mods.installer.default import DefaultInstaller
-from launcher.mods.tempfile import DefaultTempDir
+from launcher.mods.info import ModInfo
+from launcher.mods.installer.base import BaseInstaller
 
 
-class GitInstaller(DefaultInstaller):
+class GitResourceInstaller(BaseInstaller):
 
-    def __init__(self, url: str) -> None:
-        super().__init__({
-            'name': 'Git Installer',
-            'url': url,
-            'subdirs': None,
-            'author': 'Internal',
-            'title': f'Git Installer for {url}',
-            'iurl': url,
-        })
-        self.mods = []
+    def __init__(self, info: ModInfo, find_gamedata: bool = False) -> None:
+        super().__init__(info)
+        self._find_gamedata = find_gamedata
 
-    def _find_gamedata(self, pdir: Path, title: str) -> Set[Path]:
-        tmp = list(pdir.glob(f"**/{title}"))
-        if tmp:
-            return set(tmp)
+    @staticmethod
+    def _gamedata_iterator(p: Path) -> Iterator[Path]:
+        return p.glob('**/gamedata')
 
-        for i in folder_to_install:
-            tmp += [v.parent for v in pdir.glob(f"**/{i}")]
-
-        return sorted(set(tmp))
-
-    def append(self, data: dict) -> None:
-        self.mods.append(data)
+    @staticmethod
+    def _toplevel_dir_iterator(p: Path) -> Iterator[Path]:
+        for i in p.iterdir():
+            if i.is_dir():
+                yield i
 
     def install(self, to: Path) -> None:
-        if not self.url:
-            return
+        print(f'[+] Installing Git Resource mod: {self.info.url}')
+        to.mkdir(exist_ok=True)
 
-        print(f"[+] Installing Git Mod: {self.url}")
+        iterator = self._gamedata_iterator if self._find_gamedata else self._toplevel_dir_iterator
 
-        with DefaultTempDir(self, prefix="gamma-launcher-modinstall-") as pdir:
-            for m in self.mods:
-                print(f"  --> Installing {m['name']}")
-                install_dir = to / m["name"]
+        with TemporaryDirectory(prefix="gamma-launcher-modinstall-") as dir:
+            pdir = Path(dir)
+            self.extract(pdir)
 
-                iter = self._find_gamedata(pdir, m["title"])
-                if not iter:
-                    print("  /!\\ Failed to install, directory not found /!\\")
-                    continue
-
-                install_dir.mkdir(exist_ok=True)
-                for i in iter:
-                    for gamedir in folder_to_install:
-                        pgame_dir = i / gamedir
-
-                        if not pgame_dir.exists():
-                            continue
-
-                        copytree(pgame_dir, install_dir / gamedir, dirs_exist_ok=True)
-
-                self._write_ini_file(install_dir / 'meta.ini')
+            for i in iterator(pdir):
+                copytree(i, to / i.name, dirs_exist_ok=True)

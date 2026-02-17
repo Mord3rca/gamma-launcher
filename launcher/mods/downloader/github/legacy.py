@@ -1,13 +1,18 @@
 from pathlib import Path
-from shutil import copytree, move
+from shutil import copytree
 from tempfile import TemporaryDirectory
 from typing import Optional
 
-from launcher.mods.archive import extract_archive
+from launcher.archive import extract_archive
+from launcher.mods.info import ModInfo
 from launcher.mods.downloader.base import DefaultDownloader, g_session
 
 
 class GithubDownloader(DefaultDownloader):
+
+    def __init__(self, info: ModInfo) -> None:
+        super().__init__(info)
+        self._revision = None
 
     def download(self, to: Path, use_cached: bool = False, filename: str = None) -> Path:
         user, project, *_ = self.regexp_url.match(self._url).groups()
@@ -32,21 +37,18 @@ class GithubDownloader(DefaultDownloader):
 
         return super().download(to, use_cached)
 
-    def extract(self, to: Path, r: str = None, tmpdir: str = None) -> None:
+    def extract(self, to: Path) -> None:
         with TemporaryDirectory(prefix='gamma-launcher-github-extract-') as dir:
-            pdir = Path(tmpdir or dir)
+            pdir = Path(dir)
             extract_archive(self.archive, str(pdir))
 
-            if r:
-                d = list(pdir.glob(r))[0]
-                for i in d.glob("*"):
-                    move(i, pdir)
-                d.rmdir()
-
-            if pdir == to:
-                return
+            # Detect if the archive contains a dir containing the git tree
+            ldir = list(pdir.iterdir())
+            if len(ldir) == 1:
+                pdir = ldir[0]
 
             copytree(pdir, to, dirs_exist_ok=True)
 
+    @property
     def revision(self) -> Optional[str]:
         return self._revision

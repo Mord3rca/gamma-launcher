@@ -7,7 +7,7 @@ from typing import Dict
 from launcher.commands import CheckAnomaly
 from launcher.common import anomaly_arg, gamma_arg, cache_dir_arg
 
-from launcher.mods import BaseArchive, GithubArchive, ModDBArchive, read_mod_maker
+from launcher.mods import BaseArchive, GithubArchive, GitResource, ModDBArchive, read_mod_maker
 
 
 guide_url: str = "https://github.com/DravenusRex/stalker-gamma-linux-guide"
@@ -124,15 +124,15 @@ class GammaSetup:
             self._install_mod_organizer(args.mo_version)
 
         downloads_dir = self._gamma_dir / "downloads"
+        downloads_dir.mkdir(exist_ok=True)
+
         if args.cache_path and system() != "Windows":
             downloads_dir.rmdir()
             downloads_dir.symlink_to(self._cache_dir.absolute(), target_is_directory=True)
-        else:
-            downloads_dir.mkdir(exist_ok=True)
 
         archive = GithubArchive("https://github.com/Grokitach/gamma_setup")
         archive.download(downloads_dir, True)
-        archive.extract(self._grok_mod_dir, "gamma_setup-*")
+        archive.extract(self._grok_mod_dir)
 
         (self._gamma_dir / "mods").mkdir(exist_ok=True)
 
@@ -215,15 +215,15 @@ class FullInstall:
                 print('[*] --custom-gamma-definition was used to init this installation, skipping...')
                 return
 
-            if crev == g.revision():
+            if crev == g.downloader.revision:
                 print('[*] Already on the same revision, skipping...')
                 return
         except FileNotFoundError:
             pass
 
-        g.extract(self._grok_mod_dir, 'Stalker_GAMMA-*')
+        g.extract(self._grok_mod_dir)
 
-        rev_file.write_text(f'{g.revision()}\n')
+        rev_file.write_text(f'{g.downloader.revision}\n')
 
     def _set_custom_gamma_def(self, rev: str) -> None:
         rev_file = self._grok_mod_dir / 'revision.txt'
@@ -231,7 +231,7 @@ class FullInstall:
 
         g = GithubArchive(f'https://github.com/{self._repo}/archive/{rev}.zip')
         g.download(self._dl_dir)
-        g.extract(self._grok_mod_dir, '*')
+        g.extract(self._grok_mod_dir)
 
         rev_file.write_text(f'Custom: {rev}\n')
 
@@ -254,10 +254,21 @@ class FullInstall:
 
     def _install_mods(self) -> None:
         for mod in read_mod_maker(self._grok_mod_dir / 'G.A.M.M.A' / 'modpack_data'):
-            if mod.name == "164- Hunger Thirst Sleep UI 0.71 - xcvb":
+            if mod.info.name == "164- Hunger Thirst Sleep UI 0.71 - xcvb":
                 continue
             mod.download(self._dl_dir, use_cached=True)
             mod.install(self._mod_dir)
+
+    def _install_git_resources(self) -> None:
+        print('[+] Installing Git Resources')
+
+        resource = GitResource('https://github.com/Grokitach/gamma_large_files_v2', False)
+        resource.download(self._dl_dir)
+        resource.install(self._mod_dir)
+
+        resource = GitResource('https://github.com/Grokitach/teivaz_anomaly_gunslinger', True)
+        resource.download(self._dl_dir)
+        resource.install(self._mod_dir / '312- Gunslinger Guns for Anomaly - Teivazcz & Gunslinger Team')
 
     def _copy_gamma_modpack(self) -> None:
         path = self._grok_mod_dir / 'G.A.M.M.A' / 'modpack_addons'
@@ -309,6 +320,7 @@ AutomaticArchiveInvalidation=false
             self._patch_anomaly(args.preserve_user_config)
 
         self._install_mods()
+        self._install_git_resources()
         self._install_modorganizer_profile()
         self._copy_gamma_modpack()
 

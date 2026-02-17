@@ -1,17 +1,18 @@
 from pathlib import Path
 
-from launcher.mods.base import ModBase
+from launcher.mods.info import ModInfo
+from launcher.mods.installer.base import BaseInstaller
 
 
-class SeparatorInstaller(ModBase):
+class SeparatorInstaller(BaseInstaller):
 
     def __init__(self, name: str) -> None:
-        super().__init__({'name': name})
+        super().__init__(ModInfo({'name': name}))
 
     def install(self, to: Path) -> None:
-        install_dir = to / self.name
+        install_dir = to / self.info.name
 
-        print(f'[+] Installing separator: {self.name}')
+        print(f'[+] Installing separator: {self.info.name}')
         install_dir.mkdir(exist_ok=True)
         (install_dir / 'meta.ini').write_text(
             '[General]\n'
