@@ -8,6 +8,10 @@ class SeparatorInstaller(ModBase):
     def __init__(self, name: str) -> None:
         super().__init__(None, name, None)
 
+    def download(self, to: Path, use_cached: bool = False, **kwargs) -> Path:
+        # Separators don't need downloading
+        return to
+
     def install(self, to: Path) -> None:
         install_dir = to / self.name
 
