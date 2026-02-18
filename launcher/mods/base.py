@@ -1,31 +1,35 @@
 from pathlib import Path
+from typing import Optional
 
 
 class ModBase:
 
-    def __init__(self, author: str, name: str, title: str, *args) -> None:
+    def __init__(self, author: Optional[str], name: str, title: Optional[str], *args) -> None:
         self._name = name
         self._title = title
         self._author = author
 
-    def check(self, dl_dir: Path, update_cache: bool = False) -> None:
+    def check(self, dl_dir: Path, update_cache: bool = False) -> bool:
+        return True
+
+    def download(self, to: Path, use_cached: bool = False, **kwargs) -> Path:
+        raise NotImplementedError
+
+    def extract(self, to: Path, **kwargs) -> None:
         pass
 
-    def download(self, dl_dir: Path, use_cached: bool = False) -> Path:
-        pass
-
-    def extract(self, to: Path) -> None:
-        pass
+    def revision(self) -> Optional[str]:
+        return None
 
     def install(self, to: Path) -> None:
         pass
 
     @property
-    def archive(self) -> Path:
+    def archive(self) -> Optional[Path]:
         return None
 
     @property
-    def author(self) -> str:
+    def author(self) -> Optional[str]:
         return self._author
 
     @property
@@ -33,5 +37,5 @@ class ModBase:
         return self._name
 
     @property
-    def title(self) -> str:
+    def title(self) -> Optional[str]:
         return self._title

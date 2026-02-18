@@ -1,6 +1,6 @@
 from pathlib import Path
 from shutil import copytree
-from typing import Dict, List
+from typing import Dict, List, Optional
 import xml.etree.ElementTree as ET
 
 from launcher.common import folder_to_install
@@ -10,8 +10,8 @@ from launcher.mods.tempfile import DefaultTempDir
 
 class DefaultInstaller(ModBase):
 
-    def __init__(self, name: str, url: str, author: str, title: str, iurl: str, add_dirs: List[str]) -> None:
-        super().__init__(author, name, title)
+    def __init__(self, name: Optional[str], url: str, author: Optional[str], title: Optional[str], iurl: Optional[str], add_dirs: Optional[List[str]]) -> None:
+        super().__init__(author, name or "", title)
         self._add_dirs = add_dirs
         self._url = url
         self._iurl = iurl
@@ -29,16 +29,17 @@ class DefaultInstaller(ModBase):
         }
 
     def _write_ini_file(self, inifile: Path) -> None:
+        archive_name = self.archive.name if self.archive else "unknown"
         inifile.write_text(
             "[General]\n"
             "gameName=stalkeranomaly\n"
             "modid=0\n"
-            f'ignoredversion={self.archive.name}\n'
-            f'version={self.archive.name}\n'
-            f'newestversion={self.archive.name}\n'
+            f'ignoredversion={archive_name}\n'
+            f'version={archive_name}\n'
+            f'newestversion={archive_name}\n'
             'category="-1,"\n'
             'nexusFileStatus=1\n'
-            f'installationFile={self.archive.name}\n'
+            f'installationFile={archive_name}\n'
             'repository=\n'
             'comments=\n'
             'notes=\n'

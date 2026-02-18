@@ -9,8 +9,12 @@ from launcher.mods.downloader.base import DefaultDownloader, g_session
 
 class GithubDownloader(DefaultDownloader):
 
-    def download(self, to: Path, use_cached: bool = False, filename: str = None) -> Path:
-        user, project, *_ = self.regexp_url.match(self._url).groups()
+    def download(self, to: Path, use_cached: bool = False, **kwargs) -> Path:
+        filename = kwargs.get('filename')
+        match = self.regexp_url.match(self._url)
+        if not match:
+            raise ValueError(f"Invalid GitHub URL: {self._url}")
+        user, project, *_ = match.groups()
 
         if "release" in self._url or self._url.endswith(".zip"):
             self._revision = Path(self._url).name.split('.')[0]
@@ -32,10 +36,12 @@ class GithubDownloader(DefaultDownloader):
 
         return super().download(to, use_cached)
 
-    def extract(self, to: Path, r: str = None, tmpdir: str = None) -> None:
+    def extract(self, to: Path, **kwargs) -> None:
+        r = kwargs.get('r')
+        tmpdir = kwargs.get('tmpdir')
         with TemporaryDirectory(prefix='gamma-launcher-github-extract-') as dir:
             pdir = Path(tmpdir or dir)
-            extract_archive(self.archive, str(pdir))
+            extract_archive(str(self.archive), str(pdir))
 
             if r:
                 d = list(pdir.glob(r))[0]

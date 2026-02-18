@@ -39,7 +39,7 @@ class HotfixMalformedArchive:
 tempDirHotfixes = (HotfixPathCase, HotfixMalformedArchive) if not system() == 'Windows' else ()
 
 
-class DefaultTempDir(TemporaryDirectory, *tempDirHotfixes):
+class DefaultTempDir(TemporaryDirectory, *tempDirHotfixes):  # type: ignore[misc]
 
     def __init__(self, mod: ModBase, **kwargs) -> None:
         TemporaryDirectory.__init__(self, **kwargs)
@@ -47,7 +47,7 @@ class DefaultTempDir(TemporaryDirectory, *tempDirHotfixes):
 
     def __enter__(self) -> Path:
         s = Path(TemporaryDirectory.__enter__(self))
-        self._mod.extract(s, tmpdir=s)
+        self._mod.extract(s, tmpdir=str(s))
         for hotfix in sorted(filter(lambda x: 'hotfix' in x, dir(self))):
             getattr(self, hotfix)(s)
         return s

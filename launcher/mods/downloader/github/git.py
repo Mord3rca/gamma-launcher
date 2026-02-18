@@ -36,11 +36,15 @@ class ProgressPrinter(RemoteProgress):
 
 class GithubDownloader(DefaultDownloader):
 
-    def download(self, to: Path, use_cached: bool = False, filename: str = None) -> Path:
+    def download(self, to: Path, use_cached: bool = False, **kwargs) -> Path:
+        filename = kwargs.get('filename')
         if is_in_pyinstaller_context() and getenv('LD_LIBRARY_PATH'):
             del environ['LD_LIBRARY_PATH']
 
-        user, project, *_, revision = self.regexp_url.match(self._url).groups()
+        match = self.regexp_url.match(self._url)
+        if not match:
+            raise ValueError(f"Invalid GitHub URL: {self._url}")
+        user, project, *_, revision = match.groups()
         self._archive = to / f"{project}.git"
         self._revision = revision if revision else f"{user}/main"
 
@@ -55,7 +59,9 @@ class GithubDownloader(DefaultDownloader):
 
         return self._archive
 
-    def extract(self, to: Path, r: str = None, tmpdir: str = None) -> None:
+    def extract(self, to: Path, **kwargs) -> None:
+        r = kwargs.get('r')
+        tmpdir = kwargs.get('tmpdir')
         repo = Repo(self._archive)
 
         with TemporaryDirectory(prefix='gamma-launcher-github-extract-') as dir:

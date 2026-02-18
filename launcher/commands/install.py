@@ -2,7 +2,7 @@ from pathlib import Path
 from platform import system
 from shutil import copy2, copytree, disk_usage
 from tempfile import TemporaryDirectory
-from typing import Dict
+from typing import Dict, Optional
 
 from launcher.commands import CheckAnomaly
 from launcher.common import anomaly_arg, gamma_arg, cache_dir_arg
@@ -45,8 +45,8 @@ class AnomalyInstall:
     help: str = "Installation of S.T.A.L.K.E.R.: Anomaly"
 
     def __init__(self) -> None:
-        self._anomaly_dir = None
-        self._cache_dir = None
+        self._anomaly_dir: Optional[Path] = None
+        self._cache_dir: Optional[Path] = None
 
     def run(self, args) -> None:
         self._anomaly_dir = Path(args.anomaly).expanduser()
@@ -95,11 +95,12 @@ class GammaSetup:
     help: str = "Preliminary setup for S.T.A.L.K.E.R.: G.A.M.M.A."
 
     def __init__(self) -> None:
-        self._cache_dir = None
-        self._gamma_dir = None
-        self._grok_mod_dir = None
+        self._cache_dir: Optional[Path] = None
+        self._gamma_dir: Optional[Path] = None
+        self._grok_mod_dir: Optional[Path] = None
 
     def _install_mod_organizer(self, version: str) -> None:
+        assert self._gamma_dir is not None, "_gamma_dir must be set before calling this method"
         url = "https://github.com/ModOrganizer2/modorganizer/releases/download/" + \
               f"{version}/Mod.Organizer-{version.lstrip('v')}.7z"
 
@@ -126,13 +127,14 @@ class GammaSetup:
         downloads_dir = self._gamma_dir / "downloads"
         if args.cache_path and system() != "Windows":
             downloads_dir.rmdir()
+            assert self._cache_dir is not None
             downloads_dir.symlink_to(self._cache_dir.absolute(), target_is_directory=True)
         else:
             downloads_dir.mkdir(exist_ok=True)
 
         archive = GithubArchive("https://github.com/Grokitach/gamma_setup")
         archive.download(downloads_dir, True)
-        archive.extract(self._grok_mod_dir, "gamma_setup-*")
+        archive.extract(self._grok_mod_dir, r="gamma_setup-*")
 
         (self._gamma_dir / "mods").mkdir(exist_ok=True)
 
@@ -193,15 +195,16 @@ class FullInstall:
     help: str = "Complete install of S.T.A.L.K.E.R.: G.A.M.M.A."
 
     def __init__(self):
-        self._anomaly_dir = None
-        self._gamma_dir = None
+        self._anomaly_dir: Optional[Path] = None
+        self._gamma_dir: Optional[Path] = None
 
-        self._dl_dir = None
-        self._mod_dir = None
-        self._grok_mod_dir = None
-        self._repo = None
+        self._dl_dir: Optional[Path] = None
+        self._mod_dir: Optional[Path] = None
+        self._grok_mod_dir: Optional[Path] = None
+        self._repo: Optional[str] = None
 
     def _update_gamma_definition(self, *args) -> None:
+        assert self._grok_mod_dir is not None and self._repo is not None and self._dl_dir is not None
         print('[+] Updating G.A.M.M.A. definition')
 
         rev_file = self._grok_mod_dir / 'revision.txt'
@@ -221,21 +224,23 @@ class FullInstall:
         except FileNotFoundError:
             pass
 
-        g.extract(self._grok_mod_dir, 'Stalker_GAMMA-*')
+        g.extract(self._grok_mod_dir, r='Stalker_GAMMA-*')
 
         rev_file.write_text(f'{g.revision()}\n')
 
     def _set_custom_gamma_def(self, rev: str) -> None:
+        assert self._grok_mod_dir is not None and self._repo is not None and self._dl_dir is not None
         rev_file = self._grok_mod_dir / 'revision.txt'
         print(f'[+] Setting custom G.A.M.M.A. definition to: {rev}')
 
         g = GithubArchive(f'https://github.com/{self._repo}/archive/{rev}.zip')
         g.download(self._dl_dir)
-        g.extract(self._grok_mod_dir, '*')
+        g.extract(self._grok_mod_dir, r='*')
 
         rev_file.write_text(f'Custom: {rev}\n')
 
     def _patch_anomaly(self, preserve_user_config: bool = False) -> None:
+        assert self._anomaly_dir is not None and self._grok_mod_dir is not None
         user_config = self._anomaly_dir / 'appdata' / 'user.ltx'
         saved_config = self._anomaly_dir / 'appdata' / 'user.ltx.bak'
 
@@ -253,6 +258,7 @@ class FullInstall:
             replace_string_in_file(user_config, "rs_screenmode fullscreen", "rs_screenmode borderless")
 
     def _install_mods(self) -> None:
+        assert self._grok_mod_dir is not None and self._dl_dir is not None and self._mod_dir is not None
         for mod in read_mod_maker(self._grok_mod_dir / 'G.A.M.M.A' / 'modpack_data'):
             if mod.name == "164- Hunger Thirst Sleep UI 0.71 - xcvb":
                 continue
@@ -260,11 +266,13 @@ class FullInstall:
             mod.install(self._mod_dir)
 
     def _copy_gamma_modpack(self) -> None:
+        assert self._grok_mod_dir is not None and self._mod_dir is not None
         path = self._grok_mod_dir / 'G.A.M.M.A' / 'modpack_addons'
         print(f'[+] Copying G.A.M.M.A mods in from "{path}" to "{self._mod_dir}"')
         copytree(path, self._mod_dir, dirs_exist_ok=True)
 
     def _install_modorganizer_profile(self) -> None:
+        assert self._gamma_dir is not None and self._grok_mod_dir is not None
         p_path = self._gamma_dir / 'profiles' / 'G.A.M.M.A'
         settings = p_path / 'settings.txt'
 

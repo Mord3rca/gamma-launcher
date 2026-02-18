@@ -2,6 +2,7 @@ from cloudscraper import create_scraper
 from os.path import basename
 from pathlib import Path
 from re import compile
+from typing import Optional
 from requests.exceptions import ConnectionError
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_fixed
 from tqdm import tqdm
@@ -19,6 +20,11 @@ g_session = create_scraper(
 
 
 class DefaultDownloader:
+    # Attributes expected to be provided by DefaultInstaller
+    _url: str
+    _iurl: Optional[str]
+    _archive: Optional[Path]
+    _revision: Optional[str]
 
     regexp_url = compile("https?://github.com/([\\w_.-]+)/([\\w_.-]+)(/archive/([\\w]+).zip)?")
 
@@ -33,7 +39,7 @@ class DefaultDownloader:
     def url(self) -> str:
         return self._url
 
-    def check(self, dl_dir: Path, update_cache: bool = False) -> None:
+    def check(self, dl_dir: Path, update_cache: bool = False) -> bool:
         return (dl_dir / basename(urlparse(self._url).path)).exists()
 
     @retry(
@@ -43,19 +49,22 @@ class DefaultDownloader:
         stop=stop_after_attempt(3),
         wait=wait_fixed(30)
     )
-    def download(self, to: Path, use_cached=False, hash: str = None) -> Path:
+    def download(self, to: Path, use_cached: bool = False, **kwargs) -> Path:
+        hash = kwargs.get('hash', '')
         self._archive = self._archive or (to / basename(urlparse(self._url).path))
 
         # Special case for github.com archive link
         if 'github.com' in self._url:
-            _, project, *_ = self.regexp_url.match(self._url).groups()
-            self._archive = to / f"{project}-{basename(urlparse(self._url).path)}"
+            match = self.regexp_url.match(self._url)
+            if match:
+                _, project, *_ = match.groups()
+                self._archive = to / f"{project}-{basename(urlparse(self._url).path)}"
 
         if self._archive.exists() and use_cached:
             if not hash:
                 return self._archive
 
-            if check_hash(self._archive, hash):
+            if isinstance(hash, str) and check_hash(self._archive, hash):
                 return self._archive
 
         r = g_session.get(self._url, stream=True)
@@ -70,9 +79,10 @@ class DefaultDownloader:
 
         return self._archive
 
-    def extract(self, to: Path, tmpdir: str = None) -> None:
+    def extract(self, to: Path, **kwargs) -> None:
+        tmpdir = kwargs.get('tmpdir')
         print(f'Extracting {self.archive}')
-        extract_archive(self.archive, to)
+        extract_archive(str(self.archive), str(to))
 
-    def revision(self) -> None:
-        pass
+    def revision(self) -> Optional[str]:
+        return None

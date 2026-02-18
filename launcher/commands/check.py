@@ -27,9 +27,9 @@ class CheckAnomaly:
         for line in checksums.read_text().split("\n"):
             if not line:
                 continue
-            hash, file = line.split(" ")
-            file = anomaly / file.lstrip("*").replace("\\", sep)
-            yield file, hash
+            hash, file_str = line.split(" ")
+            file_path = anomaly / file_str.lstrip("*").replace("\\", sep)
+            yield file_path, hash
 
     def run(self, args) -> None:
         anomaly = Path(args.anomaly).expanduser()

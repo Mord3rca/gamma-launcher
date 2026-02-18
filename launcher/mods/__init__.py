@@ -1,6 +1,6 @@
 from os.path import sep
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import Dict, List, Union, Optional, Any, cast
 
 from launcher.mods.archive import extract_archive
 from launcher.mods.base import ModBase
@@ -27,14 +27,14 @@ class ModDBArchive(ModDBDownloader, ModDefault):
     def __init__(self, name: str, url: str, iurl: str) -> None:
         super().__init__(name, url, None, None, iurl, None)
 
-    def check(self, *args, **kwargs) -> None:
+    def check(self, *args, **kwargs) -> bool:  # type: ignore[override]
         raise NotImplementedError("Not available")
 
     def install(self, to: Path) -> None:
         if not self._archive:
             raise RuntimeError("Use download() method first")
 
-        extract_archive(self._archive, to, "application/x-7z-compressed+bcj2")
+        extract_archive(str(self._archive), str(to), "application/x-7z-compressed+bcj2")
 
 
 class GithubArchive(GithubDownloader, ModDefault):
@@ -55,21 +55,25 @@ class ModGitInstaller(GithubDownloader, GitInstaller, ModDefault):
     pass
 
 
-def _register_git_mod(git_mods: List[ModGitInstaller], **kwargs):
-    tmp = list(filter(lambda x: x.url == kwargs.get('iurl'), git_mods))
+def _register_git_mod(git_mods: List[ModGitInstaller], **kwargs: Any) -> None:
+    iurl = kwargs.get('iurl')
+    if not iurl:
+        return
+
+    tmp = list(filter(lambda x: x._url == iurl, git_mods))
     if tmp:
         tmp[0].append(**kwargs)
         return
 
-    obj = ModGitInstaller(kwargs.get('iurl'))
+    obj = ModGitInstaller(iurl)
     obj.append(**kwargs)
     git_mods += [obj]
 
 
-def _parse_modpack_maker_line(line: str) -> Union[Dict[str, str], None]:
+def _parse_modpack_maker_line(line: str) -> Optional[Dict[str, Any]]:
     try:
         it = line.split('\t')
-        data = {
+        data: Dict[str, Any] = {
             'name': f'{it[3]}{it[2]}',
             'url': it[0],
             'add_dirs': [
@@ -87,11 +91,11 @@ def _parse_modpack_maker_line(line: str) -> Union[Dict[str, str], None]:
 
 
 def read_mod_maker(mod_path: Path) -> List[ModBase]:  # noqa: C901
-    result = []
-    git_mods = []
+    result: List[ModBase] = []
+    git_mods: List[ModGitInstaller] = []
 
     print(f'[+] Reading mod definition from {mod_path} ...')
-    modlist = {
+    modlist: Dict[str, Optional[Dict[str, Any]]] = {
         i[1:].strip(): None for i in filter(
             lambda x: x.startswith('+') or x.startswith('-'),
             (mod_path / 'modlist.txt').read_text().split('\n')
@@ -103,7 +107,7 @@ def read_mod_maker(mod_path: Path) -> List[ModBase]:  # noqa: C901
             (mod_path / 'modpack_maker_list.txt').read_text().split('\n')
         )
     ]
-    modmaker = list(filter(lambda x: x is not None, modmaker))
+    modmaker = cast(List[Dict[str, Any]], list(filter(lambda x: x is not None, modmaker)))
 
     # Strict search (match title - author)
     for i in modlist.keys():
@@ -134,11 +138,11 @@ def read_mod_maker(mod_path: Path) -> List[ModBase]:  # noqa: C901
         if not data:
             continue
 
-        if 'addons/start/222467' in data.get('url') and 'github.com' in data.get('iurl'):
+        if 'addons/start/222467' in data.get('url', '') and 'github.com' in data.get('iurl', ''):
             _register_git_mod(git_mods, **data)
             continue
 
-        if 'moddb.com' in data.get('url'):
+        if 'moddb.com' in data.get('url', ''):
             result.append(ModDBInstaller(**data))
             continue
 

@@ -1,6 +1,6 @@
 from pathlib import Path
 from shutil import copytree
-from typing import Set
+from typing import Set, Any, List, Dict
 
 from launcher.common import folder_to_install
 from launcher.mods.installer.default import DefaultInstaller
@@ -10,20 +10,20 @@ from launcher.mods.tempfile import DefaultTempDir
 class GitInstaller(DefaultInstaller):
 
     def __init__(self, url: str) -> None:
-        super().__init__(**{
-            'name': 'Git Installer',
-            'url': url,
-            'add_dirs': None,
-            'author': 'Internal',
-            'title': f'Git Installer for {url}',
-            'iurl': url,
-        })
-        self.mods = []
+        super().__init__(
+            name='Git Installer',
+            url=url,
+            add_dirs=None,
+            author='Internal',
+            title=f'Git Installer for {url}',
+            iurl=url
+        )
+        self.mods: List[Dict[str, Any]] = []
 
-    def _find_gamedata(self, pdir: Path, title: str) -> Set[Path]:
+    def _find_gamedata(self, pdir: Path, title: str) -> List[Path]:
         tmp = list(pdir.glob(f"**/{title}"))
         if tmp:
-            return set(tmp)
+            return list(set(tmp))
 
         for i in folder_to_install:
             tmp += [v.parent for v in pdir.glob(f"**/{i}")]
@@ -34,10 +34,10 @@ class GitInstaller(DefaultInstaller):
         self.mods.append(kwargs)
 
     def install(self, to: Path) -> None:
-        if not self.url:
+        if not self._url:
             return
 
-        print(f"[+] Installing Git Mod: {self.url}")
+        print(f"[+] Installing Git Mod: {self._url}")
 
         with DefaultTempDir(self, prefix="gamma-launcher-modinstall-") as pdir:
             for m in self.mods:

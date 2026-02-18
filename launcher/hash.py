@@ -3,7 +3,7 @@ from pathlib import Path
 from tqdm import tqdm
 
 
-def check_hash(file: Path, checksum: str, desc: str = None) -> bool:
+def check_hash(file: Path, checksum: str, desc: str = "") -> bool:
     hash = md5()
     with open(file, 'rb') as f, tqdm(
         desc=desc or f"Calculating hash of {file.name}",
