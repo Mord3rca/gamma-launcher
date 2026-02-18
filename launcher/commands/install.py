@@ -84,7 +84,7 @@ class GammaSetup:
         "--gamma-set-mod-organizer-version": {
             "help": "Set ModOrganizer Version (have to match github tags)",
             "type": str,
-            "default": "v2.4.4",
+            "default": "v2.5.2",
             "dest": "mo_version",
         },
         **cache_dir_arg,
