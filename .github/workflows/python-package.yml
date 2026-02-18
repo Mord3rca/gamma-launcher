@@ -35,3 +35,9 @@ jobs:
         flake8 . --count --max-complexity=10 --statistics
     - name: Installing package via pip
       run: python -m pip install .
+
+    - name: Installing deps for unit testing
+      run: sudo apt install libunrar5t64
+
+    - name: Running unit test
+      run: python -m unittest discover -v tests/
