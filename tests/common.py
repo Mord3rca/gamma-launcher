@@ -3,6 +3,9 @@ from requests.exceptions import HTTPError
 from typing import List, Dict
 
 
+data_dir = Path(__file__).parent / 'data'
+
+
 class MockedResponse:
     def __init__(self, status, file: Path, headers: Dict = None) -> None:
         self._status = status
