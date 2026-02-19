@@ -3,27 +3,15 @@ from requests.exceptions import ConnectionError, HTTPError
 from unittest import TestCase, skip
 from unittest.mock import patch
 from tempfile import TemporaryDirectory
-from typing import List
 from pathlib import Path
 from shutil import copy
 
 from launcher.mods.downloader.base import DefaultDownloader
 
+from common import MockedResponse
+
 
 data_dir: Path = Path(__file__).parent / 'data'
-
-
-class MockedResponse:
-    def __init__(self, status, file: Path) -> None:
-        self._status = status
-        self._file = file
-
-    def raise_for_status(self) -> None:
-        if self._status != 200:
-            raise HTTPError('MockedResponse not happy')
-
-    def iter_content(self, *args, **kwargs) -> List[bytes]:
-        return [self._file.read_bytes()] if self._file else []
 
 
 def mocked_get(*args, **kwargs):
