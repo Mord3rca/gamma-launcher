@@ -1,0 +1,13 @@
+ Audio
+https://www.moddb.com/addons/start/183808	00 MAIN FILES	 - Wojach	 Ambient Music Pack
+ Visual
+https://www.moddb.com/addons/start/213337	0	 - Awene	 Agressor Reshade	https://www.moddb.com/mods/stalker-anomaly/addons/agressor-reshade
+https://www.moddb.com/addons/start/217507	T.H.A.P. Rework 2.3	 - IENCE	 THAP Rework	https://www.moddb.com/mods/stalker-anomaly/addons/thap-rework
+ Gameplay
+https://www.moddb.com/addons/start/207498	Stealth_2.0	 - xcvb	 Stealth Overhaul	https://www.moddb.com/mods/stalker-anomaly/addons/stealth1
+ Stashes
+https://www.moddb.com/addons/start/200140	00. Grok's Stash Overhaul	 - Grokitach	 Stash Overhaul	https://www.moddb.com/mods/stalker-anomaly/addons/groks-stash-overhaul-redux
+ Gunplay
+https://github.com/Grokitach/blindside_reanimation_legacy/archive/refs/heads/main.zip	blindside_reanimation_legacy-main\main:blindside_reanimation_legacy-main\[OPTIONALS]\Vanilla Weapon Stats	 - Blindside	 Weapons Reanimation and Rebalance	https://www.moddb.com/mods/stalker-anomaly/addons/blindsides-weapon-reanimation-and-rebalance-military	blindside_reanimation_legacy.zip	a7a6f6dcab895744faf743a968af0389
+ Newly added addons
+https://github.com/Grokitach/gamma_loading_screens/archive/refs/heads/main.zip	\gamma_loading_screens-main/CS Eden's GAMMA Loading Screens	 - CS Eden	 GAMMA Loading Screens	https://github.com/Grokitach/gamma_loading_screens	gamma_loading_screens.zip 9b60acaf459a82185cbfbd517209a37f
