@@ -12,39 +12,39 @@ from launcher.exceptions import HashError, ModDBDownloadError
 from launcher.mods.downloader.base import DefaultDownloader, g_session
 
 
-def parse_moddb_data(url: str) -> Dict[str, str]:
-    r = g_session.get(url)
-
-    if r.status_code != 200:
-        r.raise_for_status()
-
-    soup = BeautifulSoup(r.text, features="html.parser")
-    result = {}
-
-    for i in soup.body.find_all('div', attrs={'class': "row clear"}):
-        try:
-            name = i.h5.text
-            value = i.span.text.strip()
-        except AttributeError:
-            # if div have no h5 or span child, just ignore it.
-            continue
-
-        # We can parse more, but we don't need it.
-        if name in ('Filename', 'MD5 Hash'):
-            result[name] = value
-    try:
-        result['Download'] = soup.find(id='downloadmirrorstoggle')['href'].strip()
-    except TypeError:
-        pass
-
-    return result
-
-
 class ModDBDownloader(DefaultDownloader):
 
     def __init__(self, url: str, iurl: str) -> None:
         super().__init__(url)
         self._iurl = iurl
+
+    @staticmethod
+    def _parse_moddb_data(url: str) -> Dict[str, str]:
+        r = g_session.get(url)
+
+        if r.status_code != 200:
+            r.raise_for_status()
+
+        soup = BeautifulSoup(r.text, features="html.parser")
+        result = {}
+
+        for i in soup.body.find_all('div', attrs={'class': "row clear"}):
+            try:
+                name = i.h5.text
+                value = i.span.text.strip()
+            except AttributeError:
+                # if div have no h5 or span child, just ignore it.
+                continue
+
+            # We can parse more, but we don't need it.
+            if name in ('Filename', 'MD5 Hash'):
+                result[name] = value
+        try:
+            result['Download'] = soup.find(id='downloadmirrorstoggle')['href'].strip()
+        except TypeError:
+            pass
+
+        return result
 
     @staticmethod
     def _get_download_url(url: str) -> str:
@@ -60,7 +60,7 @@ class ModDBDownloader(DefaultDownloader):
             raise HashError(f'No info_url related to {self.name} mod')
 
         try:
-            info = parse_moddb_data(self._iurl)
+            info = self._parse_moddb_data(self._iurl)
             file = dl_dir / info['Filename']
             hash = info['MD5 Hash']
         except ConnectionError as e:
@@ -93,7 +93,7 @@ class ModDBDownloader(DefaultDownloader):
 
     def download(self, to: Path, use_cached: bool = False, *args, **kwargs) -> Path:
         try:
-            metadata = parse_moddb_data(self._iurl) if self._iurl else {}
+            metadata = self._parse_moddb_data(self._iurl) if self._iurl else {}
         except Exception:
             metadata = {}
 
