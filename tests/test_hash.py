@@ -4,8 +4,7 @@ from typing import Dict
 
 from launcher.hash import check_hash
 
-
-data_dir = Path(__file__).parent / 'data'
+from common import data_dir
 
 
 class CheckHashTestCase(TestCase):

@@ -5,8 +5,7 @@ from pathlib import Path
 from launcher.archive import extract_archive
 from launcher.tempfile import DefaultTempDir
 
-
-data_dir = Path(__file__).parent / 'data'
+from common import data_dir
 
 
 @skipIf(system() == 'Windows', 'Only make sense on *nix')

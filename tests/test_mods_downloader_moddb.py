@@ -5,10 +5,7 @@ from unittest.mock import patch
 
 from launcher.mods.downloader.moddb import ModDBDownloader
 
-from common import MockedResponse
-
-
-data_dir: Path = Path(__file__).parent / 'data'
+from common import data_dir, MockedResponse
 
 
 def mocked_get(*args, **kwargs):
