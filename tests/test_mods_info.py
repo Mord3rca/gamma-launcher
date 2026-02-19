@@ -13,7 +13,7 @@ class ModInfoTestCase(TestCase):
         'author': 'mario', 'name': 'modname',
         'title': '999- modname',
         'url': _url, 'iurl': _iurl,
-        'subdirs': ['foobar']
+        'subdirs': ['foobar'], 'args': ('filename', 'HASH')
     }
 
     _partial_data1: dict = {
@@ -39,6 +39,7 @@ class ModInfoTestCase(TestCase):
             'Invalid number of subdirs'
         )
         self.assertEqual(m.subdirs[0], 'foobar', 'Invalid subdir')
+        self.assertEqual(m.args, ('filename', 'HASH'))
 
     def test_partial_data1(self):
         m = ModInfo(self._partial_data1)
@@ -49,6 +50,7 @@ class ModInfoTestCase(TestCase):
         self.assertEqual(m.url, '')
         self.assertEqual(m.iurl, '')
         self.assertEqual(m.subdirs, None)
+        self.assertEqual(m.args, None)
 
     def test_partial_data2(self):
         m = ModInfo(self._partial_data2)
@@ -64,6 +66,7 @@ class ModInfoTestCase(TestCase):
         )
         self.assertIn('foo', self._partial_data2['subdirs'])
         self.assertIn('bar', self._partial_data2['subdirs'])
+        self.assertEqual(m.args, None)
 
     def test_set_name(self):
         m = ModInfo(self._partial_data1)
