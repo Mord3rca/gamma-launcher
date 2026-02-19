@@ -7,28 +7,28 @@ class ModInfo:
         self._data = data
 
     @property
-    def author(self) -> Optional[str]:
-        return self._data.get('author', None)
+    def author(self) -> str:
+        return self._data.get('author', '')
 
     @property
-    def name(self) -> Optional[str]:
-        return self._data.get('name', None)
+    def name(self) -> str:
+        return self._data.get('name', '')
 
     @name.setter
     def name(self, name: str) -> None:
         self._data['name'] = name
 
     @property
-    def title(self) -> Optional[str]:
-        return self._data.get('title', None)
+    def title(self) -> str:
+        return self._data.get('title', '')
 
     @property
-    def url(self) -> Optional[str]:
-        return self._data.get('url', None)
+    def url(self) -> str:
+        return self._data.get('url', '')
 
     @property
-    def iurl(self) -> Optional[str]:
-        return self._data.get('iurl', None)
+    def iurl(self) -> str:
+        return self._data.get('iurl', '')
 
     @property
     def subdirs(self) -> Optional[List[str]]:
