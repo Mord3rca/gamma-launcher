@@ -1,3 +1,4 @@
+from itertools import chain
 from os.path import sep
 from pathlib import Path
 from typing import List
@@ -51,6 +52,9 @@ class GitResource(GitResourceInstaller):
 def _parse_modpack_maker_line(line: str) -> ModInfo:
     try:
         it = line.split('\t')
+        args = tuple(
+            chain.from_iterable([i.split(' ') for i in it[5:]])
+        ) if len(it) > 5 else None
         data = {
             'name': f'{it[3]}{it[2]}',
             'url': it[0],
@@ -60,6 +64,7 @@ def _parse_modpack_maker_line(line: str) -> ModInfo:
             'author': it[2].strip('- '),
             'title': it[3].strip(),
             'iurl': it[4] if len(it) >= 5 else '',
+            'args': args,
         }
     except ValueError:
         print(f'   Skipping: {line}')

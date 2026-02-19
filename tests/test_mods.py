@@ -1,5 +1,5 @@
 from unittest import TestCase
-from typing import Optional, List
+from typing import Optional, List, Tuple
 
 from launcher.mods import read_mod_maker, ModSeparator, ModDBInstaller, ModDefault
 
@@ -19,7 +19,7 @@ class ReadModMakerTestCase(TestCase):
         self, mod, instanceOf,
         author: str = '', title: str = '',
         url: str = '', iurl: str = '',
-        subdirs: List = None
+        subdirs: List = None, args: Tuple = None
     ) -> None:
         self.assertIsInstance(mod, instanceOf)
 
@@ -44,7 +44,8 @@ class ReadModMakerTestCase(TestCase):
             mod, ModDefault, author='CS Eden', title='GAMMA Loading Screens',
             url='https://github.com/Grokitach/gamma_loading_screens/archive/refs/heads/main.zip',
             iurl='https://github.com/Grokitach/gamma_loading_screens',
-            subdirs=["gamma_loading_screens-main/CS Eden's GAMMA Loading Screens"]
+            subdirs=["gamma_loading_screens-main/CS Eden's GAMMA Loading Screens"],
+            args=('gamma_loading_screens.zip', '9b60acaf459a82185cbfbd517209a37f')
         )
 
         mod = self._find_by_name('71- Weapons Reanimation and Rebalance - Blindside', o)
@@ -56,7 +57,7 @@ class ReadModMakerTestCase(TestCase):
             subdirs=[
                 'blindside_reanimation_legacy-main/main',
                 'blindside_reanimation_legacy-main/[OPTIONALS]/Vanilla Weapon Stats'
-            ]
+            ], args=('blindside_reanimation_legacy.zip', 'a7a6f6dcab895744faf743a968af0389')
         )
 
         mod = self._find_by_name('60- Stash Overhaul - Grokitach', o)

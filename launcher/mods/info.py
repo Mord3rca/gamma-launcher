@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 
 class ModInfo:
@@ -33,3 +33,7 @@ class ModInfo:
     @property
     def subdirs(self) -> Optional[List[str]]:
         return self._data.get('subdirs', None)
+
+    @property
+    def args(self) -> Optional[Tuple[str]]:
+        return self._data.get('args', None)
