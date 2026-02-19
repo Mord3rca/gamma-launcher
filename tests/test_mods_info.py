@@ -44,18 +44,18 @@ class ModInfoTestCase(TestCase):
         m = ModInfo(self._partial_data1)
 
         self.assertEqual(m.name, 'separator')
-        self.assertEqual(m.author, None)
-        self.assertEqual(m.title, None)
-        self.assertEqual(m.url, None)
-        self.assertEqual(m.iurl, None)
+        self.assertEqual(m.author, '')
+        self.assertEqual(m.title, '')
+        self.assertEqual(m.url, '')
+        self.assertEqual(m.iurl, '')
         self.assertEqual(m.subdirs, None)
 
     def test_partial_data2(self):
         m = ModInfo(self._partial_data2)
 
-        self.assertEqual(m.name, None)
-        self.assertEqual(m.author, None)
-        self.assertEqual(m.title, None)
+        self.assertEqual(m.name, '')
+        self.assertEqual(m.author, '')
+        self.assertEqual(m.title, '')
         self.assertEqual(m.url, self._url)
         self.assertEqual(m.iurl, self._iurl)
         self.assertEqual(

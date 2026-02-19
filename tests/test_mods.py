@@ -17,8 +17,8 @@ class ReadModMakerTestCase(TestCase):
 
     def _check_mod(
         self, mod, instanceOf,
-        author: str = None, title: str = None,
-        url: str = None, iurl: str = None,
+        author: str = '', title: str = '',
+        url: str = '', iurl: str = '',
         subdirs: List = None
     ) -> None:
         self.assertIsInstance(mod, instanceOf)
@@ -34,14 +34,10 @@ class ReadModMakerTestCase(TestCase):
         self.assertEqual(len(o), 9)
 
         mod = self._find_by_name('G.A.M.M.A. End of List_separator', o)
-        self._check_mod(
-            mod, ModSeparator, None, None,
-        )
+        self._check_mod(mod, ModSeparator)
 
         mod = self._find_by_name('Alternative Addons & Patches_separator', o)
-        self._check_mod(
-            mod, ModSeparator, None, None,
-        )
+        self._check_mod(mod, ModSeparator)
 
         mod = self._find_by_name('282- GAMMA Loading Screens - CS Eden', o)
         self._check_mod(
@@ -97,6 +93,5 @@ class ReadModMakerTestCase(TestCase):
         mod = self._find_by_name('18- Ambient Music Pack - Wojach', o)
         self._check_mod(
             mod, ModDBInstaller, author='Wojach', title='Ambient Music Pack',
-            url='https://www.moddb.com/addons/start/183808', iurl='',
-            subdirs=['00 MAIN FILES']
+            url='https://www.moddb.com/addons/start/183808', subdirs=['00 MAIN FILES']
         )
