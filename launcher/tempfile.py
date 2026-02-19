@@ -15,7 +15,7 @@ class HotfixPathCase:
         ):
             for file in path.glob('**/*.*'):
                 t = file.relative_to(path.parent)
-                rp = str(t.parent).lower()
+                rp = str(t.parent).lower()  # TODO: Check if lowering filename too will be OK
                 nfolder = path.parent / rp
                 nfolder.mkdir(parents=True, exist_ok=True)
                 file.rename(nfolder / file.name)
