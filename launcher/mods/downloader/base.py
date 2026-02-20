@@ -22,9 +22,27 @@ class DefaultDownloader:
 
     regexp_url = compile("https?://github.com/([\\w_.-]+)/([\\w_.-]+)(/archive/([\\w]+).zip)?")
 
-    def __init__(self, url: str) -> None:
+    def __init__(self, url: str, filename: str = None, filehash: str = None) -> None:
         self._url = url
         self._archive = None
+        self._archivehash = filehash
+
+        self._user_wanted_name = filename
+
+    def _set_archive_name(self, to) -> None:
+        if self._archive:
+            return
+
+        if self._user_wanted_name:
+            self._archive = to / self._user_wanted_name
+            return
+
+        if 'github.com' in self._url:
+            _, project, *_ = self.regexp_url.match(self._url).groups()
+            self._archive = to / f"{project}-{basename(urlparse(self._url).path)}"
+            return
+
+        self._archive = to / basename(urlparse(self._url).path)
 
     @property
     def archive(self) -> Path:
@@ -48,12 +66,9 @@ class DefaultDownloader:
         wait=wait_fixed(30)
     )
     def download(self, to: Path, use_cached=False, hash: str = None) -> Path:
-        self._archive = self._archive or (to / basename(urlparse(self._url).path))
+        self._set_archive_name(to)
 
-        # Special case for github.com archive link
-        if 'github.com' in self._url:
-            _, project, *_ = self.regexp_url.match(self._url).groups()
-            self._archive = to / f"{project}-{basename(urlparse(self._url).path)}"
+        hash = hash or self._archivehash
 
         if self._archive.exists() and use_cached:
             if not hash:

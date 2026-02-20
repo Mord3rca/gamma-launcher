@@ -70,6 +70,21 @@ class DefaultDownloaderTestCase(TestCase):
         mock_request.assert_called_once_with(self._basic_url, stream=True)
 
     @patch('launcher.mods.downloader.g_session.get', side_effect=mocked_get)
+    def test_download_with_extra_args(self, mock_request):
+        o = DefaultDownloader(self._basic_url, 'nany?.zip', '26134043be9927512a7e47f2e4261605')
+
+        with TemporaryDirectory(prefix='gamma-launcher-base-downloader-test-') as dir:
+            pdir = Path(dir)
+            archive_path = pdir / 'nany?.zip'
+
+            copy(data_dir / 'test-git-archive.zip', archive_path)
+
+            o.download(pdir, use_cached=True)
+            self.assertEqual(md5(archive_path.read_bytes()).hexdigest(), '26134043be9927512a7e47f2e4261605')
+
+        mock_request.assert_called_once_with(self._basic_url, stream=True)
+
+    @patch('launcher.mods.downloader.g_session.get', side_effect=mocked_get)
     def test_check(self, mock_request):
         o = DefaultDownloader(self._basic_url)
 
