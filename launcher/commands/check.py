@@ -70,12 +70,15 @@ class CheckMD5:
         gamma = Path(args.gamma).expanduser()
         dl_dir = gamma / "downloads"
 
-        mod_maker = read_mod_maker(
-            gamma / ".Grok's Modpack Installer" / "G.A.M.M.A" / "modpack_data"
-        )
+        downloaders = list({
+            i.downloader.url: i.downloader for i in filter(
+                lambda x: x.downloader,
+                read_mod_maker(gamma / ".Grok's Modpack Installer" / "G.A.M.M.A" / "modpack_data")
+            )
+        }.values())
 
         print('-- Starting MD5 Check')
-        for i in mod_maker:
+        for i in downloaders:
             try:
                 i.check(dl_dir, args.update_cache)
             except (HashError, ModDBDownloadError) as e:
