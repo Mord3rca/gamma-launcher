@@ -54,9 +54,6 @@ class DefaultInstaller(BaseInstaller):
 
     def install(self, to: Path) -> None:
         install_dir = to / self.info.name
-
-        print(f'[+] Installing mod: {self.info.title}')
-
         install_dir.mkdir(exist_ok=True)
 
         with DefaultTempDir(lambda x: self.extract(x), prefix="gamma-launcher-modinstall-") as pdir:

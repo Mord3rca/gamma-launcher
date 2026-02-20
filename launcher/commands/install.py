@@ -253,7 +253,10 @@ class FullInstall:
             replace_string_in_file(user_config, "rs_screenmode fullscreen", "rs_screenmode borderless")
 
     def _install_mods(self) -> None:
-        for mod in read_mod_maker(self._grok_mod_dir / 'G.A.M.M.A' / 'modpack_data'):
+        mods = read_mod_maker(self._grok_mod_dir / 'G.A.M.M.A' / 'modpack_data')
+        mods_len = len(mods)
+        for i, mod in enumerate(mods):
+            print(f'[+] Processing mod {mod.info.title or mod.info.name} ({i}/{mods_len})')
             if mod.info.name == "164- Hunger Thirst Sleep UI 0.71 - xcvb":
                 continue
             mod.download(self._dl_dir, use_cached=True)
