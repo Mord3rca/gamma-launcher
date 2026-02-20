@@ -57,7 +57,7 @@ class ModDBDownloader(DefaultDownloader):
 
     def check(self, dl_dir: Path, update_cache: bool = False) -> None:  # noqa: C901
         if not self._iurl:
-            raise HashError(f'No info_url related to {self.name} mod')
+            raise HashError('No Info URL provided for this mod')
 
         try:
             info = self._parse_moddb_data(self._iurl)

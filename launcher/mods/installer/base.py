@@ -12,7 +12,10 @@ class BaseInstaller:
         self._dl = DownloaderFactory(info)
 
     def check(self, dl_dir: Path, update_cache: bool = False) -> None:
-        pass
+        if not self._dl:
+            return
+
+        self._dl.check(dl_dir, update_cache)
 
     def download(self, to: Path, use_cached: bool = False) -> Path:
         if not self._dl:
