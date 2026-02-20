@@ -47,7 +47,7 @@ class DefaultDownloader:
     @property
     def archive(self) -> Path:
         if not self._archive:
-            raise RuntimeError("archive not available, run download() first")
+            raise RuntimeError("archive not available, run check() or download() first")
 
         return self._archive
 
@@ -56,7 +56,8 @@ class DefaultDownloader:
         return self._url
 
     def check(self, dl_dir: Path, update_cache: bool = False) -> None:
-        return (dl_dir / basename(urlparse(self._url).path)).exists()
+        self._archive = dl_dir / basename(urlparse(self._url).path)
+        return self._archive.exists()
 
     @retry(
         before_sleep=lambda _: print("Connection error, retrying in 30s..."),
