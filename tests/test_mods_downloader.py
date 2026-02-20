@@ -13,6 +13,8 @@ class DownloaderFactoryTestCase(TestCase):
 
     _random_archive = ModInfo({'url': 'https://somewhere/on/the/internet.rar'})
 
+    _info_with_args = ModInfo({'url': 'https://somewhere/on/the/internet.rar', 'args': ('hello.rar', 'HASH')})
+
     _info_none = ModInfo({})
 
     def test_moddb_url(self):
@@ -33,3 +35,7 @@ class DownloaderFactoryTestCase(TestCase):
     def test_none_url(self):
         o = DownloaderFactory(self._info_none)
         self.assertIsNone(o)
+
+    def test_default_with_args(self):
+        o = DownloaderFactory(self._info_with_args)
+        self.assertIsInstance(o, DefaultDownloader)
