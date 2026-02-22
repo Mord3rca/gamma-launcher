@@ -28,7 +28,12 @@ class ModDBDownloader(DefaultDownloader):
         soup = BeautifulSoup(r.text, features="html.parser")
         result = {}
 
+        if not soup.body:
+            raise ModDBDownloadError(f"Unexpected page structure when requesting {url}")
+
         for i in soup.body.find_all('div', attrs={'class': "row clear"}):
+            if not i.h5 or not i.span:
+                continue
             try:
                 name = i.h5.text
                 value = i.span.text.strip()
@@ -40,7 +45,10 @@ class ModDBDownloader(DefaultDownloader):
             if name in ('Filename', 'MD5 Hash'):
                 result[name] = value
         try:
-            result['Download'] = soup.find(id='downloadmirrorstoggle')['href'].strip()
+            elem = soup.find(id='downloadmirrorstoggle')
+            if not elem:
+                raise ModDBDownloadError(f"Download link not found when requesting {url}")
+            result['Download'] = elem.get('href', '').strip() #type: ignore[union-attr]
         except TypeError:
             pass
 
@@ -55,7 +63,7 @@ class ModDBDownloader(DefaultDownloader):
 
         return g_session.get(f"https://www.moddb.com{s[0]}", allow_redirects=False).headers["location"]
 
-    def check(self, dl_dir: Path, update_cache: bool = False) -> None:  # noqa: C901
+    def check(self, dl_dir: Path, update_cache: bool = False) -> bool:  # noqa: C901
         if not self._iurl:
             raise HashError('No Info URL provided for this mod')
 
@@ -79,10 +87,10 @@ class ModDBDownloader(DefaultDownloader):
         if not self._archive.exists():
             if update_cache:
                 super().download(dl_dir)
-            return
+            return False
 
         if check_hash(self._archive, hash):
-            return
+            return True
 
         if not update_cache:
             raise HashError(f'{file.name} MD5 missmatch')
@@ -90,6 +98,7 @@ class ModDBDownloader(DefaultDownloader):
         self._archive.unlink()
         super().download(dl_dir)
         super().download(dl_dir, use_cached=True, hash=hash)  # to check hash
+        return True
 
     def download(self, to: Path, use_cached: bool = False, *args, **kwargs) -> Path:
         try:
@@ -97,7 +106,7 @@ class ModDBDownloader(DefaultDownloader):
         except Exception:
             metadata = {}
 
-        hash = metadata.get('MD5 Hash', None) if metadata.get('Download', '') in self._url else None
+        hash = metadata.get('MD5 Hash', '') if metadata.get('Download', '') in self._url else ''
 
         self._url = self._get_download_url(self._url)
         self._archive = to / os.path.basename(urlparse(self._url).path)

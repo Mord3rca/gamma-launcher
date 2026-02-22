@@ -49,7 +49,7 @@ def __pyi_ssl_certs_workaround() -> None:
 def __find_7z_path() -> None:
     # Adding default 7-Zip path or user defined to PATH
     if getenv('LAUNCHER_WIN32_7Z_PATH'):
-        environ['PATH'] += pathsep + getenv('LAUNCHER_WIN32_7Z_PATH')
+        environ['PATH'] += pathsep + getenv('LAUNCHER_WIN32_7Z_PATH') # type: ignore[operator]
         return
 
     default_install_path = (

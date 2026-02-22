@@ -1,6 +1,6 @@
 from typing import Tuple
 
-folder_to_install: Tuple[str] = ('appdata', 'db', 'gamedata')
+folder_to_install: Tuple[str, str, str] = ('appdata', 'db', 'gamedata')
 
 anomaly_arg = {
     "--anomaly": {
