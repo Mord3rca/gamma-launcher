@@ -2,7 +2,7 @@ from pathlib import Path
 from platform import system
 from shutil import copy2, copytree, disk_usage
 from tempfile import TemporaryDirectory
-from typing import Dict
+from typing import Dict, cast
 
 from launcher.commands import CheckAnomaly
 from launcher.common import anomaly_arg, gamma_arg, cache_dir_arg
@@ -45,8 +45,8 @@ class AnomalyInstall:
     help: str = "Installation of S.T.A.L.K.E.R.: Anomaly"
 
     def __init__(self) -> None:
-        self._anomaly_dir = None
-        self._cache_dir = None
+        self._anomaly_dir: Path
+        self._cache_dir: Path
 
     def run(self, args) -> None:
         self._anomaly_dir = Path(args.anomaly).expanduser()
@@ -95,9 +95,9 @@ class GammaSetup:
     help: str = "Preliminary setup for S.T.A.L.K.E.R.: G.A.M.M.A."
 
     def __init__(self) -> None:
-        self._cache_dir = None
-        self._gamma_dir = None
-        self._grok_mod_dir = None
+        self._cache_dir = cast(Path, None)  # needs cast for truthiness check
+        self._gamma_dir: Path
+        self._grok_mod_dir: Path
 
     def _install_mod_organizer(self, version: str) -> None:
         url = "https://github.com/ModOrganizer2/modorganizer/releases/download/" + \
@@ -193,13 +193,13 @@ class FullInstall:
     help: str = "Complete install of S.T.A.L.K.E.R.: G.A.M.M.A."
 
     def __init__(self):
-        self._anomaly_dir = None
-        self._gamma_dir = None
+        self._anomaly_dir: Path
+        self._gamma_dir: Path
 
-        self._dl_dir = None
-        self._mod_dir = None
-        self._grok_mod_dir = None
-        self._repo = None
+        self._dl_dir: Path
+        self._mod_dir: Path
+        self._grok_mod_dir: Path
+        self._repo: str
 
     def _update_gamma_definition(self, *args) -> None:
         print('[+] Updating G.A.M.M.A. definition')
@@ -215,7 +215,7 @@ class FullInstall:
                 print('[*] --custom-gamma-definition was used to init this installation, skipping...')
                 return
 
-            if crev == g.downloader.revision:
+            if crev == cast(object, g.downloader).revision:  # type: ignore[attr-defined]
                 print('[*] Already on the same revision, skipping...')
                 return
         except FileNotFoundError:
@@ -223,7 +223,7 @@ class FullInstall:
 
         g.extract(self._grok_mod_dir)
 
-        rev_file.write_text(f'{g.downloader.revision}\n')
+        rev_file.write_text(f'{cast(object, g.downloader).revision}\n')  # type: ignore[attr-defined]
 
     def _set_custom_gamma_def(self, rev: str) -> None:
         rev_file = self._grok_mod_dir / 'revision.txt'

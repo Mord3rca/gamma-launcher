@@ -25,6 +25,6 @@ def DownloaderFactory(info: ModInfo) -> Optional[DefaultDownloader]:
         return ModDBDownloader(info.url, info.iurl)
 
     if 'github.com' in info.url and not info.url.endswith(('.zip', '.7z', '.rar')):
-        return GithubDownloader(info.url)
+        return GithubDownloader(info)
 
     return DefaultDownloader(info.url, *(info.args or ()))

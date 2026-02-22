@@ -57,15 +57,19 @@ else:
     }
 
 
-def extract_archive(filename: str, path: str, mime: str = None) -> None:
+def extract_archive(filename: str, path: str, mime: str = "") -> None:
     mime = mime or get_mime_from_file(filename)
-    _extract_func_dict.get(mime)(filename, path)
+    if mime not in _extract_func_dict:
+        raise Exception(f'Unsupported archive type: {mime}')
+    _extract_func_dict[mime](filename, path)
 
 
-def list_archive_content(filename: str, mime: str = None) -> List[str]:
+def list_archive_content(filename: str, mime: str = "") -> List[str]:
     mime = mime or get_mime_from_file(filename)
+    if mime not in _extract_func_dict:
+        raise Exception(f'Unsupported archive type: {mime}')
     return {
         'application/x-7z-compressed': lambda f: SevenZipFile(f).getnames(),
         'application/x-rar': lambda f: RarFile(f).namelist(),
         'application/zip': lambda f: ZipFile(f).namelist(),
-    }.get(mime)(filename)
+    }[mime](filename)

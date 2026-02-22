@@ -11,11 +11,17 @@ from launcher.mods.downloader.base import DefaultDownloader, g_session
 class GithubDownloader(DefaultDownloader):
 
     def __init__(self, info: ModInfo) -> None:
-        super().__init__(info)
+        super().__init__(info.url, *(info.args or ()))
         self._revision = None
 
-    def download(self, to: Path, use_cached: bool = False, filename: str = None) -> Path:
-        user, project, *_ = self.regexp_url.match(self._url).groups()
+    def download(self, to: Path, use_cached: bool = False, filename: str = "") -> Path:  # type: ignore[override]
+        # Note: Using 'filename' instead of 'hash' - legacy downloader allows custom archive names
+        # Signature doesn't match base class but preserves original functionality
+        match = self.regexp_url.match(self._url)
+        if not match:
+            raise ValueError(f"Invalid GitHub URL: {self._url}")
+
+        user, project, *_ = match.groups()
 
         if "release" in self._url or self._url.endswith(".zip"):
             self._revision = Path(self._url).name.split('.')[0]
@@ -40,7 +46,7 @@ class GithubDownloader(DefaultDownloader):
     def extract(self, to: Path) -> None:
         with TemporaryDirectory(prefix='gamma-launcher-github-extract-') as dir:
             pdir = Path(dir)
-            extract_archive(self.archive, str(pdir))
+            extract_archive(str(self.archive), str(pdir))
 
             # Detect if the archive contains a dir containing the git tree
             ldir = list(pdir.iterdir())

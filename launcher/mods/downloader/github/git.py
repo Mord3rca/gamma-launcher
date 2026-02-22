@@ -38,14 +38,18 @@ class ProgressPrinter(RemoteProgress):
 class GithubDownloader(DefaultDownloader):
 
     def __init__(self, info: ModInfo) -> None:
-        super().__init__(info)
+        super().__init__(info.url, *(info.args or ()))
         self._revision = None
 
-    def download(self, to: Path, use_cached: bool = False, filename: str = None) -> Path:
+    def download(self, to: Path, use_cached: bool = False, hash: str = "") -> Path:
         if is_in_pyinstaller_context() and getenv('LD_LIBRARY_PATH'):
             del environ['LD_LIBRARY_PATH']
 
-        user, project, *_, revision = self.regexp_url.match(self._url).groups()
+        match = self.regexp_url.match(self._url)
+        if not match:
+            raise ValueError(f"Invalid GitHub URL: {self._url}")
+
+        user, project, *_, revision = match.groups()
         self._archive = to / f"{project}.git"
         self._revision = revision if revision else f"{user}/main"
 

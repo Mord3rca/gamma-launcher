@@ -1,7 +1,7 @@
 from itertools import chain
 from os.path import sep
 from pathlib import Path
-from typing import List
+from typing import Dict, List, Optional
 
 from launcher.mods.info import ModInfo
 from launcher.mods.installer import BaseInstaller, DefaultInstaller, GitResourceInstaller, SeparatorInstaller
@@ -36,8 +36,8 @@ class ModDBInstaller(DefaultInstaller):
 
 class ModSeparator(SeparatorInstaller):
 
-    def download(self, *args, **kwargs) -> None:
-        pass
+    def download(self, *args, **kwargs) -> Path:
+        return Path()  # Separator doesn't actually download anything
 
     def extract(self, *args, **kwargs) -> None:
         pass
@@ -49,7 +49,7 @@ class GitResource(GitResourceInstaller):
         super().__init__(ModInfo({'url': url}), gamedata)
 
 
-def _parse_modpack_maker_line(line: str) -> ModInfo:
+def _parse_modpack_maker_line(line: str) -> Optional[ModInfo]:
     try:
         it = line.split('\t')
         args = tuple(
@@ -66,7 +66,7 @@ def _parse_modpack_maker_line(line: str) -> ModInfo:
             'iurl': it[4] if len(it) >= 5 else '',
             'args': args,
         }
-    except ValueError:
+    except (ValueError, IndexError):
         print(f'   Skipping: {line}')
         return None
 
@@ -77,19 +77,21 @@ def read_mod_maker(mod_path: Path) -> List[ModSeparator | ModDBInstaller | ModDe
     result = []
 
     print(f'[+] Reading mod definition from {mod_path} ...')
-    modlist = {
+    modlist: Dict[str, Optional[ModInfo]] = {
         i[1:].strip(): None for i in filter(
             lambda x: x.startswith('+') or x.startswith('-'),
             (mod_path / 'modlist.txt').read_text().split('\n')
         )
     }
-    modmaker = [
-        _parse_modpack_maker_line(i) for i in filter(
+    # Parse modpack_maker_list.txt lines into ModInfo objects
+    # Skip lines that are empty, start with spaces, or fail to parse
+    modmaker: List[ModInfo] = [
+        mod for line in filter(
             lambda x: x and not x.startswith(' '),
             (mod_path / 'modpack_maker_list.txt').read_text().split('\n')
         )
+        if (mod := _parse_modpack_maker_line(line)) is not None
     ]
-    modmaker = list(filter(lambda x: x is not None, modmaker))
 
     # Strict search (match title - author)
     for i in modlist.keys():
