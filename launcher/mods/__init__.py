@@ -49,22 +49,27 @@ class GitResource(GitResourceInstaller):
         super().__init__(ModInfo({'url': url}), gamedata)
 
 
-def _parse_modpack_maker_line(line: str) -> ModInfo:
-    it = line.split('\t')
-    args = tuple(
-        chain.from_iterable([i.split(' ') for i in it[5:]])
-    ) if len(it) > 5 else None
-    data = {
-        'name': f'{it[3]}{it[2]}',
-        'url': it[0],
-        'subdirs': [
-            i.replace('\\', sep).lstrip(sep) for i in it[1].split(':')
-        ] if it[1] != '0' else None,
-        'author': it[2].strip('- '),
-        'title': it[3].strip(),
-        'iurl': it[4] if len(it) >= 5 else '',
-        'args': args,
-    }
+def _parse_modpack_maker_line(line: str) -> Optional[ModInfo]:
+    try:
+        it = line.split('\t')
+        args = tuple(
+            chain.from_iterable([i.split(' ') for i in it[5:]])
+        ) if len(it) > 5 else None
+        data = {
+            'name': f'{it[3]}{it[2]}',
+            'url': it[0],
+            'subdirs': [
+                i.replace('\\', sep).lstrip(sep) for i in it[1].split(':')
+            ] if it[1] != '0' else None,
+            'author': it[2].strip('- '),
+            'title': it[3].strip(),
+            'iurl': it[4] if len(it) >= 5 else '',
+            'args': args,
+        }
+    except (ValueError, IndexError):
+        print(f'   Skipping: {line}')
+        return None
+
     return ModInfo(data)
 
 
@@ -80,15 +85,13 @@ def read_mod_maker(mod_path: Path) -> List[ModSeparator | ModDBInstaller | ModDe
     }
     # Parse modpack_maker_list.txt lines into ModInfo objects
     # Skip lines that are empty, start with spaces, or fail to parse
-    modmaker: List[ModInfo] = []
-    for i in filter(
-        lambda x: x and not x.startswith(' '),
-        (mod_path / 'modpack_maker_list.txt').read_text().split('\n')
-    ):
-        try:
-            modmaker.append(_parse_modpack_maker_line(i))
-        except (ValueError, IndexError):
-            print(f'   Skipping: {i}')
+    modmaker: List[ModInfo] = [
+        mod for line in filter(
+            lambda x: x and not x.startswith(' '),
+            (mod_path / 'modpack_maker_list.txt').read_text().split('\n')
+        )
+        if (mod := _parse_modpack_maker_line(line)) is not None
+    ]
 
     # Strict search (match title - author)
     for i in modlist.keys():
