@@ -101,6 +101,10 @@ class CheckMD5:
             )
         }.values())
 
+        print(
+              '[*] WARNING: This is a bit intensive for ModDB. You may be heavily checked by Cloudflare '
+              'and this commands will freeze & spin a CPU to 100% if this is the case.'
+        )
         print('-- Starting MD5 Check')
         for i in downloaders:
             try:
