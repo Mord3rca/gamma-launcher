@@ -8,6 +8,7 @@ from tqdm import tqdm
 from urllib.parse import urlparse
 
 from launcher import __version__
+from launcher.exceptions import HashError
 from launcher.hash import check_hash
 from launcher.archive import extract_archive
 
@@ -29,7 +30,7 @@ class DefaultDownloader:
 
         self._user_wanted_name = filename
 
-    def _set_archive_name(self, to) -> None:
+    def _set_archive_name(self, to: Path) -> None:
         if self._archive:
             return
 
@@ -47,7 +48,7 @@ class DefaultDownloader:
     @property
     def archive(self) -> Path:
         if not self._archive:
-            raise RuntimeError("archive not available, run download() first")
+            raise RuntimeError("archive not available, run check() or download() first")
 
         return self._archive
 
@@ -55,8 +56,34 @@ class DefaultDownloader:
     def url(self) -> str:
         return self._url
 
-    def check(self, dl_dir: Path, update_cache: bool = False) -> None:
-        return (dl_dir / basename(urlparse(self._url).path)).exists()
+    def _check_if_non_exist(self, to: Path, update_cache: bool = False) -> None:
+        if not update_cache:
+            raise HashError(f'Hash verification failed since {self._archive.name} does not exist')
+
+        self.download(to)
+
+        if self._archivehash:
+            if not check_hash(self._archive, self._archivehash):
+                raise HashError(f'Hash verification failed after download for {self._archive.name}')
+
+    def _check_if_exist(self, to: Path, update_cache: bool = False) -> None:
+        if not self._archivehash:
+            return
+
+        if check_hash(self._archive, self._archivehash):
+            return
+
+        if update_cache:
+            self._archive.unlink()
+            self._check_if_non_exist(to, update_cache)
+            return
+
+        raise HashError(f'Hash verification failed for {self._archive.name}')
+
+    def check(self, to: Path, update_cache: bool = False) -> None:
+        self._set_archive_name(to)
+
+        (self._check_if_exist if self._archive.exists() else self._check_if_non_exist)(to, update_cache)
 
     @retry(
         before_sleep=lambda _: print("Connection error, retrying in 30s..."),

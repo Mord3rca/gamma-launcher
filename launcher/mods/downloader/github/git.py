@@ -39,24 +39,32 @@ class GithubDownloader(DefaultDownloader):
 
     def __init__(self, info: ModInfo) -> None:
         super().__init__(info)
+        self._user = None
+        self._project = None
         self._revision = None
+
+    def _set_vars(self, to: Path) -> None:
+        self._user, self._project, *_, revision = self.regexp_url.match(self._url).groups()
+        self._archive = to / f"{self._project}.git"
+        self._revision = revision if revision else f"{self._user}/main"
+
+    def check(self, to: Path, update_cache: bool = False) -> None:
+        pass
 
     def download(self, to: Path, use_cached: bool = False, filename: str = None) -> Path:
         if is_in_pyinstaller_context() and getenv('LD_LIBRARY_PATH'):
             del environ['LD_LIBRARY_PATH']
 
-        user, project, *_, revision = self.regexp_url.match(self._url).groups()
-        self._archive = to / f"{project}.git"
-        self._revision = revision if revision else f"{user}/main"
+        self._set_vars(to)
 
         if not self._archive.is_dir():
             Repo.init(self._archive, bare=True)
 
         repo = Repo(self._archive)
-        remote = repo.create_remote(user, f"https://github.com/{user}/{project}") \
-            if user not in repo.remotes else repo.remotes[user]
+        remote = repo.create_remote(self._user, f"https://github.com/{self._user}/{self._project}") \
+            if self._user not in repo.remotes else repo.remotes[self._user]
 
-        remote.fetch(progress=ProgressPrinter(self._archive.name, user))
+        remote.fetch(progress=ProgressPrinter(self._archive.name, self._user))
 
         return self._archive
 

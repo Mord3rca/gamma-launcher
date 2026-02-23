@@ -37,8 +37,8 @@ class ModDBDownloaderTestCase(TestCase):
         self.assertTrue(mock_request.call_args_list[1].called_with(self._dl_mirror_url))
 
     @patch('launcher.mods.downloader.moddb.g_session.get', side_effect=mocked_get)
-    def test_parse_moddb_data(self, mock_request) -> None:
-        o = ModDBDownloader._parse_moddb_data(self._mod_page_info)
+    def test_parse_moddb_metadata(self, mock_request) -> None:
+        o = ModDBDownloader._parse_moddb_metadata(self._mod_page_info)
 
         self.assertEqual(o['Filename'], 'Anomaly-1.5.3-Full.2.7z')
         self.assertEqual(o['MD5 Hash'], 'd6bce51a4e6d98f9610ef0aa967ba964')
@@ -50,9 +50,9 @@ class ModDBDownloaderTestCase(TestCase):
     def test_download(self, mock_request) -> None:
         o = ModDBDownloader(self._dl_start_url, self._mod_page_info)
 
-        # TODO: Better test cases (check cache, reqouests call, ...)
+        # TODO: Better test cases (check cache, requests call, ...)
         with TemporaryDirectory(prefix='gamma-launcher-moddb-downloader-test-') as dir:
             pdir = Path(dir)
 
             o.download(pdir)
-            self.assertTrue((pdir / 'mod.7z').exists())
+            self.assertTrue((pdir / 'Anomaly-1.5.3-Full.2.7z').exists())

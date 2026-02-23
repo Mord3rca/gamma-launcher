@@ -6,6 +6,7 @@ from tempfile import TemporaryDirectory
 from pathlib import Path
 from shutil import copy
 
+from launcher.exceptions import HashError
 from launcher.mods.downloader.base import DefaultDownloader
 
 from common import data_dir, MockedResponse
@@ -85,16 +86,33 @@ class DefaultDownloaderTestCase(TestCase):
         mock_request.assert_called_once_with(self._basic_url, stream=True)
 
     @patch('launcher.mods.downloader.g_session.get', side_effect=mocked_get)
-    def test_check(self, mock_request):
-        o = DefaultDownloader(self._basic_url)
+    def test_check_dont_exist(self, mock_request):
+        o = DefaultDownloader(self._basic_url, filehash='26134043be9927512a7e47f2e4261605')
 
         with TemporaryDirectory(prefix='gamma-launcher-base-downloader-test-') as dir:
             pdir = Path(dir)
 
-            self.assertTrue(not o.check(pdir))
+            with self.assertRaises(HashError):
+                o.check(pdir)
 
-            o.download(pdir)
-            self.assertTrue(o.check(pdir))
+            o.check(pdir, True)
+            self.assertEqual(md5(o.archive.read_bytes()).hexdigest(), '26134043be9927512a7e47f2e4261605')
+
+        mock_request.assert_called_once_with(self._basic_url, stream=True)
+
+    @patch('launcher.mods.downloader.g_session.get', side_effect=mocked_get)
+    def test_check_exist(self, mock_request):
+        o = DefaultDownloader(self._basic_url, filehash='26134043be9927512a7e47f2e4261605')
+
+        with TemporaryDirectory(prefix='gamma-launcher-base-downloader-test-') as dir:
+            pdir = Path(dir)
+            copy(data_dir / 'test.rar', pdir / 'leet.zip')
+
+            with self.assertRaises(HashError):
+                o.check(pdir)
+
+            o.check(pdir, True)
+            self.assertEqual(md5(o.archive.read_bytes()).hexdigest(), '26134043be9927512a7e47f2e4261605')
 
         mock_request.assert_called_once_with(self._basic_url, stream=True)
 

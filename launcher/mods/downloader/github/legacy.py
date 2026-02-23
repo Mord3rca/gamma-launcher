@@ -14,6 +14,9 @@ class GithubDownloader(DefaultDownloader):
         super().__init__(info)
         self._revision = None
 
+    def check(self, to: Path, update_cache: bool = False) -> None:
+        pass
+
     def download(self, to: Path, use_cached: bool = False, filename: str = None) -> Path:
         user, project, *_ = self.regexp_url.match(self._url).groups()
 
