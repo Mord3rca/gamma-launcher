@@ -36,8 +36,13 @@ jobs:
     - name: Installing package via pip
       run: python -m pip install .
 
-    - name: Installing deps for unit testing
+    - name: Installing deps for doc & unit testing
       run: sudo apt install libunrar5t64
+
+    - name: Generate documentation
+      run: |
+        pip install pdoc3
+        pdoc3 --html -o doc/ launcher
 
     - name: Running unit test
       run: python -m unittest discover -v tests/
