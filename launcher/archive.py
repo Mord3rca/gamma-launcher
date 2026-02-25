@@ -1,3 +1,9 @@
+"""
+Module for archive extraction & listing
+
+Currently support 7z, RAR & ZIP
+"""
+
 from platform import system
 from py7zr import SevenZipFile
 from subprocess import run
@@ -6,7 +12,14 @@ from unrar.rarfile import RarFile
 from zipfile import ZipFile
 
 
-def get_mime_from_file(filename) -> str:
+def get_mime_from_file(filename: str) -> str:
+    """Get MIME type from a file
+
+    Argument(s):
+    * filename -- File path as a string
+
+    Return the MIME type of the file or except if unknown
+    """
     with open(filename, 'rb') as f:
         d = f.read(16)
 
@@ -58,11 +71,30 @@ else:
 
 
 def extract_archive(filename: str, path: str, mime: str = None) -> None:
+    """Extract the archive to a directory
+
+    Argument(s):
+    * filename -- File path of the archive to extract as str
+    * path -- Path where to extract the archive content as str
+
+    Keyword argument(s):
+    * mime -- Set a MIME type instead of determining it with `get_mime_from_file`
+    """
     mime = mime or get_mime_from_file(filename)
     _extract_func_dict.get(mime)(filename, path)
 
 
 def list_archive_content(filename: str, mime: str = None) -> List[str]:
+    """List archive content
+
+    Argument(s):
+    * filename -- File path of the archive to extract as str
+
+    Keyword argument(s):
+    * mime -- Set a MIME type instead of determining it with `get_mime_from_file`
+
+    Return a list of archive member path as string
+    """
     mime = mime or get_mime_from_file(filename)
     return {
         'application/x-7z-compressed': lambda f: SevenZipFile(f).getnames(),

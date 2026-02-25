@@ -9,6 +9,9 @@ from launcher.mods.downloader.base import DefaultDownloader, g_session
 
 
 class GithubDownloader(DefaultDownloader):
+    """Specialization of `launcher.mods.downloader.base.DefaultDownloader`
+    to manage Github URLs without `GitPython` module
+    """
 
     def __init__(self, info: ModInfo) -> None:
         super().__init__(info)

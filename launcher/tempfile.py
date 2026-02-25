@@ -7,6 +7,9 @@ from launcher.common import folder_to_install
 
 
 class HotfixPathCase:
+    """Class adding a method to `DefaultTempDir` object to fix
+    path case of files contained in temporary directory
+    """
 
     def _post_decompression_hotfix_fix_path_case(self, dir: Path) -> None:
         for path in filter(
@@ -22,6 +25,9 @@ class HotfixPathCase:
 
 
 class HotfixMalformedArchive:
+    """Class adding a method to `DefaultTempDir` object to fix
+    path separator of files contained in temporary directory
+    """
 
     def _post_decompression_hotfix_00_malformed_archive(self, dir: Path) -> None:
         for path in dir.glob('*.*'):
@@ -37,9 +43,15 @@ class HotfixMalformedArchive:
 
 
 tempDirHotfixes = (HotfixPathCase, HotfixMalformedArchive) if not system() == 'Windows' else ()
+"List of hotfixes added to `DefaultTempDir`"
 
 
 class DefaultTempDir(TemporaryDirectory, *tempDirHotfixes):
+    """A `tempfile.TemporaryDirectory` specialization to apply hotpatches to content
+    Argument(s)
+    * extract_func -- A callable used to execute an action before
+    executing hotpatch method registered in this class
+    """
 
     def __init__(self, extract_func: Callable[[Path], None], *args, **kwargs) -> None:
         TemporaryDirectory.__init__(self, *args, **kwargs)

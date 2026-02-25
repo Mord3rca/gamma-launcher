@@ -1,3 +1,4 @@
+"Handle Mods / Resources installation"
 from .base import BaseInstaller
 from .default import DefaultInstaller
 from .git import GitResourceInstaller

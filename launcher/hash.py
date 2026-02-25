@@ -4,6 +4,17 @@ from tqdm import tqdm
 
 
 def check_hash(file: Path, checksum: str, desc: str = None) -> bool:
+    """Compute MD5 hash of a file and display progress with `tqdm`
+
+    Argument(s):
+    * file -- File path as Path or str to check
+    * checksum -- Known checksum of the file
+
+    Keyword argument(s):
+    * desc -- Custom description for `tqdm`
+
+    Return True if computed checksum and checksum match
+    """
     hash = md5()
     with open(file, 'rb') as f, tqdm(
         desc=desc or f"Calculating hash of {file.name}",

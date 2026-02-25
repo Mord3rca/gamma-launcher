@@ -2,6 +2,7 @@ from launcher.common import gamma_arg
 
 
 class TestModMaker:
+    "Old command used to verify subdirs directive of modmaker"
 
     arguments: dict = {
         **gamma_arg,

@@ -12,6 +12,10 @@ from launcher.exceptions import HashError, ModDBDownloadError
 
 
 class CheckAnomaly:
+    """Verify Anomaly files based on *\\<path/to/anomaly\\>/tools/checksums.md5*
+
+    /!\\ Only works if GAMMA installation did not patched *bin/* folder.
+    """
 
     arguments: dict = {
         **anomaly_arg
@@ -44,6 +48,7 @@ class CheckAnomaly:
 
 
 class CheckMD5:
+    "Verify checksum of all mod file required by GAMMA"
 
     arguments: dict = {
         **gamma_arg,

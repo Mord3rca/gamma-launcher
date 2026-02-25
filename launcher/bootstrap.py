@@ -1,3 +1,6 @@
+"""
+"""
+
 from pathlib import Path
 from platform import machine, system
 from os import environ, execve, getenv, pathsep
@@ -5,6 +8,7 @@ from sys import argv, stderr
 
 
 def is_in_pyinstaller_context() -> bool:
+    "Determine if process is running from a pyinstaller executable"
     return bool(getenv("_PYI_ARCHIVE_FILE"))
 
 
@@ -108,6 +112,10 @@ def __noop() -> None:
 
 
 def bootstrap() -> None:
+    """Executed on module import
+
+    This will run some fixes / workaround based on OS running
+    """
     {
         'Linux': __linux_bootstrap,
         'Windows': __windows_bootstrap,

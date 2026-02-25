@@ -36,6 +36,7 @@ class ProgressPrinter(RemoteProgress):
 
 
 class GithubDownloader(DefaultDownloader):
+    "Specialization of `launcher.mods.downloader.base.DefaultDownloader` to manage Github URLs"
 
     def __init__(self, info: ModInfo) -> None:
         super().__init__(info)
@@ -81,4 +82,5 @@ class GithubDownloader(DefaultDownloader):
 
     @property
     def revision(self) -> Optional[str]:
+        "Get repository revision"
         return Repo(self._archive).rev_parse(self._revision).hexsha if self._revision else None

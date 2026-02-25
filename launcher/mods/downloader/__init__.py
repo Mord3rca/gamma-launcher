@@ -17,7 +17,8 @@ __all__ = [
 ]
 
 
-def DownloaderFactory(info: ModInfo) -> Optional[DefaultDownloader]:
+def DownloaderFactory(info: ModInfo) -> Optional[DefaultDownloader | GithubDownloader | ModDBDownloader]:
+    "Return the correct downloader instance based of `launcher.mods.info` content"
     if not info.url:
         return None
 

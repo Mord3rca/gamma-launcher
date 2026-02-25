@@ -155,6 +155,17 @@ Also remove some shaders mods:
 * 190- Screen Space Shaders - Ascii1457
 * 290- Atmospherics Shaders Weathers and Reshade - Hippobot
 
+## Documentation
+
+A documentation of launcher API can be generated with `pdoc3`
+
+```sh
+pip install pdoc3
+pdoc3 --html -o doc/ launcher
+```
+
+Once executed, a *doc/* folder containing a HTML documentation will be created.
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md)

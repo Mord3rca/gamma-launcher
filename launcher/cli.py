@@ -1,3 +1,4 @@
+"Entry point module for CLI"
 import launcher.bootstrap  # noqa: F401
 
 from launcher import __title__, __version__
@@ -33,6 +34,11 @@ common_args = {
 
 
 def command_object_to_dict(o):
+    """Argument(s):
+    * o -- An object from `launcher.commands`
+
+    Return a dict usable in `parser_desc` subparsers
+    """
     args = common_args.copy()
     args.update(o.arguments)
     return {
@@ -71,6 +77,7 @@ _no_config = getenv('GAMMA_LAUNCHER_NO_CONFIG') is not None
 
 
 def save_configuration(args: Namespace) -> None:
+    "Save current arguments in *config.ini* to reuse later"
     if _no_config:
         return
 
@@ -87,6 +94,7 @@ def save_configuration(args: Namespace) -> None:
 
 
 def main():
+    "CLI entrypoint function"
     _config_file_path.parent.mkdir(parents=True, exist_ok=True)
     _config_file_path.touch(exist_ok=True)
 
