@@ -9,6 +9,7 @@ from launcher.mods.installer.base import BaseInstaller
 
 
 class DefaultInstaller(BaseInstaller):
+    "Installer which is used for ModDB provided mods"
 
     @staticmethod
     def _read_fomod_directives(dir: Path) -> Dict[Path, Path]:

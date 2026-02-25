@@ -2,6 +2,11 @@ from typing import List, Optional, Tuple
 
 
 class ModInfo:
+    """Class containing GAMMA modpack maker information used for downloading / installation
+
+    Argument(s):
+    * data -- A dictionary created by `launcher.mods._parse_modpack_maker_line` with all modpack_maker line infos
+    """
 
     def __init__(self, data: dict) -> None:
         self._data = data

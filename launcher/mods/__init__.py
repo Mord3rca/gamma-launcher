@@ -74,6 +74,13 @@ def _parse_modpack_maker_line(line: str) -> ModInfo:
 
 
 def read_mod_maker(mod_path: Path) -> List[ModSeparator | ModDBInstaller | ModDefault]:  # noqa: C901
+    """Create a List of Mods to download / install
+
+    Argument(s):
+    * mod_path -- `pathlib.Path` object pointing to Grok's modpack_data/
+
+    return a list of mods for GAMMA installation
+    """
     result = []
 
     print(f'[+] Reading mod definition from {mod_path} ...')

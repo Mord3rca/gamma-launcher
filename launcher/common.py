@@ -1,6 +1,7 @@
 from typing import Tuple
 
 folder_to_install: Tuple[str] = ('appdata', 'db', 'gamedata')
+"Folder to lookout for GAMMA mods installation"
 
 anomaly_arg = {
     "--anomaly": {
@@ -9,6 +10,7 @@ anomaly_arg = {
         "type": str
     }
 }
+"Common arg(s) for Anomaly commands"
 
 gamma_arg = {
     "--gamma": {
@@ -17,6 +19,7 @@ gamma_arg = {
         "type": str
     }
 }
+"Common arg(s) for GAMMA commands"
 
 cache_dir_arg = {
     "--cache-directory": {
@@ -25,3 +28,4 @@ cache_dir_arg = {
         "dest": "cache_path"
     }
 }
+"Common arg(s) for cache directory function"

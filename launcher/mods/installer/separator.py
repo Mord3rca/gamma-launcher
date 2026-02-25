@@ -5,6 +5,7 @@ from launcher.mods.installer.base import BaseInstaller
 
 
 class SeparatorInstaller(BaseInstaller):
+    "Specialization for Separator mods"
 
     def __init__(self, name: str) -> None:
         super().__init__(ModInfo({'name': name}))

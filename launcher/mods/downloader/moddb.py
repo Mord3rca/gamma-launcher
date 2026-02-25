@@ -10,6 +10,7 @@ from launcher.mods.downloader.base import DefaultDownloader, g_session
 
 
 class ModDBDownloader(DefaultDownloader):
+    "Specialization of `launcher.mods.downloader.base.DefaultDownloader` to manage ModDB URLs"
 
     def __init__(self, url: str, iurl: str) -> None:
         super().__init__(url)

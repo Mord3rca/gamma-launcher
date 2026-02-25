@@ -8,6 +8,7 @@ from launcher.mods.installer.base import BaseInstaller
 
 
 class GitResourceInstaller(BaseInstaller):
+    "Installer used to install Github based mods / ressources"
 
     def __init__(self, info: ModInfo, find_gamedata: bool = False) -> None:
         super().__init__(info)
