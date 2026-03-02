@@ -8,12 +8,23 @@ class UserLTX:
 
     class Bind(dict):
 
+        _azerty_map: dict = {
+            'kW': 'kZ', 'kA': 'kQ', 'kQ': 'kA', 'kW': 'kZ', 'kM': 'kCOMMA'
+        }
+
         def __init__(self, type: str) -> None:
             super().__init__()
             self.__type = type
 
         def __str__(self) -> str:
             return '\r\n'.join([f'{self.__type} {k} {v}' for k, v in self.items()])
+
+        def to_azerty_layout(self) -> None:
+            'Change bind from QWERTY to AZERTY layout'
+            for k, v in self.items():
+                if v not in self._azerty_map.keys():
+                    continue
+                self[k] = self._azerty_map[v]
 
     def __init__(self, file: Path | str = None) -> None:
         self.__content = dict()

@@ -72,3 +72,16 @@ class UserLTXTestCase(TestCase):
 
         self.assertTrue(tfile.exists())
         self.assertEqual(md5(tfile.read_bytes()).hexdigest(), 'c5127d3806debb427bce1c0d6a576929')
+
+    def test_to_azerty(self) -> None:
+        u = UserLTX()
+
+        u.bind['foo'] = 'kA'
+        u.bind['bar'] = 'kW'
+        u.bind['foobar'] = 'kM'
+
+        u.bind.to_azerty_layout()
+
+        self.assertEqual(u.bind['foo'], 'kQ')
+        self.assertEqual(u.bind['bar'], 'kZ')
+        self.assertEqual(u.bind['foobar'], 'kCOMMA')
