@@ -12,6 +12,11 @@ class UserLTX:
             'kW': 'kZ', 'kA': 'kQ', 'kQ': 'kA', 'kW': 'kZ', 'kM': 'kCOMMA'
         }
 
+        _dvorak_map: dict = {
+            'kW': 'kCOMMA', 'kS': 'kO', 'kD': 'kE', 'kQ': 'kAPOSTROPHE',
+            'kE': 'kPERIOD', 'kU': 'kF', 'kF': 'kU', 'kR': 'kP'
+        }
+
         def __init__(self, type: str) -> None:
             super().__init__()
             self.__type = type
@@ -25,6 +30,13 @@ class UserLTX:
                 if v not in self._azerty_map.keys():
                     continue
                 self[k] = self._azerty_map[v]
+
+        def to_dvorak_layout(self) -> None:
+            'Change bind from QWERTY to DVORAK layout'
+            for k, v in self.items():
+                if v not in self._dvorak_map.keys():
+                    continue
+                self[k] = self._dvorak_map[v]
 
     def __init__(self, file: Path | str = None) -> None:
         self.__content = dict()

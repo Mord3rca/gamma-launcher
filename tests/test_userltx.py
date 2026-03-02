@@ -85,3 +85,16 @@ class UserLTXTestCase(TestCase):
         self.assertEqual(u.bind['foo'], 'kQ')
         self.assertEqual(u.bind['bar'], 'kZ')
         self.assertEqual(u.bind['foobar'], 'kCOMMA')
+
+    def test_to_dvorak(self) -> None:
+        u = UserLTX()
+
+        u.bind['foo'] = 'kU'
+        u.bind['bar'] = 'kE'
+        u.bind['foobar'] = 'kJ'
+
+        u.bind.to_dvorak_layout()
+
+        self.assertEqual(u.bind['foo'], 'kF')
+        self.assertEqual(u.bind['bar'], 'kPERIOD')
+        self.assertEqual(u.bind['foobar'], 'kJ')
