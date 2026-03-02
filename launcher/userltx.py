@@ -1,8 +1,19 @@
+from __future__ import annotations
+
 from pathlib import Path
 
 
 class UserLTX:
     'Object used to create / edit user.ltx file'
+
+    class Bind(dict):
+
+        def __init__(self, type: str) -> None:
+            super().__init__()
+            self.__type = type
+
+        def __str__(self) -> str:
+            return '\r\n'.join([f'{self.__type} {k} {v}' for k, v in self.items()])
 
     def __init__(self, file: Path | str = None) -> None:
         self.__content = dict()
@@ -23,6 +34,20 @@ class UserLTX:
     def __setitem__(self, key: str, value: str) -> None:
         self.__content[key] = value
 
+    @property
+    def bind(self) -> UserLTX.Bind:
+        'Return and instance of `UserLTX.Bind` which manage primary binds'
+        if 'bind' not in self.__content:
+            self.__content['bind'] = self.Bind('bind')
+        return self.__content['bind']
+
+    @property
+    def bind_sec(self) -> UserLTX.Bind:
+        'Return and instance of `UserLTX.Bind` which manage secondary binds'
+        if 'bind_sec' not in self.__content:
+            self.__content['bind_sec'] = self.Bind('bind_sec')
+        return self.__content['bind_sec']
+
     def load(self, file: Path | str) -> None:
         '''Read ltx file
 
@@ -37,7 +62,9 @@ class UserLTX:
 
             key, *args = line.strip().split(' ')
             if 'bind' in key:
-                self.__content[f'{key} {args[0]}'] = ' '.join(args[1:])
+                if key not in self.__content:
+                    self.__content[key] = self.Bind(key)
+                self.__content[key][args[0]] = ' '.join(args[1:])
             else:
                 self.__content[key] = ' '.join(args)
 
@@ -56,6 +83,11 @@ class UserLTX:
             raise ValueError('file output need to defined in constructor or as argument of save()')
 
         for key, value in self.__content.items():
-            data += f'{key} {value}\r\n' if value else f'{key}\r\n'
+            if isinstance(value, self.Bind):
+                data += f'{value}\r\n'
+            elif not value:
+                data += f'{key}\r\n'
+            else:
+                data += f'{key} {value}\r\n'
 
         file.write_text(data)

@@ -19,7 +19,7 @@ class UserLTXTestCase(TestCase):
         u = UserLTX(self.ltx_test_file)
 
         u['ai_use_torch_dynamic_lights'] = 'off'
-        u['bind_sec inventory'] = 'kESC'
+        u.bind_sec['inventory'] = 'kESC'
 
         tfile = Path(self.tempDir.name) / 'test-edit.ltx'
         u.save(tfile)
@@ -49,11 +49,11 @@ class UserLTXTestCase(TestCase):
         self.assertEqual(u['ai_aim_min_angle'], '0.19635')
         self.assertEqual(u['ai_use_torch_dynamic_lights'], 'on')
         self.assertEqual(u['default_controls'], '')
-        self.assertEqual(u['bind left'], 'kLEFT')
-        self.assertEqual(u['bind jump'], 'kSPACE')
-        self.assertEqual(u['bind crouch'], 'kLCONTROL')
-        self.assertEqual(u['bind inventory'], 'kI')
-        self.assertEqual(u['bind_sec inventory'], 'kTAB')
+        self.assertEqual(u.bind['left'], 'kLEFT')
+        self.assertEqual(u.bind['jump'], 'kSPACE')
+        self.assertEqual(u.bind['crouch'], 'kLCONTROL')
+        self.assertEqual(u.bind['inventory'], 'kI')
+        self.assertEqual(u.bind_sec['inventory'], 'kTAB')
         self.assertEqual(u['dsr_test'], '(0.000000, 0.000000, 0.000000)')
         self.assertEqual(u['g_dead_body_collision'], 'actor_only')
         self.assertEqual(u['g_game_difficulty'], 'gd_novice')
