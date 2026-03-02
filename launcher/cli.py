@@ -10,6 +10,7 @@ from launcher.commands import (
     GammaSetup,
     RemoveReshade,
     PurgeShaderCache,
+    SwitchKeymap,
     TestModMaker,
     Usvfs,
 )
@@ -65,6 +66,7 @@ parser_desc = {
              **command_object_to_dict(GammaSetup),
              **command_object_to_dict(RemoveReshade),
              **command_object_to_dict(PurgeShaderCache),
+             **command_object_to_dict(SwitchKeymap),
              **command_object_to_dict(TestModMaker),
              **command_object_to_dict(Usvfs),
          },
