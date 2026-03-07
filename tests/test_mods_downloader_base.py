@@ -9,14 +9,7 @@ from shutil import copy
 from launcher.exceptions import HashError
 from launcher.mods.downloader.base import DefaultDownloader
 
-from common import data_dir, MockedResponse
-
-
-def mocked_get(*args, **kwargs):
-    return {
-        DefaultDownloaderTestCase._basic_url: MockedResponse(200, data_dir / 'test.zip'),
-        DefaultDownloaderTestCase._git_url: MockedResponse(200, data_dir / 'test-git-archive.zip'),
-    }.get(args[0], MockedResponse(404, None))
+from common import basic_url, data_dir, git_archive_url, mocked_get
 
 
 def mocked_retry(*args, **kwargs):
@@ -25,21 +18,17 @@ def mocked_retry(*args, **kwargs):
 
 class DefaultDownloaderTestCase(TestCase):
 
-    _basic_url: str = 'http://mockedURL/leet.zip'
-
-    _git_url: str = 'https://github.com/foo/bar/archive/refs/heads/main.zip'
-
     def test_archive_before_download(self):
-        o = DefaultDownloader(self._basic_url)
+        o = DefaultDownloader(basic_url)
 
         with self.assertRaises(RuntimeError):
             o.archive
 
     @patch('launcher.mods.downloader.g_session.get', side_effect=mocked_get)
     def test_download_and_extract(self, mock_request):
-        o = DefaultDownloader(self._basic_url)
+        o = DefaultDownloader(basic_url)
 
-        self.assertEqual(o.url, self._basic_url)
+        self.assertEqual(o.url, basic_url)
 
         with TemporaryDirectory(prefix='gamma-launcher-base-downloader-test-') as dir:
             pdir = Path(dir)
@@ -50,11 +39,11 @@ class DefaultDownloaderTestCase(TestCase):
             o.extract(pdir)
             self.assertEqual((pdir / 'flag').read_text().strip(), 'success')
 
-        mock_request.assert_called_once_with(self._basic_url, stream=True)
+        mock_request.assert_called_once_with(basic_url, stream=True)
 
     @patch('launcher.mods.downloader.g_session.get', side_effect=mocked_get)
     def test_download_with_cached(self, mock_request):
-        o = DefaultDownloader(self._basic_url)
+        o = DefaultDownloader(basic_url)
 
         with TemporaryDirectory(prefix='gamma-launcher-base-downloader-test-') as dir:
             pdir = Path(dir)
@@ -68,11 +57,11 @@ class DefaultDownloaderTestCase(TestCase):
             o.download(pdir, use_cached=True, hash='26134043be9927512a7e47f2e4261605')
             self.assertEqual(md5(archive_path.read_bytes()).hexdigest(), '26134043be9927512a7e47f2e4261605')
 
-        mock_request.assert_called_once_with(self._basic_url, stream=True)
+        mock_request.assert_called_once_with(basic_url, stream=True)
 
     @patch('launcher.mods.downloader.g_session.get', side_effect=mocked_get)
     def test_download_with_extra_args(self, mock_request):
-        o = DefaultDownloader(self._basic_url, 'nany?.zip', '26134043be9927512a7e47f2e4261605')
+        o = DefaultDownloader(basic_url, 'nany?.zip', '26134043be9927512a7e47f2e4261605')
 
         with TemporaryDirectory(prefix='gamma-launcher-base-downloader-test-') as dir:
             pdir = Path(dir)
@@ -83,11 +72,11 @@ class DefaultDownloaderTestCase(TestCase):
             o.download(pdir, use_cached=True)
             self.assertEqual(md5(archive_path.read_bytes()).hexdigest(), '26134043be9927512a7e47f2e4261605')
 
-        mock_request.assert_called_once_with(self._basic_url, stream=True)
+        mock_request.assert_called_once_with(basic_url, stream=True)
 
     @patch('launcher.mods.downloader.g_session.get', side_effect=mocked_get)
     def test_check_dont_exist(self, mock_request):
-        o = DefaultDownloader(self._basic_url, filehash='26134043be9927512a7e47f2e4261605')
+        o = DefaultDownloader(basic_url, filehash='26134043be9927512a7e47f2e4261605')
 
         with TemporaryDirectory(prefix='gamma-launcher-base-downloader-test-') as dir:
             pdir = Path(dir)
@@ -98,11 +87,11 @@ class DefaultDownloaderTestCase(TestCase):
             o.check(pdir, True)
             self.assertEqual(md5(o.archive.read_bytes()).hexdigest(), '26134043be9927512a7e47f2e4261605')
 
-        mock_request.assert_called_once_with(self._basic_url, stream=True)
+        mock_request.assert_called_once_with(basic_url, stream=True)
 
     @patch('launcher.mods.downloader.g_session.get', side_effect=mocked_get)
     def test_check_exist(self, mock_request):
-        o = DefaultDownloader(self._basic_url, filehash='26134043be9927512a7e47f2e4261605')
+        o = DefaultDownloader(basic_url, filehash='26134043be9927512a7e47f2e4261605')
 
         with TemporaryDirectory(prefix='gamma-launcher-base-downloader-test-') as dir:
             pdir = Path(dir)
@@ -114,11 +103,11 @@ class DefaultDownloaderTestCase(TestCase):
             o.check(pdir, True)
             self.assertEqual(md5(o.archive.read_bytes()).hexdigest(), '26134043be9927512a7e47f2e4261605')
 
-        mock_request.assert_called_once_with(self._basic_url, stream=True)
+        mock_request.assert_called_once_with(basic_url, stream=True)
 
     @patch('launcher.mods.downloader.g_session.get', side_effect=mocked_get)
     def test_git_url(self, mock_request):
-        o = DefaultDownloader(self._git_url)
+        o = DefaultDownloader(git_archive_url)
 
         with TemporaryDirectory(prefix='gamma-launcher-base-downloader-test-') as dir:
             pdir = Path(dir)
@@ -126,7 +115,7 @@ class DefaultDownloaderTestCase(TestCase):
             o.download(pdir)
             self.assertEqual(o.archive, pdir / 'bar-main.zip')
 
-        mock_request.assert_called_once_with(self._git_url, stream=True)
+        mock_request.assert_called_once_with(git_archive_url, stream=True)
 
     @patch('launcher.mods.downloader.g_session.get', side_effect=mocked_get)
     def test_not_found(self, mock_request):
@@ -142,7 +131,7 @@ class DefaultDownloaderTestCase(TestCase):
     @skip('Take a minute')
     @patch('launcher.mods.downloader.g_session.get', side_effect=mocked_retry)
     def test_retry_and_fail(self, mock_request):
-        o = DefaultDownloader(self._basic_url)
+        o = DefaultDownloader(basic_url)
 
         with self.assertRaises(ConnectionError), TemporaryDirectory(
             prefix='gamma-launcher-base-downloader-test-'
