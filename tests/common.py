@@ -56,3 +56,26 @@ def mocked_get(*args, **kwargs):
             302, None, headers={'location': basic_url2}
         ),
     }.get(args[0], MockedResponse(404, None))
+
+
+class MockedDownloader:
+
+    _file: Path = Path('/this/path/dont/exist')
+
+    _content: List[Path] = [
+        Path('appdata/user.ltx'),
+        Path('gamedata/flag'),
+
+        Path('testsubdir/db/test.ini'),
+        Path('anothersubdir/gamedata/song.ogg'),
+
+        Path('fomod/config.xml'),
+    ]
+
+    def download(self, *args, **kwargs) -> Path:
+        return self._file
+
+    def extract(self, to: Path, *args, **kwargs) -> None:
+        for i in self._content:
+            (to / i).parent.mkdir(parents=True, exist_ok=True)
+            (to / i).write_text('TEST')
