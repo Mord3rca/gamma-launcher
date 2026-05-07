@@ -14,6 +14,7 @@ class ModDBDownloader(DefaultDownloader):
 
     def __init__(self, url: str, iurl: str) -> None:
         super().__init__(url)
+        self._moddb_start_url = url
         self._iurl = iurl
 
     @staticmethod
@@ -53,6 +54,15 @@ class ModDBDownloader(DefaultDownloader):
 
         return g_session.get(f"https://www.moddb.com{s[0]}", allow_redirects=False).headers["location"]
 
+
+    def _pre_download_hook(self) -> None:
+        """Re-resolve the ModDB mirror URL before each retry attempt.
+
+        ModDB returns different mirrors; a mirror that failed may be
+        replaced with a working one on the next request.
+        """
+        self._url = self._get_download_url(self._moddb_start_url)
+
     def _set_vars_from_metadata(self):
         if not self._iurl:
             return
@@ -88,6 +98,5 @@ class ModDBDownloader(DefaultDownloader):
 
     def download(self, to: Path, use_cached: bool = False, *args, **kwargs) -> Path:
         self._set_vars_from_metadata()
-        self._url = self._get_download_url(self._url)
 
         return super().download(to, use_cached)

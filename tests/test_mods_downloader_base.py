@@ -1,12 +1,12 @@
 from hashlib import md5
 from requests.exceptions import ConnectionError, HTTPError
 from unittest import TestCase, skip
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 from tempfile import TemporaryDirectory
 from pathlib import Path
 from shutil import copy
 
-from launcher.exceptions import HashError
+from launcher.exceptions import HashError, InsufficientSpaceError
 from launcher.mods.downloader.base import DefaultDownloader
 
 from common import basic_url, data_dir, git_archive_url, mocked_get
@@ -139,3 +139,46 @@ class DefaultDownloaderTestCase(TestCase):
             o.download(Path(dir))
 
         self.assertEqual(len(mock_request.call_args_list), 3)
+
+
+class ExtractSpaceCheckTestCase(TestCase):
+    """Tests for the disk-space guard in DefaultDownloader.extract()."""
+
+    @patch('launcher.mods.downloader.base.extract_archive')
+    @patch('launcher.mods.downloader.base.disk_usage')
+    @patch('launcher.mods.downloader.base.get_archive_uncompressed_size')
+    def test_extracts_when_enough_space(self, mock_size, mock_du, mock_extract):
+        mock_size.return_value = 1000
+        mock_du.return_value = (0, 0, 2000)  # 2000 bytes free
+
+        o = DefaultDownloader(basic_url)
+        o._archive = Path('/fake/archive.zip')
+        o.extract(Path('/fake/dest'))
+
+        mock_extract.assert_called_once()
+
+    @patch('launcher.mods.downloader.base.extract_archive')
+    @patch('launcher.mods.downloader.base.disk_usage')
+    @patch('launcher.mods.downloader.base.get_archive_uncompressed_size')
+    def test_raises_insufficient_space(self, mock_size, mock_du, mock_extract):
+        mock_size.return_value = 2000
+        mock_du.return_value = (0, 0, 100)  # 100 bytes free, needs ~2200
+
+        o = DefaultDownloader(basic_url)
+        o._archive = Path('/fake/archive.zip')
+
+        with self.assertRaises(InsufficientSpaceError):
+            o.extract(Path('/fake/dest'))
+
+        mock_extract.assert_not_called()
+
+    @patch('launcher.mods.downloader.base.extract_archive')
+    @patch('launcher.mods.downloader.base.get_archive_uncompressed_size')
+    def test_skips_check_when_size_unknown(self, mock_size, mock_extract):
+        mock_size.side_effect = ValueError("not an archive")
+
+        o = DefaultDownloader(basic_url)
+        o._archive = Path('/fake/archive.zip')
+        o.extract(Path('/fake/dest'))
+
+        mock_extract.assert_called_once()

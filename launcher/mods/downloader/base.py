@@ -1,5 +1,6 @@
 ""
 from cloudscraper import create_scraper
+from shutil import disk_usage
 from os.path import basename
 from pathlib import Path
 from re import compile
@@ -9,9 +10,9 @@ from tqdm import tqdm
 from urllib.parse import urlparse
 
 from launcher import __version__
-from launcher.exceptions import HashError
+from launcher.exceptions import HashError, InsufficientSpaceError
 from launcher.hash import check_hash
-from launcher.archive import extract_archive
+from launcher.archive import extract_archive, get_archive_uncompressed_size
 
 g_session = create_scraper(
     browser={
@@ -40,6 +41,13 @@ class DefaultDownloader:
         self._archivehash = filehash
 
         self._user_wanted_name = filename
+
+    def _pre_download_hook(self) -> None:
+        """Hook called before each download attempt (including retries).
+
+        Override in subclasses to refresh download URLs between retry attempts.
+        """
+        pass
 
     def _set_archive_name(self, to: Path) -> None:
         if self._archive:
@@ -119,6 +127,7 @@ class DefaultDownloader:
         Return a `pathlib.Path` object like `self.archive`
         """
         self._set_archive_name(to)
+        self._pre_download_hook()
 
         hash = hash or self._archivehash
 
@@ -142,9 +151,28 @@ class DefaultDownloader:
         return self._archive
 
     def extract(self, to: Path) -> None:
-        """Extract the dowloaded archive
+        """Extract the downloaded archive
 
         Argument(s):
         * to -- Path object pointing to the directory to use for extraction
         """
+
+        # Check available space before extracting
+        try:
+            uncompressed = get_archive_uncompressed_size(str(self.archive))
+            _, _, free = disk_usage(to)
+            # 10% buffer for decompression overhead; see archive.py docstring
+            needed = int(uncompressed * 1.1)
+            if free < needed:
+                raise InsufficientSpaceError(
+                    f'Not enough space to extract {self.archive.name}: '
+                    f'~{uncompressed / 1024**3:.1f} GiB needed, '
+                    f'only {free / 1024**3:.1f} GiB available'
+                )
+        except InsufficientSpaceError:
+            raise
+        except (RuntimeError, OSError, ValueError):
+            # Can't determine size (e.g. unknown archive type or corrupted file)
+            pass
+
         extract_archive(self.archive, to)

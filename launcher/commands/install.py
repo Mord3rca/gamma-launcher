@@ -9,6 +9,7 @@ from launcher.common import anomaly_arg, gamma_arg, cache_dir_arg
 
 from launcher.mods import BaseArchive, GithubArchive, GitResource, ModDBArchive, read_mod_maker
 from launcher.userltx import UserLTX
+from launcher.tempfile import scoped_tempdir
 
 
 guide_url: str = "https://github.com/DravenusRex/stalker-gamma-linux-guide"
@@ -27,8 +28,8 @@ def check_tmp_free_space(size: int) -> None:
         _, __, free = disk_usage(dir)
         if free < (size * 1024 * 1024 * 1024):
             raise RuntimeError(
-                f"You need at least {size} GiB of space in TMPDIR for this to work.\n"
-                "Please export TMPDIR to a folder with enough space available."
+                f"You need at least {size} GiB of space in the temporary directory for this to work.\n"
+                "Please ensure the temporary directory has enough space available."
             )
 
 
@@ -295,8 +296,6 @@ AutomaticArchiveInvalidation=false
 """)
 
     def run(self, args):
-        check_tmp_free_space(6)
-
         # Init paths
         self._anomaly_dir = Path(args.anomaly).expanduser()
         self._gamma_dir = Path(args.gamma).expanduser()
@@ -308,23 +307,26 @@ AutomaticArchiveInvalidation=false
         # Make sure folder are existing
         self._dl_dir.mkdir(parents=True, exist_ok=True)
 
-        if not (self._anomaly_dir / "bin").is_dir():
-            AnomalyInstall().run(args)
+        # Use project-local tmpdir on the main filesystem (not /tmp tmpfs)
+        # to avoid filling tmpfs during extraction of large archives.
+        with scoped_tempdir(str(self._gamma_dir)):
+            if not (self._anomaly_dir / "bin").is_dir():
+                AnomalyInstall().run(args)
 
-        if not (self._mod_dir.is_dir() and self._grok_mod_dir.is_dir()):
-            GammaSetup().run(args)
+            if not (self._mod_dir.is_dir() and self._grok_mod_dir.is_dir()):
+                GammaSetup().run(args)
 
-        # Start installing
-        self._repo = args.custom_repo
+            # Start installing
+            self._repo = args.custom_repo
 
-        if args.update_def:
-            (self._update_gamma_definition if not args.custom_def else self._set_custom_gamma_def)(args.custom_def)
-        if args.anomaly_patch:
-            self._patch_anomaly(args.preserve_user_config)
+            if args.update_def:
+                (self._update_gamma_definition if not args.custom_def else self._set_custom_gamma_def)(args.custom_def)
+            if args.anomaly_patch:
+                self._patch_anomaly(args.preserve_user_config)
 
-        self._install_mods()
-        self._install_git_resources()
-        self._install_modorganizer_profile()
-        self._copy_gamma_modpack()
+            self._install_mods()
+            self._install_git_resources()
+            self._install_modorganizer_profile()
+            self._copy_gamma_modpack()
 
-        print('[+] Setup ended... Enjoy your journey in the Zone o/')
+            print('[+] Setup ended... Enjoy your journey in the Zone o/')

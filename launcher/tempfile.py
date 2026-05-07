@@ -1,7 +1,9 @@
 from pathlib import Path
 from platform import system
+from contextlib import contextmanager
 from tempfile import TemporaryDirectory
 from typing import Callable
+import tempfile as _tempfile_mod
 
 from launcher.common import folder_to_install
 
@@ -40,6 +42,27 @@ class HotfixMalformedArchive:
             p = dir / path.name.replace('\\', '/')
             p.parent.mkdir(parents=True, exist_ok=True)
             path.rename(dir / p)
+
+@contextmanager
+def scoped_tempdir(base_dir: str):
+    """Context manager that redirects tempfile to a directory under *base_dir*.
+
+    Creates ``<base_dir>/.tmp`` if needed, sets ``tempfile.tempdir``
+    to it for the duration of the block, and restores the previous value on exit.
+
+    This avoids filling a small tmpfs (e.g. /tmp) during large extractions.
+
+    Argument(s):
+    * base_dir -- Root directory; temp files go in ``<base_dir>/.tmp``
+    """
+    tmp_path = Path(base_dir) / ".tmp"
+    tmp_path.mkdir(parents=True, exist_ok=True)
+    old = _tempfile_mod.tempdir
+    try:
+        _tempfile_mod.tempdir = str(tmp_path)
+        yield tmp_path
+    finally:
+        _tempfile_mod.tempdir = old
 
 
 tempDirHotfixes = (HotfixPathCase, HotfixMalformedArchive) if not system() == 'Windows' else ()

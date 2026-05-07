@@ -4,7 +4,7 @@ from tempfile import TemporaryDirectory
 from typing import List
 from unittest import mock, TestCase, skipIf
 
-from launcher.archive import extract_archive, get_mime_from_file, list_archive_content
+from launcher.archive import extract_archive, get_mime_from_file, get_archive_uncompressed_size, list_archive_content
 
 from common import data_dir
 
@@ -74,3 +74,30 @@ class ListTestCase(TestCase):
         self._list_archive_test(data_dir / 'test-git-archive.zip', [
             'project-main/', 'project-main/flag'
         ])
+
+
+class UncompressedSizeTestCase(TestCase):
+
+    def _size_test(self, archive: Path, expected: int = 8) -> None:
+        size = get_archive_uncompressed_size(str(archive))
+        self.assertEqual(size, expected)
+
+    def test_size_7zip(self):
+        self._size_test(data_dir / 'test.7z')
+
+    def test_size_zip(self):
+        self._size_test(data_dir / 'test.zip')
+
+    def test_size_rar(self):
+        self._size_test(data_dir / 'test.rar')
+
+    def test_size_with_explicit_mime(self):
+        size = get_archive_uncompressed_size(
+            str(data_dir / 'test.zip'),
+            mime='application/zip',
+        )
+        self.assertEqual(size, 8)
+
+    def test_size_unknown_mime_raises(self):
+        with self.assertRaises(RuntimeError):
+            get_archive_uncompressed_size(str(data_dir / 'test.zip'), mime='application/x-bogus')

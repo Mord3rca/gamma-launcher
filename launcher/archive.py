@@ -101,3 +101,30 @@ def list_archive_content(filename: str, mime: str = None) -> List[str]:
         'application/x-rar': lambda f: RarFile(f).namelist(),
         'application/zip': lambda f: ZipFile(f).namelist(),
     }.get(mime)(filename)
+ 
+ 
+def get_archive_uncompressed_size(filename: str, mime: str = None) -> int:
+    """Get total uncompressed size of all files in an archive (in bytes).
+
+    Argument(s):
+    * filename -- File path of the archive
+
+    Keyword argument(s):
+    * mime -- Set a MIME type instead of determining it with `get_mime_from_file`
+
+    Return the sum of each file's uncompressed size. Does NOT include
+    filesystem overhead (directory entries, metadata).
+    """
+    mime = mime or get_mime_from_file(filename)
+    if mime == 'application/x-7z-compressed':
+        with SevenZipFile(filename) as archive:
+            return archive.archiveinfo().uncompressed
+    if mime == 'application/x-rar':
+        with RarFile(filename) as archive:
+            return sum(f.file_size for f in archive.infolist())
+    if mime == 'application/zip':
+        with ZipFile(filename) as archive:
+            return sum(f.file_size for f in archive.infolist())
+    raise RuntimeError(
+        f'Cannot get uncompressed size for {filename}: unknown type {mime}'
+    )
