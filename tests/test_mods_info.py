@@ -76,3 +76,11 @@ class ModInfoTestCase(TestCase):
 
         m.name = new_name
         self.assertEqual(m.name, new_name, 'Invalid name after set')
+
+    def test_branch_not_set(self):
+        m = ModInfo({})
+        self.assertIsNone(m.branch)
+
+    def test_branch_set(self):
+        m = ModInfo({'branch': 'dev2'})
+        self.assertEqual(m.branch, 'dev2')

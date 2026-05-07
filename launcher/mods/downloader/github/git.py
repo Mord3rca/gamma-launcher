@@ -7,7 +7,6 @@ from tqdm import tqdm
 from typing import Optional
 
 from launcher.bootstrap import is_in_pyinstaller_context
-from launcher.mods.info import ModInfo
 from launcher.mods.downloader.base import DefaultDownloader
 
 if getenv("GAMMA_LAUNCHER_NO_GIT", None):
@@ -38,16 +37,17 @@ class ProgressPrinter(RemoteProgress):
 class GithubDownloader(DefaultDownloader):
     "Specialization of `launcher.mods.downloader.base.DefaultDownloader` to manage Github URLs"
 
-    def __init__(self, info: ModInfo) -> None:
-        super().__init__(info)
+    def __init__(self, url: str, branch: str = None) -> None:
+        super().__init__(url)
         self._user = None
         self._project = None
         self._revision = None
+        self._branch = branch
 
     def _set_vars(self, to: Path) -> None:
         self._user, self._project, *_, revision = self.regexp_url.match(self._url).groups()
         self._archive = to / f"{self._project}.git"
-        self._revision = revision if revision else f"{self._user}/main"
+        self._revision = revision if revision else f"{self._user}/{self._branch or 'main'}"
 
     def check(self, to: Path, update_cache: bool = False) -> None:
         pass

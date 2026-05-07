@@ -4,7 +4,6 @@ from tempfile import TemporaryDirectory
 from typing import Optional
 
 from launcher.archive import extract_archive
-from launcher.mods.info import ModInfo
 from launcher.mods.downloader.base import DefaultDownloader, g_session
 
 
@@ -13,9 +12,10 @@ class GithubDownloader(DefaultDownloader):
     to manage Github URLs without `GitPython` module
     """
 
-    def __init__(self, info: ModInfo) -> None:
-        super().__init__(info)
+    def __init__(self, url: str, branch: str = None) -> None:
+        super().__init__(url)
         self._revision = None
+        self._branch = branch
 
     def check(self, to: Path, update_cache: bool = False) -> None:
         pass
@@ -28,7 +28,7 @@ class GithubDownloader(DefaultDownloader):
             self._archive = to / (filename or f"{project}-{self._revision}.zip")
             return super().download(to, use_cached)
 
-        branch = g_session.get(
+        branch = self._branch or g_session.get(
             f"https://api.github.com/repos/{user}/{project}",
             headers={"Accept": "application/json"}
         ).json()["default_branch"]

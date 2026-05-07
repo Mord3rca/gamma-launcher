@@ -17,8 +17,11 @@ class ModDefault(DefaultInstaller):
 
 class BaseArchive(BaseInstaller):
 
-    def __init__(self, url: str) -> None:
-        super().__init__(ModInfo({"url": url}))
+    def __init__(self, url: str, branch: str = None) -> None:
+        data = {"url": url}
+        if branch is not None:
+            data["branch"] = branch
+        super().__init__(ModInfo(data))
 
 
 GithubArchive = BaseArchive  # For compat: DownloaderFactory will instanciate correct handler

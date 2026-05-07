@@ -157,6 +157,12 @@ def _create_full_install_args() -> Dict:
             "dest": "custom_def",
             "default": None,
         },
+        "--gamma-branch": {
+            "help": "Target a specific branch of the G.A.M.M.A. repository (e.g., dev2 for 0.9.5)",
+            "type": str,
+            "dest": "gamma_branch",
+            "default": None,
+        },
         "--custom-gamma-repository": {
             "help": "Set a custom repository for S.T.A.L.K..E.R.: G.A.M.M.A.",
             "type": str,
@@ -198,12 +204,13 @@ class FullInstall:
         self._mod_dir = None
         self._grok_mod_dir = None
         self._repo = None
+        self._gamma_branch = None
 
     def _update_gamma_definition(self, *args) -> None:
         print('[+] Updating G.A.M.M.A. definition')
 
         rev_file = self._grok_mod_dir / 'revision.txt'
-        g = GithubArchive(f'https://github.com/{self._repo}')
+        g = GithubArchive(f'https://github.com/{self._repo}', branch=self._gamma_branch)
         g.download(self._dl_dir, use_cached=True)
 
         try:
@@ -316,6 +323,7 @@ AutomaticArchiveInvalidation=false
 
         # Start installing
         self._repo = args.custom_repo
+        self._gamma_branch = args.gamma_branch
 
         if args.update_def:
             (self._update_gamma_definition if not args.custom_def else self._set_custom_gamma_def)(args.custom_def)

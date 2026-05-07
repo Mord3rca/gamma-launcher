@@ -39,3 +39,69 @@ class DownloaderFactoryTestCase(TestCase):
     def test_default_with_args(self):
         o = DownloaderFactory(self._info_with_args)
         self.assertIsInstance(o, DefaultDownloader)
+
+    def test_github_downloader_receives_branch(self):
+        """Verify branch is forwarded from ModInfo to GithubDownloader."""
+        info = ModInfo({'url': 'https://github.com/Mord3rca/gamma-launcher', 'branch': 'dev2'})
+
+        # We can't fully instantiate the real downloader without network/git,
+        # so we verify the factory passes the branch argument correctly.
+        # Instead, test that DownloaderFactory calls GithubDownloader with the branch kwarg.
+        # We do this by patching the GithubDownloader constructor.
+        import launcher.mods.downloader as mod
+        from unittest.mock import patch
+
+        with patch.object(mod, 'GithubDownloader', wraps=mod.GithubDownloader) as mock_dl:
+            mod.DownloaderFactory(info)
+            mock_dl.assert_called_once_with(info.url, branch='dev2')
+
+
+class GithubDownloaderGitBranchTestCase(TestCase):
+    """Tests for branch support in git.py GithubDownloader."""
+
+    def test_defaults_to_main_when_branch_none(self):
+        from launcher.mods.downloader.github.git import GithubDownloader as GitDL
+        dl = GitDL("https://github.com/foo/bar")
+        self.assertIsNone(dl._branch)
+
+    def test_stores_branch_when_provided(self):
+        from launcher.mods.downloader.github.git import GithubDownloader as GitDL
+        dl = GitDL("https://github.com/foo/bar", branch="dev2")
+        self.assertEqual(dl._branch, "dev2")
+
+    def test_set_vars_uses_branch(self):
+        """Verify _set_vars resolves to the correct branch reference."""
+        from launcher.mods.downloader.github.git import GithubDownloader as GitDL
+        from pathlib import Path
+        from tempfile import TemporaryDirectory
+
+        with TemporaryDirectory() as tmp:
+            to = Path(tmp)
+            dl = GitDL("https://github.com/foo/bar", branch="dev2")
+            dl._set_vars(to)
+            self.assertEqual(dl._revision, "foo/dev2")
+
+    def test_set_vars_defaults_main(self):
+        from launcher.mods.downloader.github.git import GithubDownloader as GitDL
+        from pathlib import Path
+        from tempfile import TemporaryDirectory
+
+        with TemporaryDirectory() as tmp:
+            to = Path(tmp)
+            dl = GitDL("https://github.com/foo/bar")
+            dl._set_vars(to)
+            self.assertEqual(dl._revision, "foo/main")
+
+
+class GithubDownloaderLegacyBranchTestCase(TestCase):
+    """Tests for branch support in legacy.py GithubDownloader."""
+
+    def test_stores_branch_when_provided(self):
+        from launcher.mods.downloader.github.legacy import GithubDownloader as LegacyDL
+        dl = LegacyDL("https://github.com/foo/bar", branch="dev2")
+        self.assertEqual(dl._branch, "dev2")
+
+    def test_defaults_to_none_when_not_provided(self):
+        from launcher.mods.downloader.github.legacy import GithubDownloader as LegacyDL
+        dl = LegacyDL("https://github.com/foo/bar")
+        self.assertIsNone(dl._branch)

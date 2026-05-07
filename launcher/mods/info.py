@@ -42,3 +42,6 @@ class ModInfo:
     @property
     def args(self) -> Optional[Tuple[str]]:
         return self._data.get('args', None)
+    @property
+    def branch(self) -> Optional[str]:
+        return self._data.get('branch', None)
