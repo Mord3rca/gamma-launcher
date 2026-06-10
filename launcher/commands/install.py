@@ -259,6 +259,8 @@ class FullInstall:
             print(f'[+] Processing mod {mod.info.title or mod.info.name} ({i}/{mods_len})')
             if mod.info.name == "164- Hunger Thirst Sleep UI 0.71 - xcvb":
                 continue
+            if mod.info.title == "FDDA Redone Fixes":
+                continue
             mod.download(self._dl_dir, use_cached=True)
             mod.install(self._mod_dir)
 
