@@ -14,8 +14,7 @@ license = "GPL-3.0-only"
 license-files = ["LICENSE"]
 dependencies = [
     "beautifulsoup4", "cloudscraper", "GitPython", "platformdirs",
-    "py7zr", "unrar", "requests", "tenacity",
-    "tqdm"
+    "py7zr", "requests", "tenacity", "tqdm", "unrar"
 ]
 classifiers = [
     'Programming Language :: Python',
