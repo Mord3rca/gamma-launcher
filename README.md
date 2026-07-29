@@ -13,7 +13,6 @@ to have a working game.
   * [Using pip](#using-pip-from-source)
   * [Using easy-install](#using-easy-install)
   * [Using release](#using-release)
-  * [Using AUR](#using-aur-arch-linux)
 * [Commands](#commands)
 * [Troubleshoot](#troubleshoot)
 * [Contributing](CONTRIBUTING.md)
@@ -53,22 +52,6 @@ $ sudo make install
 By downloading gamma-launcher from the [latest release](https://github.com/Mord3rca/gamma-launcher/releases/latest), you can use it without any installation. Everything is self contained in an executable. Release built with Ubuntu.
 
 Use the `--cache-directory` option to re-use previously downloaded files.
-
-### Using AUR (Arch Linux)
-
-This installation method is **not supported** on this repo, contact [AUR maintainers](https://aur.archlinux.org/packages/gamma-launcher) for any issue with this installation method.
-
-On Arch Linux and Arch-based operating systems, you can download package from AUR:
-
-`yay -S gamma-launcher`
-
-Use at your own risk!
-
-Or you can build it by yourself:
-
-`git clone https://aur.archlinux.org/gamma-launcher.git`
-`cd gamma-launcher`
-`makepkg -sri`
 
 ## Commands
 
