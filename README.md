@@ -15,6 +15,7 @@ to have a working game.
   * [Using release](#using-release)
 * [Commands](#commands)
 * [Troubleshoot](#troubleshoot)
+* [Documentation](#documentation)
 * [Contributing](CONTRIBUTING.md)
 
 ## Installation
