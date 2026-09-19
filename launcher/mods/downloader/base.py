@@ -3,7 +3,8 @@ from cloudscraper import create_scraper
 from os.path import basename
 from pathlib import Path
 from re import compile
-from requests.exceptions import ConnectionError
+from requests.exceptions import ConnectionError, HTTPError
+from sys import stdin
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_fixed
 from tqdm import tqdm
 from urllib.parse import urlparse
@@ -130,7 +131,16 @@ class DefaultDownloader:
                 return self._archive
 
         r = g_session.get(self._url, stream=True)
-        r.raise_for_status()
+        try:
+            r.raise_for_status()
+        except HTTPError:
+            if stdin.isatty():
+                print(f"[!] Download failed: {r.status_code} {self._url}")
+                print(f"    Save as: {self._archive}")
+                input("    Press Enter after placing the file...")
+                if self._archive.exists():
+                    return self._archive
+            raise
         with open(self._archive, "wb") as f, tqdm(
             desc=f"  - Downloading {self._archive.name} ({self._url})",
             unit="iB", unit_scale=True, unit_divisor=1024

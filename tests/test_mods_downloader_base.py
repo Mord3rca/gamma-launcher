@@ -117,8 +117,10 @@ class DefaultDownloaderTestCase(TestCase):
 
         mock_request.assert_called_once_with(git_archive_url, stream=True)
 
+    @patch('launcher.mods.downloader.base.stdin')
     @patch('launcher.mods.downloader.g_session.get', side_effect=mocked_get)
-    def test_not_found(self, mock_request):
+    def test_not_found(self, mock_request, mock_stdin):
+        mock_stdin.isatty.return_value = False
         o = DefaultDownloader('http://blablabla/foobar.zip')
 
         with self.assertRaises(HTTPError), TemporaryDirectory(
@@ -127,6 +129,26 @@ class DefaultDownloaderTestCase(TestCase):
             o.download(Path(dir))
 
         mock_request.assert_called_once_with('http://blablabla/foobar.zip', stream=True)
+
+    @patch('builtins.input')
+    @patch('launcher.mods.downloader.base.stdin', create=True)
+    @patch('launcher.mods.downloader.g_session.get', side_effect=mocked_get)
+    def test_http_error_uses_manual_file_when_tty(self, mock_request, mock_stdin, mock_input):
+        mock_stdin.isatty.return_value = True
+        o = DefaultDownloader('http://blablabla/foobar.zip')
+
+        with TemporaryDirectory(prefix='gamma-launcher-base-downloader-test-') as dir:
+            pdir = Path(dir)
+            dest = pdir / 'foobar.zip'
+
+            def drop_file(_prompt=None):
+                copy(data_dir / 'test-git-archive.zip', dest)
+                return ''
+
+            mock_input.side_effect = drop_file
+            self.assertEqual(o.download(pdir), dest)
+
+        mock_input.assert_called_once()
 
     @skip('Take a minute')
     @patch('launcher.mods.downloader.g_session.get', side_effect=mocked_retry)
