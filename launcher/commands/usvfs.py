@@ -35,7 +35,7 @@ class Usvfs:
         anomaly_dir = Path(args.anomaly).expanduser()
         install_dir = Path(args.final).expanduser()
 
-        install_dir.mkdir(parents=True)
+        install_dir.mkdir(parents=True, exist_ok=True)
 
         print('Copying Anomaly dir to install directory...')
         copytree(anomaly_dir, install_dir, dirs_exist_ok=True)
