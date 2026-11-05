@@ -100,6 +100,12 @@ DO NOT USE IT if wine is compatible with ModOrganizer, this will remove all mods
 
 To use it: `gamma-launcher usvfs-workaround --anomaly <Anomaly path> --gamma <GAMMA path> --final <Final Install path>`
 
+Run it again after an update to refresh the final installation, save games are kept.
+
+Add `--hardlink` to hard link files instead of copying them, so the final installation takes almost no extra disk space.
+All three directories must be on the same filesystem (files are copied otherwise),
+and files edited in place in the final installation are changed in the Anomaly & mods directories too.
+
 ### Test Mod Maker
 
 This command will verify if additonal installation directives are valid
